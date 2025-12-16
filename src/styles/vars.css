@@ -1,0 +1,27 @@
+/* --- VARIABLES --- */
+:root {
+    /* Palette Mirage (Warm Minimalism) */
+    --c-bg: #F4F1EA;
+    /* Slightly warmer off-white */
+    --c-text: #1C1B1A;
+    /* Softer black */
+    --c-accent: #9E9A93;
+    /* Warm grey */
+    --c-inactive: #D8D4CD;
+    /* Warm light grey */
+
+    /* Glassmorphism */
+    --c-glass: rgba(244, 241, 234, 0.7);
+    --blur-glass: 12px;
+
+    /* Dimensions */
+    --gutter: clamp(2rem, 5vw, 4rem);
+    /* Responsive gutter */
+    --header-h: 100px;
+    /* More breathing room */
+
+    /* Easings */
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-fluid: cubic-bezier(0.4, 0, 0, 1);
+    /* Lenis-like feel */
+}

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mirage Studio | Digital Experience</title>
+
+  <!-- Polices : Cormorant Garamond (Élégance) & Inter (Modernité) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- SVG Filter for Liquid Distortion -->
+  <svg style="display: none;">
+    <defs>
+      <filter id="liquid-distortion">
+        <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="3" result="warp" />
+        <feDisplacementMap xChannelSelector="R" yChannelSelector="G" scale="0" in="SourceGraphic" in2="warp" />
+      </filter>
+      <filter id="liquid-distortion-blob">
+        <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="3" result="warp" />
+        <feDisplacementMap xChannelSelector="R" yChannelSelector="G" scale="0" in="SourceGraphic" in2="warp" />
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- Texture Overlay -->
+  <div class="noise-overlay"></div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="logo"><img src="./src/assets/img/logo-blanc.png" alt="Logo Mirage Studio"></div>
+    <nav><span>Menu</span></nav>
+  </header>
+
+  <!-- Contenu Principal (Lenis Wrapper) -->
+  <main id="smooth-wrapper">
+    <div id="smooth-content">
+
+      <!-- SECTION 1: HERO -->
+      <section id="hero">
+        <!-- Fond -->
+        <div class="hero-bg-container">
+          <img src="./src/assets/img/hero-bg.png" class="hero-bg-img" alt="Background Blur">
+        </div>
+
+        <!-- Blob Interactif -->
+        <div class="hero-center-container" id="blob-container">
+          <img src="./src/assets/img/hero-center4.jpg" class="hero-center-img" alt="Hero Portrait">
+        </div>
+
+        <!-- Logo -->
+        <div class="hero-logo-container">
+          <!-- Fallback Logo Texte si Image manque -->
+          <img class="hero-logo-img" src="./src/assets/img/logo-blanc.png" alt="Logo Mirage Studio">
+        </div>
+
+        <div class="scroll-indicator">Scroll to explore</div>
+      </section>
+
+      <!-- SECTION 2: CONCEPT -->
+      <section id="concept">
+        <div class="concept-container">
+          <!-- Colonne Gauche : Texte -->
+          <div class="concept-text">
+            <span class="subtitle">Philosophie</span>
+            <p class="reveal-paragraph" id="concept-text">
+              Nous créons des images qui oscillent entre réalité et rêve, mises en scène dans des décors
+              minimaux, conceptuels et profondément esthétiques.
+            </p>
+          </div>
+
+          <!-- Colonne Droite : 5 Images Stack -->
+          <div class="concept-images">
+            <!-- Image 1 -->
+            <div class="image-card card-1" style="z-index: 1;">
+              <img src="./src/assets/img/about-img1.jpeg" alt="Fashion Dream">
+            </div>
+            <!-- Image 2 -->
+            <div class="image-card card-2" style="z-index: 2;">
+              <img src="./src/assets/img/about-img2.jpeg" alt="Helios photo">
+            </div>
+            <!-- Image 3 -->
+            <div class="image-card card-3" style="z-index: 3;">
+              <img src="./src/assets/img/about-img3.jpeg" alt="The carried light photo">
+            </div>
+            <!-- Image 4 -->
+            <div class="image-card card-4" style="z-index: 4;">
+              <img src="https://images.unsplash.com/photo-1618331835717-801e976710b2?q=80&w=1000&auto=format&fit=crop"
+                alt="Abstract Art">
+            </div>
+            <!-- Image 5 -->
+            <div class="image-card card-5" style="z-index: 5;">
+              <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1000&auto=format&fit=crop"
+                alt="Male Portrait">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: WORKS -->
+      <section id="works">
+        <div class="works-container">
+          <ul class="project-list">
+            <!-- Project 1 -->
+            <li class="project-item"
+              data-img-left="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop"
+              data-img-right="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=600&auto=format&fit=crop">
+              <span class="project-meta meta-left">Hans</span>
+              <span class="project-title">BJERNO</span>
+              <span class="project-meta meta-right">Canada</span>
+            </li>
+            <!-- Project 2 -->
+            <li class="project-item"
+              data-img-left="https://images.unsplash.com/photo-1500917293891-ef795e70e1f6?q=80&w=600&auto=format&fit=crop"
+              data-img-right="https://images.unsplash.com/photo-1618331835717-801e976710b2?q=80&w=600&auto=format&fit=crop">
+              <span class="project-meta meta-left">Adeel</span>
+              <span class="project-title">SHAMSI</span>
+              <span class="project-meta meta-right">Montréal</span>
+            </li>
+            <!-- Project 3 -->
+            <li class="project-item"
+              data-img-left="https://images.unsplash.com/photo-1516961642265-531546e84af2?q=80&w=600&auto=format&fit=crop"
+              data-img-right="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop">
+              <span class="project-meta meta-left">Tom</span>
+              <span class="project-title">BROWN</span>
+              <span class="project-meta meta-right">Canada</span>
+            </li>
+            <!-- Project 4 -->
+            <li class="project-item"
+              data-img-left="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=600&auto=format&fit=crop"
+              data-img-right="https://images.unsplash.com/photo-1500917293891-ef795e70e1f6?q=80&w=600&auto=format&fit=crop">
+              <span class="project-meta meta-left">Rafaela</span>
+              <span class="project-title">CARVALHO</span>
+              <span class="project-meta meta-right">Canada</span>
+            </li>
+            <!-- Project 5 -->
+            <li class="project-item"
+              data-img-left="https://images.unsplash.com/photo-1618331835717-801e976710b2?q=80&w=600&auto=format&fit=crop"
+              data-img-right="https://images.unsplash.com/photo-1516961642265-531546e84af2?q=80&w=600&auto=format&fit=crop">
+              <span class="project-meta meta-left">Dylan</span>
+              <span class="project-title">DUBÉ</span>
+              <span class="project-meta meta-right">Toronto</span>
+            </li>
+          </ul>
+
+          <!-- Image Containers (Fixed/Absolute) -->
+          <div class="work-preview-left">
+            <img src="" alt="Preview Left" id="preview-left-img">
+          </div>
+          <div class="work-preview-right">
+            <img src="" alt="Preview Right" id="preview-right-img">
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: CONTACT -->
+      <section id="contact" style="min-height: 100vh; background: var(--c-bg);">
+        <h2 class="display-text">Let's connect</h2>
+      </section>
+
+    </div>
+  </main>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
