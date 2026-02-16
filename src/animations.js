@@ -308,8 +308,8 @@ export function initAnimations() {
             if (title) title.style.filter = `url(#${filterId})`;
 
             item.addEventListener("mouseenter", () => {
-                const imgLeft = item.getAttribute("data-img-left");
-                const imgRight = item.getAttribute("data-img-right");
+                const imgLeft = item.querySelector(".project-img-left")?.getAttribute("src");
+                const imgRight = item.querySelector(".project-img-right")?.getAttribute("src");
 
                 if (previewLeft && imgLeft) previewLeft.src = imgLeft;
                 if (previewRight && imgRight) previewRight.src = imgRight;

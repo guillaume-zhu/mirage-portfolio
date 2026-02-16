@@ -382,6 +382,7 @@ section {
     right: 100%;
     margin-right: 1.5rem;
     text-align: right;
+
 }
 
 .meta-right {
@@ -409,7 +410,9 @@ section {
     z-index: 5;
     overflow: hidden;
     will-change: transform, opacity;
-    border: 1px solid red;
+    /* border: 1px solid red; */
+    border-radius: 8px;
+
 }
 
 .work-preview-left {
