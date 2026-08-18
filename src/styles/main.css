@@ -1,29 +1,7 @@
 @import "./vars.css";
 
-/* --- FONT FACES (TeX Gyre Adventor, local) --- */
-@font-face {
-  font-family: "TeXGyreAdventor";
-  src: url("../assets/fonts/texgyreadventor-regular.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "TeXGyreAdventor";
-  src: url("../assets/fonts/texgyreadventor-italic.otf") format("opentype");
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "TeXGyreAdventor-Bold";
-  src: url("../assets/fonts/texgyreadventor-bold.otf") format("opentype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
+/* --- FONT FACES (Plus Jakarta Sans, self-hosted via @fontsource-variable) --- */
+@import "@fontsource-variable/plus-jakarta-sans";
 
 /* --- RESET & BASE --- */
 *,
@@ -60,7 +38,9 @@ body {
   background-color: var(--c-bg);
   color: var(--c-text);
   font-family: var(--font-regular);
-  font-size: 16px;
+  font-weight: 400;
+  font-size: clamp(1rem, 0.9rem + 0.5vw, 1.25rem);
+  /* ~16px sur mobile -> 20px sur desktop */
   line-height: 1.6;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -72,8 +52,7 @@ h1,
 h2,
 h3 {
   font-family: var(--font-bold);
-  font-weight: 300;
-  /* Lighter weight for elegance */
+  font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.01em;
 }
@@ -83,7 +62,7 @@ h3 {
   /* Larger impact */
   text-transform: uppercase;
   letter-spacing: -0.03em;
-  font-weight: 300;
+  font-weight: 700;
 }
 
 .subtitle {
@@ -271,21 +250,20 @@ section {
 
 .reveal-paragraph {
   font-family: var(--font-bold);
-  font-size: clamp(2rem, 3.5vw, 4rem);
-  font-weight: 600;
+  font-size: clamp(2rem, 3.25vw, 4rem);
+  font-weight: 700;
   line-height: 1.2;
   color: var(--c-text);
   letter-spacing: -0.02em;
+  width: 35vw;
 
   /* Gradient Text Setup */
   background: linear-gradient(
     45deg,
-    rgba(168, 19, 26, 1) 0%,
-    rgba(182, 51, 25, 1) 16%,
-    rgba(197, 108, 44, 1) 34%,
-    rgba(233, 181, 35, 1) 48%,
-    rgba(231, 179, 173, 1) 62%,
-    rgba(231, 179, 173, 1) 100%
+    var(--c-red) 0%,
+    var(--c-orange) 30%,
+    var(--c-yellow) 55%,
+    var(--c-rose) 80%
   );
   -webkit-background-clip: text;
   background-clip: text;
@@ -296,9 +274,14 @@ section {
 
 .word {
   display: inline-block;
+  white-space: nowrap;
+  /* empêche la coupure d'un mot en fin de ligne */
+}
+
+.letter {
+  display: inline-block;
   color: var(--c-inactive);
-  /* Gris très clair au début */
-  transition: color 0.3s ease;
+  /* Gris très clair au début — couleur pilotée par GSAP (scrub), pas de transition CSS */
 }
 
 /* Images à droite */
@@ -317,8 +300,9 @@ section {
   width: 60%;
   max-width: 400px;
   aspect-ratio: 3/4;
-  border-radius: 8px;
+  border-radius: 25px;
   overflow: hidden;
+  cursor: pointer;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
   opacity: 0;
   /* Caché par défaut */
@@ -389,7 +373,7 @@ section {
   color: var(--c-text);
   display: inline-block;
   position: relative;
-  font-weight: 400;
+  font-weight: 700;
 }
 
 .project-meta {

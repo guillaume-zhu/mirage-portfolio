@@ -132,8 +132,9 @@ export function initAnimations() {
 
     // --- ANIMATIONS: CONCEPT (Scrollytelling Synchro) ---
 
-    // 1. Préparation du Texte (Clean Split)
+    // 1. Préparation du Texte (Split par lettres, groupées par mot)
     const paragraph = document.getElementById('concept-text');
+    let totalLetters = 0;
     if (paragraph) {
         const textContent = paragraph.textContent.replace(/\s+/g, ' ').trim();
         paragraph.innerHTML = '';
@@ -141,12 +142,18 @@ export function initAnimations() {
         const words = textContent.split(' ');
         words.forEach(word => {
             if (!word) return;
-            const span = document.createElement('span');
-            span.textContent = word;
-            span.className = 'word';
-            paragraph.appendChild(span);
+            const wordSpan = document.createElement('span');
+            wordSpan.className = 'word';
+            word.split('').forEach(char => {
+                const letterSpan = document.createElement('span');
+                letterSpan.textContent = char;
+                letterSpan.className = 'letter';
+                wordSpan.appendChild(letterSpan);
+            });
+            paragraph.appendChild(wordSpan);
             paragraph.appendChild(document.createTextNode(' ')); // Espace réel
         });
+        totalLetters = document.querySelectorAll('.letter').length;
     }
 
     // 2. Setup Images (Invisible + Bas)
@@ -157,40 +164,88 @@ export function initAnimations() {
         scrollTrigger: {
             trigger: "#concept",
             start: "top top",
-            end: "+=400%", // Increased scroll distance for more time
+            end: "+=200%",
             pin: true,
             scrub: 1.5,
         }
     });
 
-    // A. Texte (Lecture)
-    conceptTl.to(".word", {
+    // A. Texte (Lecture, lettre par lettre)
+    const letterDuration = 0.05;
+    const letterStagger = totalLetters > 1 ? (2.9 - letterDuration) / (totalLetters - 1) : 0;
+
+    conceptTl.to(".letter", {
         color: "rgba(0,0,0,0)", // Transparent to reveal background gradient
-        stagger: 0.12,
-        duration: 0.1,   // Short duration for "harder" edge
+        stagger: letterStagger,
+        duration: letterDuration,   // Short duration for "harder" edge
         ease: "power1.out"
     }, 0);
 
     // B. Images (Apparition Stack Verticale - Sequenced)
-    // Cards float up with slight rotation reset
+    // Cards float up with slight rotation reset, taille et dispersion légèrement aléatoires
 
     // Card 1: Centre
-    conceptTl.to(".card-1", { opacity: 1, y: 0, x: 0, scale: 1, duration: 0.5, ease: "power3.out" }, 0);
+    conceptTl.to(".card-1", { opacity: 1, y: 0, x: 0, scale: gsap.utils.random(0.88, 1.12), duration: 0.5, ease: "power3.out" }, 0);
 
     // Card 2: Gauche Haut
-    conceptTl.to(".card-2", { opacity: 1, y: -20, x: -30, scale: 1, duration: 0.5, ease: "power3.out" }, 0.6);
+    conceptTl.to(".card-2", { opacity: 1, y: -40, x: -60, scale: gsap.utils.random(0.88, 1.12), duration: 0.5, ease: "power3.out" }, 0.6);
 
     // Card 3: Droite Bas
-    conceptTl.to(".card-3", { opacity: 1, y: 30, x: 40, scale: 1, duration: 0.5, ease: "power3.out" }, 1.2);
+    conceptTl.to(".card-3", { opacity: 1, y: 60, x: 80, scale: gsap.utils.random(0.88, 1.12), duration: 0.5, ease: "power3.out" }, 1.2);
 
     // Card 4: Gauche Bas
-    conceptTl.to(".card-4", { opacity: 1, y: 40, x: -20, scale: 1, duration: 0.5, ease: "power3.out" }, 1.8);
+    conceptTl.to(".card-4", { opacity: 1, y: 80, x: -40, scale: gsap.utils.random(0.88, 1.12), duration: 0.5, ease: "power3.out" }, 1.8);
 
     // Card 5: Centre Haut (Final)
-    conceptTl.to(".card-5", { opacity: 1, y: -40, x: 10, scale: 1, duration: 0.5, ease: "power3.out" }, 2.4);
+    conceptTl.to(".card-5", { opacity: 1, y: -80, x: 20, scale: gsap.utils.random(0.88, 1.12), duration: 0.5, ease: "power3.out" }, 2.4);
 
-    // Hold phase (Wait for a bit before unpinning)
-    // conceptTl.to({}, { duration: 1.0 });
+    // Hold phase (court temps de pause pour observer la composition finale)
+    conceptTl.to({}, { duration: 0.3 });
+
+    // --- ANIMATIONS: IMAGE CARDS LIQUID HOVER ---
+    const svgNS = "http://www.w3.org/2000/svg";
+    const liquidDefs = document.getElementById("liquid-defs");
+
+    document.querySelectorAll(".image-card").forEach((card, index) => {
+        const img = card.querySelector("img");
+        if (!img || !liquidDefs) return;
+
+        // Filtre dédié à cette carte (déformation indépendante par image)
+        const filterId = `liquid-distortion-card-${index}`;
+        const filter = document.createElementNS(svgNS, "filter");
+        filter.setAttribute("id", filterId);
+
+        const turbulenceCard = document.createElementNS(svgNS, "feTurbulence");
+        turbulenceCard.setAttribute("type", "fractalNoise");
+        turbulenceCard.setAttribute("baseFrequency", "0.008");
+        turbulenceCard.setAttribute("numOctaves", "2");
+        turbulenceCard.setAttribute("result", "warp");
+
+        const displacementCard = document.createElementNS(svgNS, "feDisplacementMap");
+        displacementCard.setAttribute("xChannelSelector", "R");
+        displacementCard.setAttribute("yChannelSelector", "G");
+        displacementCard.setAttribute("scale", "0");
+        displacementCard.setAttribute("in", "SourceGraphic");
+        displacementCard.setAttribute("in2", "warp");
+
+        filter.appendChild(turbulenceCard);
+        filter.appendChild(displacementCard);
+        liquidDefs.appendChild(filter);
+
+        img.style.filter = `url(#${filterId})`;
+
+        card.addEventListener("mouseenter", () => {
+            gsap.to(displacementCard, { attr: { scale: 14 }, duration: 0.9, ease: "power2.out" });
+            gsap.to(turbulenceCard, { attr: { baseFrequency: 0.022 }, duration: 0.9, ease: "power2.out" });
+            gsap.to(img, { scale: 1.06, duration: 0.9, ease: "power2.out" });
+        });
+
+        card.addEventListener("mouseleave", () => {
+            gsap.to(displacementCard, { attr: { scale: 0 }, duration: 1, ease: "power2.out" });
+            gsap.to(turbulenceCard, { attr: { baseFrequency: 0.008 }, duration: 1, ease: "power2.out" });
+            gsap.to(img, { scale: 1, duration: 1, ease: "power2.out" });
+        });
+    });
 
     // --- ANIMATIONS: LOGO LIQUID HOVER ---
     const logoImg = document.querySelector(".hero-logo-img");
@@ -397,14 +452,12 @@ export function initAnimations() {
         gradient.setAttribute("x2", "100%");
         gradient.setAttribute("y2", "0%"); // Approx 45 degrees
 
-        // Stops based on user request
+        // Stops alignés sur la palette (--c-red, --c-orange, --c-yellow, --c-rose)
         const stopsData = [
-            { offset: "0%", color: "rgba(168, 19, 26, 1)" },
-            { offset: "16%", color: "rgba(182, 51, 25, 1)" },
-            { offset: "34%", color: "rgba(197, 108, 44, 1)" },
-            { offset: "48%", color: "rgba(233, 181, 35, 1)" },
-            { offset: "62%", color: "rgba(231, 179, 173, 1)" },
-            { offset: "100%", color: "rgba(231, 179, 173, 1)" }
+            { offset: "0%", color: "#A8131A" },
+            { offset: "33%", color: "#C56C2C" },
+            { offset: "66%", color: "#E9B523" },
+            { offset: "100%", color: "#E7B3AD" }
         ];
 
         stopsData.forEach(s => {

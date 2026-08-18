@@ -10,6 +10,12 @@
     --c-inactive: #D8D4CD;
     /* Warm light grey */
 
+    /* Palette Dégradé (Reveal texte, effet scratch) */
+    --c-red: #A8131A;
+    --c-orange: #C56C2C;
+    --c-yellow: #E9B523;
+    --c-rose: #E7B3AD;
+
     /* Glassmorphism */
     --c-glass: rgba(244, 241, 234, 0.7);
     --blur-glass: 12px;
@@ -26,9 +32,9 @@
     /* Lenis-like feel */
 
     /* Typographie */
-    --font-regular: "TeXGyreAdventor", sans-serif;
+    --font-regular: "Plus Jakarta Sans Variable", sans-serif;
     /* Corps de texte */
-    --font-bold: "TeXGyreAdventor-Bold", sans-serif;
+    --font-bold: "Plus Jakarta Sans Variable", sans-serif;
     /* Gros textes design */
     --font-special: "Gloock", serif;
     /* Cas spéciaux */

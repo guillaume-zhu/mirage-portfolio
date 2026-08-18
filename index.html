@@ -5,19 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mirage Studio | Digital Experience</title>
 
-    <!-- Polices : TeX Gyre Adventor (Regular/Bold, en local via @font-face) & Gloock (cas spéciaux) -->
+    <!-- Polices : Plus Jakarta Sans (Regular/Bold, en local via @fontsource-variable) & Gloock (cas spéciaux) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Gloock&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Gloock&display=swap" rel="stylesheet" />
   </head>
 
   <body>
     <!-- SVG Filter for Liquid Distortion -->
     <svg style="display: none">
-      <defs>
+      <defs id="liquid-defs">
         <filter id="liquid-distortion">
           <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="3" result="warp" />
           <feDisplacementMap
@@ -87,7 +84,6 @@
           <div class="concept-container">
             <!-- Colonne Gauche : Texte -->
             <div class="concept-text">
-              <span class="subtitle">Philosophie</span>
               <p class="reveal-paragraph" id="concept-text">
                 Nous créons des images qui oscillent entre réalité et rêve, mises en scène dans des
                 décors minimaux, conceptuels et profondément esthétiques.
