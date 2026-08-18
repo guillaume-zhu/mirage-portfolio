@@ -24,4 +24,12 @@
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-fluid: cubic-bezier(0.4, 0, 0, 1);
     /* Lenis-like feel */
+
+    /* Typographie */
+    --font-regular: "TeXGyreAdventor", sans-serif;
+    /* Corps de texte */
+    --font-bold: "TeXGyreAdventor-Bold", sans-serif;
+    /* Gros textes design */
+    --font-special: "Gloock", serif;
+    /* Cas spéciaux */
 }
