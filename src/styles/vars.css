@@ -10,6 +10,9 @@
     --c-inactive: #D8D4CD;
     /* Warm light grey */
 
+    --c-black: #181616;
+    /* Noir "normal" du site, remplace --c-text sur les textes standards */
+
     /* Palette Dégradé (Reveal texte, effet scratch) */
     --c-red: #A8131A;
     --c-orange: #C56C2C;
@@ -38,4 +41,7 @@
     /* Gros textes design */
     --font-special: "Gloock", serif;
     /* Cas spéciaux */
+
+    /* Taille de corps unique, responsive */
+    --fs-body: clamp(0.95rem, 0.9rem + 0.3vw, 1.1rem);
 }
