@@ -121,6 +121,7 @@ export function initAnimations() {
 
     blob.addEventListener("mouseenter", () => {
       gsap.to(blobTween, { timeScale: 2, duration: 1, ease: "power2.out" })
+      gsap.to(blob, { opacity: 0, duration: 0.6, ease: "power2.out" })
 
       // Liquid Effect (Blob)
       if (blobDisplacement && blobTurbulence) {
@@ -135,6 +136,7 @@ export function initAnimations() {
 
     blob.addEventListener("mouseleave", () => {
       gsap.to(blobTween, { timeScale: 1, duration: 1, ease: "power2.out" })
+      gsap.to(blob, { opacity: 1, duration: 0.6, ease: "power2.out" })
       gsap.to(blob, { rotationX: 0, rotationY: 0, duration: 1.2, ease: "power2.out" })
       gsap.to(blobImage, { x: 0, y: 0, duration: 1.2, ease: "power2.out" })
 

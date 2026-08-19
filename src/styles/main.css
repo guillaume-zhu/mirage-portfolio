@@ -177,11 +177,9 @@ section {
   bottom: 2rem;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.8rem;
+  font-size: var(--fs-body);
   color: rgba(255, 255, 255, 0.7);
   z-index: 4;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
   font-family: var(--font-regular);
   animation: pulse 2s infinite;
 }
