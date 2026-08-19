@@ -219,6 +219,23 @@ export function initAnimations() {
   // A. Texte (Lecture, lettre par lettre)
   const letterDuration = 0.05
   const letterStagger = totalLetters > 1 ? (2.9 - letterDuration) / (totalLetters - 1) : 0
+  const letterGrayInDuration = 0.08
+  const letterGrayInLead = 0.12
+  const letterGrayColor = getComputedStyle(document.documentElement)
+    .getPropertyValue("--c-inactive")
+    .trim()
+
+  // A.1 Pré-apparition douce en gris, juste avant le passage du dégradé
+  conceptTl.to(
+    ".letter",
+    {
+      color: letterGrayColor,
+      stagger: letterStagger,
+      duration: letterGrayInDuration,
+      ease: "sine.inOut",
+    },
+    -letterGrayInLead,
+  )
 
   conceptTl.to(
     ".letter",

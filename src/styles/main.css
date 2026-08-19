@@ -261,8 +261,8 @@ section {
 
 .letter {
   display: inline-block;
-  color: var(--c-inactive);
-  /* Gris très clair au début — couleur pilotée par GSAP (scrub), pas de transition CSS */
+  color: var(--c-bg);
+  /* Invisible au début (même couleur que le fond) — couleur pilotée par GSAP (scrub), pas de transition CSS */
 }
 
 /* Images à droite */
@@ -451,9 +451,9 @@ section {
 }
 
 .expertise-title {
-  font-family: var(--font-special);
+  font-family: var(--font-regular);
   font-size: clamp(2.5rem, 5vw, 5rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 1;
   margin-bottom: 1.5rem;
   letter-spacing: 0;
