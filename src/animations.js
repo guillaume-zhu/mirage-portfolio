@@ -638,29 +638,14 @@ export function initAnimations() {
   const previewRightContainer = document.querySelector(".work-preview-right")
 
   if (workItems.length > 0) {
-    // List appearance
-    // List appearance
-    gsap.fromTo(
-      ".project-item",
-      { y: 50, opacity: 0 },
-      {
-        y: 0,
-        opacity: 1,
-        stagger: 0.1,
-        duration: 1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: "#works",
-          start: "top 90%", // Trigger earlier
-        },
-        // A persisted transform would keep each item in its own stacking context
-        // and prevent its metadata from blending with the sibling previews.
-        onComplete: () => gsap.set(workItems, { clearProps: "transform" }),
-      },
-    )
-
     // Get the SVG defs to append filters to
     const svgDefs = document.querySelector("svg defs")
+
+    // Apparition en chaîne (opacité + distorsion liquide), pilotée par le scroll
+    gsap.set(".works-label", { opacity: 0, y: 30 })
+    gsap.set(workItems, { opacity: 0, pointerEvents: "none" })
+    const workDisplacements = []
+    const workTurbulences = []
 
     workItems.forEach((item, index) => {
       const title = item.querySelector(".project-title")
@@ -670,21 +655,21 @@ export function initAnimations() {
       const filter = document.createElementNS("http://www.w3.org/2000/svg", "filter")
       filter.id = filterId
 
-      // Turbulence
+      // Turbulence (état initial = distordu, comme en fin de hover-in)
       const turbulence = document.createElementNS("http://www.w3.org/2000/svg", "feTurbulence")
       turbulence.setAttribute("type", "fractalNoise")
-      turbulence.setAttribute("baseFrequency", "0.02")
+      turbulence.setAttribute("baseFrequency", "0.005")
       turbulence.setAttribute("numOctaves", "3")
       turbulence.setAttribute("result", "warp")
 
-      // Displacement
+      // Displacement (état initial = distordu, comme en fin de hover-in)
       const displacement = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "feDisplacementMap",
       )
       displacement.setAttribute("xChannelSelector", "R")
       displacement.setAttribute("yChannelSelector", "G")
-      displacement.setAttribute("scale", "0")
+      displacement.setAttribute("scale", "30")
       displacement.setAttribute("in", "SourceGraphic")
       displacement.setAttribute("in2", "warp")
 
@@ -694,6 +679,9 @@ export function initAnimations() {
 
       // Apply filter to title
       if (title) title.style.filter = `url(#${filterId})`
+
+      workDisplacements.push(displacement)
+      workTurbulences.push(turbulence)
 
       item.addEventListener("mouseenter", () => {
         const imgLeft = item.querySelector(".project-img-left")?.getAttribute("src")
@@ -758,6 +746,36 @@ export function initAnimations() {
         // gsap.to([previewLeftContainer, previewRightContainer], { y: `calc(-50% + ${yPos}px)`, duration: 0.5 });
       })
     })
+
+    // Timeline pinnée : révélation en chaîne (opacité + fin de distorsion liquide)
+    const worksTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: "#works",
+        start: "top top",
+        end: "+=250%",
+        pin: true,
+        scrub: 1,
+      },
+    })
+
+    worksTl.to(".works-label", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0)
+
+    worksTl.to(
+      workItems,
+      { opacity: 1, pointerEvents: "auto", stagger: 0.5, duration: 0.6, ease: "power2.out" },
+      0.5,
+    )
+    worksTl.to(
+      workDisplacements,
+      { attr: { scale: 0 }, stagger: 0.5, duration: 0.6, ease: "power2.out" },
+      0.5,
+    )
+    worksTl.to(
+      workTurbulences,
+      { attr: { baseFrequency: 0.02 }, stagger: 0.5, duration: 0.6, ease: "power2.out" },
+      0.5,
+    )
+    worksTl.to({}, { duration: 0.3 })
   }
 
   // --- ANIMATIONS: SCRATCH EFFECT ---
