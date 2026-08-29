@@ -7,9 +7,10 @@ export function initAnimations() {
   gsap.registerPlugin(ScrollTrigger)
 
   // Init Lenis (Heavy Inertia)
+  const lenisEasing = (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
   const lenis = new Lenis({
     duration: 2.0, // Slower, more weight
-    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    easing: lenisEasing,
     direction: "vertical",
     smooth: true,
     touchMultiplier: 1.5, // Less sensitive
@@ -393,7 +394,6 @@ export function initAnimations() {
     const expContentXRight = 70
     const expAxis = "x"
 
-    let expLastIndexEntered = 0
     expSlides[0].classList.add("on")
 
     gsap.set(expSlides[0], {
@@ -448,76 +448,128 @@ export function initAnimations() {
       })
     }
 
-    function expHandleMouseClick(item, index) {
-      const isBefore = index < expLastIndexEntered
-
-      if (index !== expLastIndexEntered) {
-        expSlides.forEach((slide) => slide.classList.remove("on"))
-        gsap.to(expSlides, {
+    // Une transition = fermeture de fromIndex + ouverture de toIndex (toIndex > fromIndex,
+    // donc toujours équivalent à la branche "isBefore: false" de l'ancien accordéon).
+    // Le scrub de ScrollTrigger rejoue naturellement ce même segment à l'envers en cas de
+    // retour en arrière, ce qui reproduit la logique directionnelle sans la dupliquer.
+    function addExpertiseTransition(tl, fromIndex, toIndex, position) {
+      tl.to(
+        expSlides[fromIndex],
+        {
           flex: "0 0 " + expWidthClosed + "px",
           height: expHeightClosed,
           borderRadius: expBorderRadiusClosed,
           duration: 0.5,
           ease: "back.inOut(0.9)",
-        })
-        gsap.to(expContents[expLastIndexEntered], {
-          [expAxis]: isBefore ? expContentXLeft : expContentXRight,
+        },
+        position,
+      )
+      tl.to(
+        expContents[fromIndex],
+        {
+          [expAxis]: expContentXLeft,
           duration: 0.5,
           ease: "back.inOut(0.9)",
-        })
-        gsap.to(expSmallTitles, {
+        },
+        position,
+      )
+      tl.to(
+        expSmallTitles[fromIndex],
+        {
           [expAxis]: 0,
           width: expHeightClosed,
           autoAlpha: 1,
           duration: 0.5,
           ease: "back.inOut(0.9)",
-        })
-        gsap.to(expBottoms, {
+        },
+        position,
+      )
+      tl.to(
+        expBottoms[fromIndex],
+        {
           autoAlpha: 0,
           duration: 0.4,
           ease: "power1.inOut",
-        })
-
-        item.classList.add("on")
-        gsap.to(item, {
+        },
+        position,
+      )
+      tl.to(
+        expSlides[toIndex],
+        {
           flex: "0 0 " + expWidthOpen + "px",
           borderRadius: expBorderRadiusOpen,
           height: expHeightOpen,
           duration: 0.5,
           ease: "back.inOut(0.9)",
-        })
-        gsap.fromTo(
-          expContents[index],
-          {
-            [expAxis]: isBefore ? expContentXRight : expContentXLeft,
-          },
-          {
-            [expAxis]: 0,
-            duration: 0.5,
-            ease: "back.inOut(0.9)",
-          },
-        )
-        gsap.to(expSmallTitles[index], {
-          [expAxis]: isBefore ? -704 : expSmallTitleXOpen,
+        },
+        position,
+      )
+      tl.fromTo(
+        expContents[toIndex],
+        { [expAxis]: expContentXLeft },
+        { [expAxis]: 0, duration: 0.5, ease: "back.inOut(0.9)" },
+        position,
+      )
+      tl.to(
+        expSmallTitles[toIndex],
+        {
+          [expAxis]: expSmallTitleXOpen,
           width: expHeightOpen,
           autoAlpha: 0,
           duration: 0.5,
           ease: "back.inOut(0.9)",
-        })
-        gsap.to(expBottoms[index], {
+        },
+        position,
+      )
+      tl.to(
+        expBottoms[toIndex],
+        {
           autoAlpha: 1,
           duration: 0.4,
           ease: "power1.inOut",
-        })
-      }
+        },
+        position,
+      )
+    }
 
-      expLastIndexEntered = index
+    const expTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: "#expertise",
+        start: "top top",
+        end: "+=300%",
+        pin: true,
+        scrub: 1,
+        snap: { snapTo: [0, 1 / 3, 2 / 3, 1], duration: 0.5, ease: "power1.inOut" },
+        onUpdate: (self) => {
+          const activeIndex = Math.round(self.progress * 3)
+          expSlides.forEach((slide, i) => {
+            slide.classList.toggle("on", i === activeIndex)
+          })
+        },
+      },
+    })
+
+    addExpertiseTransition(expTl, 0, 1, 0)
+    addExpertiseTransition(expTl, 1, 2, 1)
+    addExpertiseTransition(expTl, 2, 3, 2)
+
+    // Clic = déplacement Lenis vers la position de scroll correspondant à l'état visé ;
+    // ScrollTrigger reste seul responsable de l'animation (source de vérité unique).
+    function goToCardIndex(targetIndex) {
+      const st = expTl.scrollTrigger
+      if (!st) return
+
+      const currentIndex = Math.round(st.progress * 3)
+      if (targetIndex === currentIndex) return
+
+      const targetY = st.start + (targetIndex / 3) * (st.end - st.start)
+      lenis.scrollTo(targetY, { duration: 1.2, easing: lenisEasing })
     }
 
     expSlides.forEach((item, index) => {
       item.addEventListener("mouseenter", () => expHandleMouseEnter(item, index))
       item.addEventListener("mouseleave", () => expHandleMouseLeave(item, index))
-      item.addEventListener("click", () => expHandleMouseClick(item, index))
+      item.addEventListener("click", () => goToCardIndex(index))
     })
   }
 
@@ -601,6 +653,9 @@ export function initAnimations() {
           trigger: "#works",
           start: "top 90%", // Trigger earlier
         },
+        // A persisted transform would keep each item in its own stacking context
+        // and prevent its metadata from blending with the sibling previews.
+        onComplete: () => gsap.set(workItems, { clearProps: "transform" }),
       },
     )
 
@@ -661,11 +716,13 @@ export function initAnimations() {
           attr: { scale: 30 },
           duration: 1,
           ease: "power2.out",
+          overwrite: "auto",
         })
         gsap.to(turbulence, {
           attr: { baseFrequency: 0.005 },
           duration: 1,
           ease: "power2.out",
+          overwrite: "auto",
         })
       })
 
@@ -684,11 +741,13 @@ export function initAnimations() {
           attr: { scale: 0 },
           duration: 0.8,
           ease: "power2.out",
+          overwrite: "auto",
         })
         gsap.to(turbulence, {
           attr: { baseFrequency: 0.02 },
           duration: 0.8,
           ease: "power2.out",
+          overwrite: "auto",
         })
       })
 
