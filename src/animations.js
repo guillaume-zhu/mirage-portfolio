@@ -955,22 +955,206 @@ export function initAnimations() {
       0.1,
     )
 
+    const clientsScene = document.querySelector(".clients-scene")
     const clientsCardsContainer = clientsRoot.querySelector(".clients-cards")
     const clientCards = clientsRoot.querySelectorAll(".client-card")
     const clientsDistance = clientsCardsContainer.clientWidth - window.innerWidth
     const isPortrait = window.innerWidth < window.innerHeight
+    const coverPhasePx = window.innerHeight
+
+    // Pin unique pour toute la scène (drift horizontal + recouvrement par le pré-footer)
+    const sceneST = ScrollTrigger.create({
+      trigger: clientsScene || "#clients",
+      start: "top top",
+      end: "+=" + (clientsDistance + coverPhasePx),
+      pin: true,
+    })
+
+    // Positions dérivées du pin principal (seule source de vérité)
+    const driftEnd = () => sceneST.start + clientsDistance
+    const coverEnd = () => sceneST.start + clientsDistance + coverPhasePx
 
     const clientsScrollTween = gsap.to(clientsCardsContainer, {
       x: -clientsDistance,
       ease: "none",
       scrollTrigger: {
-        trigger: "#clients",
-        pin: true,
+        trigger: clientsScene || "#clients",
+        start: () => sceneST.start,
+        end: driftEnd,
         scrub: true,
-        start: "top top",
-        end: "+=" + clientsDistance,
       },
     })
+
+    // Recouvrement par le pré-footer, juste après le drift, sur ~100vh de scroll
+    if (clientsScene && document.querySelector("#pre-footer")) {
+      const coverScrollTrigger = {
+        trigger: clientsScene,
+        start: driftEnd,
+        end: coverEnd,
+        scrub: 1,
+      }
+
+      gsap.fromTo(
+        "#pre-footer",
+        { yPercent: 0 },
+        { yPercent: -100, ease: "none", scrollTrigger: coverScrollTrigger },
+      )
+
+      // Panneau qui s'élargit : clip-path inset() piloté par la même progression
+      // que la montée (driftEnd -> coverEnd), sans scaleX (pas de déformation du texte à venir).
+      const preFooterClip = { insetX: 8, radius: 1.5 } // vw / rem
+
+      function applyPreFooterClip() {
+        gsap.set("#pre-footer", {
+          clipPath:
+            `inset(0 ${preFooterClip.insetX}vw 0 ${preFooterClip.insetX}vw ` +
+            `round ${preFooterClip.radius}rem ${preFooterClip.radius}rem 0 0)`,
+        })
+      }
+      applyPreFooterClip() // état initial (panneau étroit, coins arrondis)
+
+      // Largeur et arrondi : atteignent leur valeur finale à ~80% de la phase
+      // (la montée verticale, elle, continue sur 100% jusqu'à coverEnd)
+      const preFooterWidthTrigger = {
+        trigger: clientsScene,
+        start: driftEnd,
+        end: () => driftEnd() + 0.8 * coverPhasePx,
+        scrub: 1,
+      }
+
+      gsap.to(preFooterClip, {
+        insetX: 0,
+        ease: "none",
+        scrollTrigger: preFooterWidthTrigger,
+        onUpdate: applyPreFooterClip,
+      })
+
+      gsap.to(preFooterClip, {
+        radius: 0,
+        ease: "none",
+        scrollTrigger: {
+          trigger: clientsScene,
+          start: () => driftEnd() + 0.6 * coverPhasePx, // dès 60% de la hauteur du viewport recouvert
+          end: () => driftEnd() + 0.8 * coverPhasePx,
+          scrub: 1,
+        },
+        onUpdate: applyPreFooterClip,
+      })
+
+      gsap.fromTo(
+        ".clients-intro",
+        { scale: 1 },
+        { scale: 0.8, ease: "none", scrollTrigger: coverScrollTrigger },
+      )
+
+      // Petit label : opacité + translateY, révélé avant le gros texte
+      gsap.set(".pre-footer-label", { opacity: 0, y: 30 })
+      gsap.to(".pre-footer-label", {
+        opacity: 1,
+        y: 0,
+        ease: "none",
+        scrollTrigger: {
+          trigger: clientsScene,
+          start: () => driftEnd() + 0.5 * coverPhasePx,
+          end: () => driftEnd() + 0.68 * coverPhasePx, // termine avant manifestRevealStart (0.7)
+          scrub: 1,
+        },
+      })
+
+      // Texte manifeste : split par lettre (adapté de la référence pre-footer),
+      // révélé pendant que le pré-footer termine de recouvrir Clients.
+      const manifestParagraphs = document.querySelectorAll(".pre-footer-manifest")
+      if (manifestParagraphs.length > 0) {
+        const manifestLetters = []
+
+        // Découpe un texte en mots > lettres > span animé, ajoutés à `parent`.
+        // `collector` (optionnel) reçoit aussi les spans créés, pour un traitement local (ex: dégradé).
+        function splitIntoLetters(text, parent, collector) {
+          text
+            .replace(/\s+/g, " ")
+            .trim()
+            .split(" ")
+            .forEach((word) => {
+              if (!word) return
+              const wordSpan = document.createElement("span")
+              wordSpan.className = "pre-footer-word"
+              word.split("").forEach((char) => {
+                const letterSpan = document.createElement("span")
+                letterSpan.className = "pre-footer-letter"
+                const innerSpan = document.createElement("span")
+                innerSpan.textContent = char
+                letterSpan.appendChild(innerSpan)
+                wordSpan.appendChild(letterSpan)
+                manifestLetters.push(innerSpan)
+                if (collector) collector.push(innerSpan)
+              })
+              parent.appendChild(wordSpan)
+              parent.appendChild(document.createTextNode(" "))
+            })
+        }
+
+        // Couleurs du dégradé du site, pour une interpolation directe par lettre
+        // (color est indépendant du transform GSAP, contrairement à background-clip:text
+        // qui ne peut pas peindre à travers des descendants transformés).
+        const gradientColors = ["--c-red", "--c-orange", "--c-yellow", "--c-rose"].map((name) =>
+          getComputedStyle(document.documentElement).getPropertyValue(name).trim(),
+        )
+        const gradientAt = gsap.utils.interpolate(gradientColors)
+
+        manifestParagraphs.forEach((manifest) => {
+          // On garde les nœuds d'origine (texte normal + éventuel <span class="pre-footer-highlight">)
+          // avant de vider le paragraphe, pour conserver le dégradé sur les mots surlignés.
+          const originalNodes = Array.from(manifest.childNodes)
+          manifest.innerHTML = ""
+
+          originalNodes.forEach((node) => {
+            if (
+              node.nodeType === Node.ELEMENT_NODE &&
+              node.classList.contains("pre-footer-highlight")
+            ) {
+              const highlightSpan = document.createElement("span")
+              highlightSpan.className = "pre-footer-highlight"
+              const highlightLetters = []
+              splitIntoLetters(node.textContent, highlightSpan, highlightLetters)
+              manifest.appendChild(highlightSpan)
+
+              highlightLetters.forEach((letter, i) => {
+                const t = highlightLetters.length > 1 ? i / (highlightLetters.length - 1) : 0
+                letter.style.color = gradientAt(t)
+              })
+            } else {
+              splitIntoLetters(node.textContent, manifest)
+            }
+          })
+        })
+
+        gsap.set(manifestLetters, { rotate: -88, xPercent: -20, opacity: 0 })
+
+        // "haut du pré-footer" dérivé de coverScrollTrigger (position:absolute,
+        // donc pas de trigger fiable sur #pre-footer lui-même) :
+        // le reveal démarre plus tard dans le recouvrement (60% parcouru) et se
+        // termine pile quand le pré-footer a fini de recouvrir Clients.
+        const manifestRevealStart = () => driftEnd() + 0.7 * coverPhasePx
+        const manifestRevealEnd = coverEnd
+
+        gsap.to(manifestLetters, {
+          rotate: 0,
+          xPercent: 0,
+          opacity: 1,
+          duration: 0.4,
+          stagger: 0.01,
+          ease: "back.out(1.1)",
+          scrollTrigger: {
+            trigger: clientsScene,
+            start: manifestRevealStart,
+            end: manifestRevealEnd,
+            scrub: 1,
+          },
+        })
+        // Pas de disparition pour l'instant — prévue plus tard pour la transition
+        // vers la section suivante, sur une plage à définir après #pre-footer.
+      }
+    }
 
     clientCards.forEach((card, i) => {
       const sign = i % 2 === 0 ? 1 : -1

@@ -424,7 +424,7 @@ section {
 }
 
 /* Grain Texture */
-.noise-overlay {
+/* .noise-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -434,7 +434,7 @@ section {
   z-index: 90;
   opacity: 0.05;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-}
+} */
 
 /* --- SECTION EXPERTISE (Champs de création) --- */
 #expertise {
@@ -565,11 +565,85 @@ section {
 }
 
 /* --- SECTION CLIENTS (Drift horizontal) --- */
+.clients-scene {
+  position: relative;
+}
+
 #clients {
   overflow: hidden;
   position: relative;
   background-color: var(--c-bg);
   min-height: 100vh;
+}
+
+/* --- SECTION PRE-FOOTER (Recouvrement de Clients) --- */
+#pre-footer {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 20;
+  background-color: var(--c-black);
+  clip-path: inset(0 8vw 0 8vw round 1.5rem 1.5rem 0 0);
+  padding: 8rem var(--gutter);
+}
+
+.pre-footer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4.75rem;
+  /* 76px */
+  max-width: 90rem;
+}
+
+.pre-footer-label {
+  font-family: var(--font-regular);
+  font-weight: 300;
+  font-size: 1.25rem;
+  /* 20px */
+  letter-spacing: 0.3125rem;
+  /* 5px */
+  text-transform: uppercase;
+  color: var(--c-bg);
+}
+
+.pre-footer-manifest-group {
+  display: flex;
+  flex-direction: column;
+  /* pas de gap : les deux paragraphes doivent rester collés, juste un saut de ligne */
+}
+
+.pre-footer-manifest {
+  font-family: var(--font-special);
+  font-weight: 400;
+  font-size: clamp(2rem, 5vw, 4.75rem);
+  /* 76px */
+  line-height: 1.05;
+  color: var(--c-bg);
+}
+
+/* .pre-footer-highlight : pas de style propre, la couleur (dégradé) est appliquée
+   directement par lettre en JS (voir animations.js) pour rester compatible avec
+   le transform GSAP sur les lettres descendantes. */
+
+.pre-footer-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.pre-footer-letter {
+  display: inline-block;
+  overflow: hidden;
+  padding-bottom: 0.2em;
+  margin-bottom: -0.2em;
+  /* laisse de la place aux descendantes (g, j, p...) sans changer le line-height */
+}
+
+.pre-footer-letter span {
+  display: inline-block;
+  transform-origin: 50% 120%;
+  /* pivot sous la lettre : la rotation la fait sortir de sa boîte (overflow:hidden) au lieu de juste l'incliner sur place */
 }
 
 .clients-intro {
