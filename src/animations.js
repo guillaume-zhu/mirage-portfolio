@@ -902,5 +902,115 @@ export function initAnimations() {
     })
   })
 
+  // --- ANIMATIONS: CLIENTS (Horizontal Drift) ---
+  const clientsRoot = document.querySelector("#clients")
+  if (clientsRoot) {
+    // Apparition du label + split par lettre du gros titre, à l'arrivée sur la section
+    const clientsTitleLetters = []
+    clientsRoot.querySelectorAll(".clients-title p").forEach((line) => {
+      const textContent = line.textContent.replace(/\s+/g, " ").trim()
+      line.innerHTML = ""
+
+      const words = textContent.split(" ")
+      words.forEach((word) => {
+        if (!word) return
+        const wordSpan = document.createElement("span")
+        wordSpan.className = "clients-word"
+        word.split("").forEach((char) => {
+          const letterSpan = document.createElement("span")
+          letterSpan.textContent = char
+          letterSpan.className = "clients-letter"
+          wordSpan.appendChild(letterSpan)
+          clientsTitleLetters.push(letterSpan)
+        })
+        line.appendChild(wordSpan)
+        line.appendChild(document.createTextNode(" "))
+      })
+    })
+
+    gsap.set(".clients-label", { opacity: 0, y: 20 })
+    gsap.set(clientsTitleLetters, { opacity: 0, y: 30 })
+
+    const clientsIntroTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: "#clients",
+        start: "top top",
+        end: "bottom top",
+        scrub: 1,
+      },
+    })
+
+    clientsIntroTl.to(".clients-label", { opacity: 1, y: 0, ease: "power2.out" }, 0)
+    clientsIntroTl.to(
+      clientsTitleLetters,
+      {
+        keyframes: {
+          "0%": { y: 30, opacity: 0 },
+          "50%": { y: -6, opacity: 1, ease: "power2.out" },
+          "75%": { y: 2, ease: "power1.inOut" },
+          "100%": { y: 0, ease: "power1.out" },
+        },
+        stagger: 0.02,
+      },
+      0.1,
+    )
+
+    const clientsCardsContainer = clientsRoot.querySelector(".clients-cards")
+    const clientCards = clientsRoot.querySelectorAll(".client-card")
+    const clientsDistance = clientsCardsContainer.clientWidth - window.innerWidth
+    const isPortrait = window.innerWidth < window.innerHeight
+
+    const clientsScrollTween = gsap.to(clientsCardsContainer, {
+      x: -clientsDistance,
+      ease: "none",
+      scrollTrigger: {
+        trigger: "#clients",
+        pin: true,
+        scrub: true,
+        start: "top top",
+        end: "+=" + clientsDistance,
+      },
+    })
+
+    clientCards.forEach((card, i) => {
+      const sign = i % 2 === 0 ? 1 : -1
+      const rotation = (Math.random() - 0.5) * 6
+      const amplitude = isPortrait ? 0.4 : 0.5
+
+      gsap.fromTo(
+        card,
+        { rotation },
+        {
+          rotation: -rotation,
+          y: () => sign * -amplitude * window.innerHeight,
+          yPercent: () => sign * 50,
+          yoyo: true,
+          repeat: 1,
+          ease: "power1.inOut",
+          scrollTrigger: {
+            trigger: card,
+            containerAnimation: clientsScrollTween,
+            start: "left 90%",
+            end: "right 10%",
+            scrub: true,
+          },
+        },
+      )
+      gsap.to(card, {
+        scale: 1.25,
+        yoyo: true,
+        repeat: 1,
+        ease: "back.inOut(3)",
+        scrollTrigger: {
+          trigger: card,
+          containerAnimation: clientsScrollTween,
+          start: "left 90%",
+          end: "right 10%",
+          scrub: true,
+        },
+      })
+    })
+  }
+
   console.log("Mirage Studio: Refined Experience Loaded")
 }
