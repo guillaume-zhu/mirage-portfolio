@@ -303,7 +303,7 @@ section {
   align-items: center;
   justify-content: center;
   position: relative;
-  padding: 4rem 0;
+  padding-top: 4rem;
 }
 
 .works-label {
@@ -574,6 +574,7 @@ section {
   position: relative;
   background-color: var(--c-bg);
   min-height: 100vh;
+  padding-top: 0;
 }
 
 /* --- SECTION PRE-FOOTER (Recouvrement de Clients) --- */
@@ -654,6 +655,9 @@ section {
   text-align: center;
   z-index: 5;
   pointer-events: none;
+}
+
+.clients-intro-inner {
   display: flex;
   flex-direction: column;
   align-items: center;

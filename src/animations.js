@@ -930,17 +930,19 @@ export function initAnimations() {
 
     gsap.set(".clients-label", { opacity: 0, y: 20 })
     gsap.set(clientsTitleLetters, { opacity: 0, y: 30 })
+    gsap.set(".clients-intro-inner", { y: "-26vh" })
 
     const clientsIntroTl = gsap.timeline({
       scrollTrigger: {
         trigger: "#clients",
-        start: "top top",
-        end: "bottom top",
-        scrub: 1,
+        start: "top bottom",
+        end: "top top",
+        scrub: true,
       },
     })
 
-    clientsIntroTl.to(".clients-label", { opacity: 1, y: 0, ease: "power2.out" }, 0)
+    clientsIntroTl.to(".clients-intro-inner", { y: "0vh", ease: "none", duration: 1.3 }, 0)
+    clientsIntroTl.to(".clients-label", { opacity: 1, y: 0, ease: "power2.out" }, 0.25)
     clientsIntroTl.to(
       clientsTitleLetters,
       {
@@ -952,7 +954,7 @@ export function initAnimations() {
         },
         stagger: 0.02,
       },
-      0.1,
+      0.8,
     )
 
     const clientsScene = document.querySelector(".clients-scene")
