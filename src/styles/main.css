@@ -306,6 +306,13 @@ section {
   padding-top: 4rem;
 }
 
+.works-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
 .works-label {
   font-family: var(--font-regular);
   font-size: var(--fs-body);
@@ -436,132 +443,147 @@ section {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 } */
 
-/* --- SECTION EXPERTISE (Champs de création) --- */
+/* --- SECTION EXPERTISE (Imaginer / Construire / Mettre en scène) --- */
 #expertise {
   background-color: var(--c-bg);
-  padding: 6rem var(--gutter);
   min-height: 100vh;
+  overflow: hidden;
+  padding: 0;
+  justify-content: center;
+}
+
+.expertise-inner {
+  position: relative;
+  width: 100%;
+  max-width: 1728px;
+  /* base Figma */
+  margin: 0 auto;
+  height: 100vh;
+  display: flex;
   align-items: center;
 }
 
-.expertise-intro {
-  max-width: 700px;
-  margin: 0 auto 6rem;
-  text-align: center;
+/* Colonne texte — left 15.38% (Figma) */
+.expertise-text {
+  position: absolute;
+  left: 15.38%;
+  width: 23%;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
 }
 
 .expertise-title {
   font-family: var(--font-special);
-  font-size: clamp(2.5rem, 5vw, 5rem);
   font-weight: 400;
-  line-height: 1;
-  margin-bottom: 1.5rem;
-  letter-spacing: 0;
+  font-size: clamp(2rem, 2.9vw, 3.125rem);
+  /* 50px */
+  line-height: 1.4;
+  color: var(--c-black);
+}
+
+/* Les deux paragraphes occupent la même cellule (cross-fade pendant le flip) */
+.expertise-leads {
+  display: grid;
 }
 
 .expertise-lead {
+  grid-area: 1 / 1;
   font-family: var(--font-regular);
+  font-weight: 400;
+  font-size: clamp(1rem, 1.16vw, 1.25rem);
+  /* 20px */
+  line-height: 1.5;
   color: var(--c-black);
-  text-align: center;
-  font-size: var(--fs-body);
 }
 
-.expertise-cards .container {
-  height: 460px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+/* Scène 3D — bloc cards, left 46.15%, 653x394 (Figma) */
+.expertise-stage {
+  position: absolute;
+  left: 46.15%;
+  width: 653px;
+  height: 394px;
+  display: grid;
+  place-items: center;
+  perspective: 150vw;
 }
 
-.expertise-cards .slide {
+.expertise-cards {
+  grid-area: 1 / 1;
+  width: 317px;
+  height: 394px;
   position: relative;
-  flex: 0 0 88px;
-  height: 460px;
-  overflow: hidden;
-  color: var(--c-bg);
+  transform-style: preserve-3d;
+  will-change: transform;
 }
 
-.expertise-cards .slide:not(.on) {
-  cursor: pointer;
-}
-
-.expertise-cards .slide:nth-child(1) {
-  background-color: var(--c-red);
-}
-
-.expertise-cards .slide:nth-child(2) {
-  background-color: var(--c-orange);
-}
-
-.expertise-cards .slide:nth-child(3) {
-  background-color: var(--c-yellow);
-}
-
-.expertise-cards .slide:nth-child(4) {
-  background-color: var(--c-rose);
-}
-
-.expertise-cards .content {
-  height: 100%;
+.expertise-card {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: 2rem;
-  cursor: pointer;
-}
-
-.expertise-cards .title {
-  font-family: var(--font-regular);
-  font-weight: 700;
-  font-size: clamp(2rem, 3.25vw, 4rem);
-  line-height: 1;
-  padding-bottom: 0.2em;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  gap: 45px;
+  padding: 40px;
+  border-radius: 25px;
   overflow: hidden;
+  color: #fff;
+  backface-visibility: hidden;
 }
 
-.expertise-cards .bottom {
-  display: flex;
-  align-items: flex-start;
-  gap: 30px;
-  width: 92%;
+.expertise-card:nth-child(even) {
+  transform: rotateY(180deg);
 }
 
-.expertise-cards .media {
-  width: 200px;
-  height: 200px;
-  border-radius: 12px;
-  flex-shrink: 0;
-  background-color: var(--c-inactive);
-}
-
-.expertise-cards .bottom p {
-  font-family: var(--font-regular);
-  font-size: var(--fs-body);
-  line-height: 1.4;
-}
-
-.expertise-cards .small-title {
-  width: 460px;
-  height: 88px;
+.expertise-card-bg {
   position: absolute;
-  bottom: 0;
-  left: 100%;
-  transform: rotate(-90deg);
-  transform-origin: 0 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+  border-radius: 25px;
 }
 
-.expertise-cards .small-title p {
-  font-family: var(--font-regular);
-  font-weight: 700;
-  font-size: 1.5rem;
-  margin: 0;
+.expertise-card-title {
+  font-family: var(--font-special);
+  font-weight: 400;
+  font-size: clamp(1.25rem, 1.74vw, 1.875rem);
+  /* 30px */
+  line-height: 1.2;
   white-space: nowrap;
+}
+
+.expertise-card-text {
+  font-family: var(--font-regular);
+  font-weight: 400;
+  font-size: clamp(0.9rem, 1.16vw, 1.25rem);
+  /* 20px */
+  line-height: 1.5;
+}
+
+/* Split lettre par lettre du grand titre */
+.expertise-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.expertise-letter {
+  display: inline-block;
+}
+
+@media (max-width: 1100px) {
+  .expertise-stage {
+    left: auto;
+    right: 4vw;
+    transform: scale(0.8);
+    transform-origin: right center;
+  }
+
+  .expertise-text {
+    left: 6vw;
+    width: 34%;
+  }
 }
 
 /* --- SECTION CLIENTS (Drift horizontal) --- */

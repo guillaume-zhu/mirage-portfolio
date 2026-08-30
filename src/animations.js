@@ -372,205 +372,206 @@ export function initAnimations() {
     })
   })
 
-  // --- ANIMATIONS: EXPERTISE CARDS (Accordéon) ---
-  const expertiseRoot = document.querySelector(".expertise-cards")
+  // --- ANIMATIONS: EXPERTISE (Intro > Phase 1 > Flip > Phase 2 > Outro) ---
+  const expertiseRoot = document.querySelector("#expertise")
   if (expertiseRoot) {
-    const expContainer = expertiseRoot.querySelector(".container")
-    const expSlides = [...expContainer.querySelectorAll(".slide")]
+    const expTitle = expertiseRoot.querySelector(".expertise-title")
+    const expLead1 = expertiseRoot.querySelector(".expertise-lead-1")
+    const expLead2 = expertiseRoot.querySelector(".expertise-lead-2")
+    const expText = expertiseRoot.querySelector(".expertise-text")
+    const expCardsA = expertiseRoot.querySelector(".expertise-cards-a")
+    const expCardsB = expertiseRoot.querySelector(".expertise-cards-b")
+    const expFacesA = expCardsA.querySelectorAll(".expertise-card")
+    const expFacesB = expCardsB.querySelectorAll(".expertise-card")
 
-    const expContents = expSlides.map((item) => item.querySelector(".content"))
-    const expSmallTitles = expSlides.map((item) => item.querySelector(".small-title"))
-    const expBottoms = expSlides.map((item) => item.querySelector(".bottom"))
-
-    let expWidthOpen = Math.min(640, window.innerWidth * 0.58)
-    const expWidthClosed = 88
-    const expBorderRadiusClosed = 44
-    const expBorderRadiusOpen = 20
-    const expHeightClosed = 370
-    const expHeightHover = 390
-    const expHeightOpen = 460
-    const expSmallTitleXOpen = 60
-    const expContentXLeft = -720
-    const expContentXRight = 70
-    const expAxis = "x"
-
-    expSlides[0].classList.add("on")
-
-    gsap.set(expSlides[0], {
-      flex: "0 0 " + expWidthOpen + "px",
-      borderRadius: expBorderRadiusOpen,
-    })
-    gsap.set(expSlides.slice(1), {
-      borderRadius: expBorderRadiusClosed,
-      height: expHeightClosed,
-    })
-    gsap.set(expSmallTitles[0], {
-      [expAxis]: expSmallTitleXOpen,
-      autoAlpha: 0,
-    })
-    gsap.set(expSmallTitles.slice(1), {
-      width: expHeightClosed,
-    })
-    gsap.set(expContents.slice(1), {
-      [expAxis]: expContentXLeft,
-    })
-    gsap.set(expBottoms.slice(1), {
-      autoAlpha: 0,
+    // Split lettre par lettre du grand titre (même logique que le titre de Clients),
+    // en préservant les <br> qui séparent les 3 lignes.
+    const expTitleLetters = []
+    const expTitleLines = [] // lettres regroupées par ligne, pour un reveal ligne à ligne
+    const expLines = expTitle.innerHTML.split(/<br\s*\/?>/i)
+    expTitle.innerHTML = ""
+    expLines.forEach((line, lineIndex) => {
+      const lineLetters = []
+      line
+        .replace(/\s+/g, " ")
+        .trim()
+        .split(" ")
+        .forEach((word) => {
+          if (!word) return
+          const wordSpan = document.createElement("span")
+          wordSpan.className = "expertise-word"
+          word.split("").forEach((char) => {
+            const letterSpan = document.createElement("span")
+            letterSpan.textContent = char
+            letterSpan.className = "expertise-letter"
+            wordSpan.appendChild(letterSpan)
+            expTitleLetters.push(letterSpan)
+            lineLetters.push(letterSpan)
+          })
+          expTitle.appendChild(wordSpan)
+          expTitle.appendChild(document.createTextNode(" "))
+        })
+      if (lineLetters.length) expTitleLines.push(lineLetters)
+      if (lineIndex < expLines.length - 1) expTitle.appendChild(document.createElement("br"))
     })
 
-    function expHandleMouseEnter(item, index) {
-      if (item.classList.contains("on")) return
+    // Décalage au repos : positions Figma (cartes de 317px, centres à ±168px sur 653px)
+    const expOffset = 53 // xPercent
 
-      gsap.to(item, {
-        height: expHeightHover,
-        duration: 0.3,
-        ease: "back.out(2)",
-      })
-      gsap.to(expSmallTitles[index], {
-        width: expHeightHover,
-        duration: 0.3,
-        ease: "back.out(2)",
-      })
+    // États initiaux (avant l'intro)
+    gsap.set(expTitleLetters, { opacity: 0, y: 30 })
+    gsap.set(expLead1, { opacity: 0, y: 30 })
+    gsap.set(expLead2, { opacity: 0, y: 30 })
+    gsap.set(expCardsA, { xPercent: -expOffset, opacity: 0, y: 40 })
+    gsap.set(expCardsB, { xPercent: expOffset, opacity: 0, y: 40 })
+
+    // Faces visibles (recto = cards 1/2, verso = cards 3/4), cf. référence mwg_effect056
+    function expSetFace(index) {
+      expFacesA.forEach((f, i) => (f.style.visibility = i === index ? "visible" : "hidden"))
+      expFacesB.forEach((f, i) => (f.style.visibility = i === index ? "visible" : "hidden"))
     }
+    expSetFace(0)
 
-    function expHandleMouseLeave(item, index) {
-      if (item.classList.contains("on")) return
+    // --- 1. APPROCHE (avant le pin) : le contenu apparaît plus haut, descend jusqu'à
+    // sa position centrée et se révèle — supprime le temps mort après #concept. ---
+    gsap.set(".expertise-inner", { y: "-18vh" })
 
-      gsap.to(item, {
-        height: expHeightClosed,
-        duration: 0.3,
-        ease: "back.out(2)",
-      })
-      gsap.to(expSmallTitles[index], {
-        width: expHeightClosed,
-        duration: 0.3,
-        ease: "back.out(2)",
-      })
-    }
+    const expApproachTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: "#expertise",
+        start: "top bottom",
+        end: "top top",
+        scrub: true,
+      },
+    })
 
-    // Une transition = fermeture de fromIndex + ouverture de toIndex (toIndex > fromIndex,
-    // donc toujours équivalent à la branche "isBefore: false" de l'ancien accordéon).
-    // Le scrub de ScrollTrigger rejoue naturellement ce même segment à l'envers en cas de
-    // retour en arrière, ce qui reproduit la logique directionnelle sans la dupliquer.
-    function addExpertiseTransition(tl, fromIndex, toIndex, position) {
-      tl.to(
-        expSlides[fromIndex],
+    // Le reveal est retardé : au début de l'approche le contenu est encore sous
+    // l'écran, il ne doit se révéler qu'en entrant réellement dans le viewport.
+    const expRevealStart = 3.0
+    const expRevealSpan = 3.1 // du début du reveal à la fin de la dernière card
+    const expApproachDuration = expRevealStart + expRevealSpan
+
+    // La descente couvre toute l'approche : position centrée atteinte pile au pin.
+    expApproachTl.to(
+      ".expertise-inner",
+      { y: "0vh", ease: "none", duration: expApproachDuration },
+      0,
+    )
+
+    // Le titre se révèle ligne par ligne : chaque ligne démarre quand la précédente
+    // est presque terminée (~68% de sa durée).
+    const expLineDuration = 0.7
+    const expLineStagger = 0.03
+    let expLineStart = 0
+
+    expTitleLines.forEach((lineLetters) => {
+      expApproachTl.to(
+        lineLetters,
         {
-          flex: "0 0 " + expWidthClosed + "px",
-          height: expHeightClosed,
-          borderRadius: expBorderRadiusClosed,
-          duration: 0.5,
-          ease: "back.inOut(0.9)",
+          keyframes: {
+            "0%": { y: 30, opacity: 0 },
+            "50%": { y: -6, opacity: 1, ease: "power2.out" },
+            "75%": { y: 2, ease: "power1.inOut" },
+            "100%": { y: 0, ease: "power1.out" },
+          },
+          stagger: expLineStagger,
+          duration: expLineDuration,
         },
-        position,
+        expRevealStart + expLineStart,
       )
-      tl.to(
-        expContents[fromIndex],
-        {
-          [expAxis]: expContentXLeft,
-          duration: 0.5,
-          ease: "back.inOut(0.9)",
-        },
-        position,
+
+      const lineSpan = expLineDuration + (lineLetters.length - 1) * expLineStagger
+      expLineStart += lineSpan * 0.68
+    })
+
+    // Cascade : titre -> corps, puis les cards enchaînent dès l'apparition du corps
+    const expTween = (target, at) =>
+      expApproachTl.to(
+        target,
+        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+        expRevealStart + at,
       )
-      tl.to(
-        expSmallTitles[fromIndex],
-        {
-          [expAxis]: 0,
-          width: expHeightClosed,
-          autoAlpha: 1,
-          duration: 0.5,
-          ease: "back.inOut(0.9)",
-        },
-        position,
-      )
-      tl.to(
-        expBottoms[fromIndex],
-        {
-          autoAlpha: 0,
-          duration: 0.4,
-          ease: "power1.inOut",
-        },
-        position,
-      )
-      tl.to(
-        expSlides[toIndex],
-        {
-          flex: "0 0 " + expWidthOpen + "px",
-          borderRadius: expBorderRadiusOpen,
-          height: expHeightOpen,
-          duration: 0.5,
-          ease: "back.inOut(0.9)",
-        },
-        position,
-      )
-      tl.fromTo(
-        expContents[toIndex],
-        { [expAxis]: expContentXLeft },
-        { [expAxis]: 0, duration: 0.5, ease: "back.inOut(0.9)" },
-        position,
-      )
-      tl.to(
-        expSmallTitles[toIndex],
-        {
-          [expAxis]: expSmallTitleXOpen,
-          width: expHeightOpen,
-          autoAlpha: 0,
-          duration: 0.5,
-          ease: "back.inOut(0.9)",
-        },
-        position,
-      )
-      tl.to(
-        expBottoms[toIndex],
-        {
-          autoAlpha: 1,
-          duration: 0.4,
-          ease: "power1.inOut",
-        },
-        position,
-      )
-    }
+
+    expTween(expLead1, 2.35)
+    expTween(expCardsA, 2.45)
+    expTween(expCardsB, 2.6)
+
+    // Bascule des faces au milieu exact du flip (t=0.9), rapportée à la durée
+    // réelle de la timeline — sinon le seuil dérive et laisse un trou sans face visible.
+    const expFlipMid = 0.9
 
     const expTl = gsap.timeline({
       scrollTrigger: {
         trigger: "#expertise",
         start: "top top",
-        end: "+=300%",
+        end: "+=225%",
         pin: true,
-        scrub: 1,
-        snap: { snapTo: [0, 1 / 3, 2 / 3, 1], duration: 0.5, ease: "power1.inOut" },
+        scrub: true,
         onUpdate: (self) => {
-          const activeIndex = Math.round(self.progress * 3)
-          expSlides.forEach((slide, i) => {
-            slide.classList.toggle("on", i === activeIndex)
-          })
+          expSetFace(self.progress * expTl.duration() < expFlipMid ? 0 : 1)
         },
       },
     })
 
-    addExpertiseTransition(expTl, 0, 1, 0)
-    addExpertiseTransition(expTl, 1, 2, 1)
-    addExpertiseTransition(expTl, 2, 3, 2)
+    // --- 2. PHASE 1 : hold (0 -> 0.4) ---
+    expTl.to({}, { duration: 0.4 }, 0)
 
-    // Clic = déplacement Lenis vers la position de scroll correspondant à l'état visé ;
-    // ScrollTrigger reste seul responsable de l'animation (source de vérité unique).
-    function goToCardIndex(targetIndex) {
-      const st = expTl.scrollTrigger
-      if (!st) return
+    // --- 3. FLIP (0.4 -> 1.4) — logique reprise de mwg_effect056 ---
+    const expRx = (Math.random() - 0.5) * 40
+    const expRz = (Math.random() - 0.5) * 40
 
-      const currentIndex = Math.round(st.progress * 3)
-      if (targetIndex === currentIndex) return
+    expTl.to(
+      expCardsA,
+      { xPercent: expOffset, rotateY: "+=180", duration: 1, ease: "power2.inOut" },
+      0.4,
+    )
+    expTl.to(expCardsA, { z: -150, duration: 0.5, yoyo: true, repeat: 1, ease: "power2.inOut" }, 0.4)
+    expTl.to(
+      expCardsB,
+      { xPercent: -expOffset, rotateY: "-=180", duration: 1, ease: "power2.inOut" },
+      0.4,
+    )
+    expTl.to(expCardsB, { z: 150, duration: 0.5, yoyo: true, repeat: 1, ease: "power2.inOut" }, 0.4)
+    expTl.to(
+      [expCardsA, expCardsB],
+      {
+        rotateX: expRx,
+        rotateZ: expRz,
+        scale: 1.1,
+        duration: 0.5,
+        repeat: 1,
+        yoyo: true,
+        ease: "power2.in",
+      },
+      0.4,
+    )
 
-      const targetY = st.start + (targetIndex / 3) * (st.end - st.start)
-      lenis.scrollTo(targetY, { duration: 1.2, easing: lenisEasing })
-    }
+    // Cross-fade des paragraphes pendant le flip
+    expTl.to(expLead1, { opacity: 0, y: -30, duration: 0.4, ease: "power2.in" }, 0.4)
+    expTl.to(expLead2, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0.9)
 
-    expSlides.forEach((item, index) => {
-      item.addEventListener("mouseenter", () => expHandleMouseEnter(item, index))
-      item.addEventListener("mouseleave", () => expHandleMouseLeave(item, index))
-      item.addEventListener("click", () => goToCardIndex(index))
-    })
+    // --- 4. PHASE 2 : hold (1.4 -> 1.8) ---
+    expTl.to({}, { duration: 0.4 }, 1.4)
+
+    // --- 5. OUTRO en cascade : textes, puis card de gauche, puis card de droite.
+    // Après le flip, B est à gauche (xPercent -53) et A à droite (+53).
+    //
+    // Sortie partielle (0.45vh) : les éléments ne doivent PAS avoir quitté l'écran quand
+    // le pin se libère, sinon une frame totalement vide s'intercale avant l'arrivée de
+    // #works. Ils finissent d'être évacués par le scroll naturel de la section dépinnée —
+    // c'est ce recouvrement qui rend la transition #works -> #clients fluide.
+    //
+    // La cascade vient des DÉPARTS décalés, mais les trois tweens se terminent au même
+    // instant (fin du pin) : sinon chacun atteint sa position finale puis s'y fige
+    // visiblement en attendant la fin du pin, l'un après l'autre.
+    const expExitY = () => -(window.innerHeight * 0.45)
+    const expOutroEnd = 2.54
+    const expExit = (target, at) =>
+      expTl.to(target, { y: expExitY, duration: expOutroEnd - at, ease: "power1.in" }, at)
+
+    expExit(expText, 1.8)
+    expExit(expCardsB, 1.92)
+    expExit(expCardsA, 2.04)
   }
 
   // --- ANIMATIONS: LOGO LIQUID HOVER ---
@@ -747,34 +748,51 @@ export function initAnimations() {
       })
     })
 
-    // Timeline pinnée : révélation en chaîne (opacité + fin de distorsion liquide)
+    // Révélation d'un sous-ensemble de projets (opacité + fin de distorsion liquide)
+    const worksRevealChain = (tl, from, to, at) => {
+      const items = [...workItems].slice(from, to)
+      const disps = workDisplacements.slice(from, to)
+      const turbs = workTurbulences.slice(from, to)
+      const opts = { stagger: 0.5, duration: 0.6, ease: "power2.out" }
+
+      tl.to(items, { opacity: 1, pointerEvents: "auto", ...opts }, at)
+      tl.to(disps, { attr: { scale: 0 }, ...opts }, at)
+      tl.to(turbs, { attr: { baseFrequency: 0.02 }, ...opts }, at)
+    }
+
+    // --- APPROCHE (avant le pin) : le contenu apparaît plus haut, descend jusqu'à sa
+    // position centrée, et la chaîne démarre déjà — sinon l'approche défile à vide
+    // avec seulement le label à l'écran. ---
+    const worksSplit = Math.ceil(workItems.length / 2)
+
+    gsap.set(".works-inner", { y: "-65vh" })
+
+    const worksApproachTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: "#works",
+        start: "top bottom",
+        end: "top top",
+        scrub: true,
+      },
+    })
+
+    // La descente couvre toute l'approche : position centrée atteinte pile au pin.
+    worksApproachTl.to(".works-inner", { y: "0vh", ease: "none", duration: 1.5 }, 0)
+    worksApproachTl.to(".works-label", { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, 0)
+    worksRevealChain(worksApproachTl, 0, worksSplit, 0.25)
+
+    // Timeline pinnée : la chaîne se poursuit sur les projets restants
     const worksTl = gsap.timeline({
       scrollTrigger: {
         trigger: "#works",
         start: "top top",
-        end: "+=250%",
+        end: "+=150%",
         pin: true,
         scrub: 1,
       },
     })
 
-    worksTl.to(".works-label", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0)
-
-    worksTl.to(
-      workItems,
-      { opacity: 1, pointerEvents: "auto", stagger: 0.5, duration: 0.6, ease: "power2.out" },
-      0.5,
-    )
-    worksTl.to(
-      workDisplacements,
-      { attr: { scale: 0 }, stagger: 0.5, duration: 0.6, ease: "power2.out" },
-      0.5,
-    )
-    worksTl.to(
-      workTurbulences,
-      { attr: { baseFrequency: 0.02 }, stagger: 0.5, duration: 0.6, ease: "power2.out" },
-      0.5,
-    )
+    worksRevealChain(worksTl, worksSplit, workItems.length, 0)
     worksTl.to({}, { duration: 0.3 })
   }
 
