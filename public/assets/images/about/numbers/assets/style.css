@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;800&display=swap');
+
+/* NORMALIZE */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    appearance: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+/* NORMALIZE */
+
+body {
+    background: #121212;
+    color: #F1F1F1;
+    font: 500 normal 22px/1.3 'Inter', sans-serif;
+}
+.mwg_effect053 {
+    width: 100%;
+}
+.mwg_effect053 .pin-height {
+    height: 600vh;
+}
+.mwg_effect053 .container {
+    height: 100vh;
+    perspective: 300vw;
+    display: grid;
+    place-items: center;
+}
+.mwg_effect053 .paragraphs {
+    grid-area: 1/1;
+    font-size: max(20px, 5.3vw);
+    line-height: 1;
+    width: 62%;
+    margin: 0 auto;
+    text-align: center;
+    transform-style: preserve-3d;
+}
+.mwg_effect053 .line {
+    transform-style: preserve-3d;
+}
+.mwg_effect053 .line-inner {
+    transform: translate3d(0, 0, 33vw);
+    backface-visibility: hidden;
+}
+.mwg_effect053 .bottom {
+    position: absolute;
+    bottom: 25px;
+    left: 25px;
+    display: flex;
+    gap: 25px;
+    align-items: center;
+}
+.mwg_effect053 .bottom img {
+    width: max(94px, 6.5vw);
+    aspect-ratio: 1;
+    border-radius: 3px;
+}
+.mwg_effect053 .bottom p {
+    font-size: max(15px, 1.25vw);
+}
+.mwg_effect053 .bottom p span {
+    color: #999;
+}
