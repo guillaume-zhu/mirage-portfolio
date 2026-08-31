@@ -60,7 +60,9 @@ body {
   justify-content: space-between;
   align-items: center;
   z-index: 100;
-  color: var(--c-black);
+  /* var(--c-black) sur main.css : basculé en clair ici, la page About
+     démarre sur un Hero au fond sombre (contrairement à Home). */
+  color: var(--c-bg);
   transition: transform 0.6s var(--ease-out-expo);
 }
 
@@ -98,7 +100,7 @@ body {
   width: 100%;
   height: 100vh;
   overflow: hidden;
-  background-color: var(--c-bg);
+  background-color: var(--c-black);
   perspective: 100vw; /* valeur de secours avant le premier calcul JS */
 }
 
@@ -150,7 +152,7 @@ body {
   /* Agrandi vs la valeur Figma (60px) */
   font-size: clamp(3.5rem, 5.5vw, 7rem);
   line-height: 1.1;
-  color: var(--c-black);
+  color: var(--c-bg);
   margin: 0;
 }
 
