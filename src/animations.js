@@ -213,7 +213,7 @@ export function initAnimations() {
     scrollTrigger: {
       trigger: "#concept",
       start: "top top",
-      end: "+=200%",
+      end: "+=100%",
       pin: true,
       scrub: 1.5,
     },
