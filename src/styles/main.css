@@ -822,7 +822,7 @@ section {
 }
 
 .footer-logo {
-  width: clamp(280px, 40vw, 1000px);
+  width: clamp(280px, 35vw, 800px);
 }
 
 .footer-signature {

@@ -63,13 +63,16 @@ export function createFooterWebGL(footerEl, options = {}) {
   if (!canvas || !imageEl) return null
 
   const config = {
-    radius: 0.5,
+    radius: 0.4,
     velocityGain: 0.25,
     positionDamping: 0.1,
     velocityDamping: 0.15,
     strengthRise: 0.15,
     strengthDecay: 0.01,
-    maxPixelRatio: 1.5,
+    idleStrength: 0.5,
+    idleSpeed: 0.15,
+    zoom: 1.4,
+    maxPixelRatio: 2,
     ...options,
   }
 
@@ -95,6 +98,10 @@ export function createFooterWebGL(footerEl, options = {}) {
     uVelocity: gl.getUniformLocation(program, "uVelocity"),
     uStrength: gl.getUniformLocation(program, "uStrength"),
     uRadius: gl.getUniformLocation(program, "uRadius"),
+    uTime: gl.getUniformLocation(program, "uTime"),
+    uIdleStrength: gl.getUniformLocation(program, "uIdleStrength"),
+    uIdleSpeed: gl.getUniformLocation(program, "uIdleSpeed"),
+    uZoom: gl.getUniformLocation(program, "uZoom"),
   }
 
   const texture = gl.createTexture()
@@ -118,6 +125,11 @@ export function createFooterWebGL(footerEl, options = {}) {
   const smoothedVelocity = { x: 0, y: 0 }
   let strength = 0
   let pointerActive = false
+
+  // Temps accumulé à partir des dt réels (jamais le timestamp absolu de rAF) :
+  // quand l'IntersectionObserver arrête puis relance la loop, l'idle reprend
+  // sans saut, exactement là où il s'était arrêté.
+  let elapsedTime = 0
 
   let rect = footerEl.getBoundingClientRect()
   let rectDirty = false
@@ -193,6 +205,8 @@ export function createFooterWebGL(footerEl, options = {}) {
     if (!Number.isFinite(dt) || dt <= 0) dt = 1 / 60
     dt = Math.min(dt, MAX_DT)
 
+    elapsedTime += dt
+
     if (rectDirty) resizeCanvas()
 
     const posFactor = frameIndependentDamping(config.positionDamping, dt)
@@ -231,6 +245,10 @@ export function createFooterWebGL(footerEl, options = {}) {
     gl.uniform2f(uniforms.uVelocity, smoothedVelocity.x, smoothedVelocity.y)
     gl.uniform1f(uniforms.uStrength, strength)
     gl.uniform1f(uniforms.uRadius, config.radius)
+    gl.uniform1f(uniforms.uTime, elapsedTime)
+    gl.uniform1f(uniforms.uIdleStrength, config.idleStrength)
+    gl.uniform1f(uniforms.uIdleSpeed, config.idleSpeed)
+    gl.uniform1f(uniforms.uZoom, config.zoom)
 
     gl.drawArrays(gl.TRIANGLES, 0, 3)
   }
