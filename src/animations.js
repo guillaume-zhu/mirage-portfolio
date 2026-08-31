@@ -981,18 +981,24 @@ export function initAnimations() {
     const clientsDistance = clientsCardsContainer.clientWidth - window.innerWidth
     const isPortrait = window.innerWidth < window.innerHeight
     const coverPhasePx = window.innerHeight
+    // Court hold : le pré-footer reste immobile, plein écran, avant que le footer
+    // ne commence à monter par-dessus.
+    const footerHoldPhasePx = window.innerHeight * 0.35
+    const footerCoverPhasePx = window.innerHeight
 
-    // Pin unique pour toute la scène (drift horizontal + recouvrement par le pré-footer)
+    // Pin unique pour toute la scène (drift horizontal + recouvrement pré-footer + hold + recouvrement footer)
     const sceneST = ScrollTrigger.create({
       trigger: clientsScene || "#clients",
       start: "top top",
-      end: "+=" + (clientsDistance + coverPhasePx),
+      end: "+=" + (clientsDistance + coverPhasePx + footerHoldPhasePx + footerCoverPhasePx),
       pin: true,
     })
 
     // Positions dérivées du pin principal (seule source de vérité)
     const driftEnd = () => sceneST.start + clientsDistance
     const coverEnd = () => sceneST.start + clientsDistance + coverPhasePx
+    const footerCoverStart = () => coverEnd() + footerHoldPhasePx
+    const footerCoverEnd = () => footerCoverStart() + footerCoverPhasePx
 
     const clientsScrollTween = gsap.to(clientsCardsContainer, {
       x: -clientsDistance,
@@ -1174,6 +1180,90 @@ export function initAnimations() {
         // Pas de disparition pour l'instant — prévue plus tard pour la transition
         // vers la section suivante, sur une plage à définir après #pre-footer.
       }
+    }
+
+    // Recouvrement du footer, après un court hold sur le pré-footer plein écran
+    if (clientsScene && document.querySelector("#footer")) {
+      const footerCoverScrollTrigger = {
+        trigger: clientsScene,
+        start: footerCoverStart,
+        end: footerCoverEnd,
+        scrub: 1,
+      }
+
+      gsap.fromTo(
+        "#footer",
+        { yPercent: 0 },
+        { yPercent: -100, ease: "none", scrollTrigger: footerCoverScrollTrigger },
+      )
+
+      // Même système clip-path + objet JS + onUpdate que le pré-footer, objet dédié.
+      const footerClip = { insetX: 8, radius: 1.5 } // vw / rem
+
+      function applyFooterClip() {
+        gsap.set("#footer", {
+          clipPath:
+            `inset(0 ${footerClip.insetX}vw 0 ${footerClip.insetX}vw ` +
+            `round ${footerClip.radius}rem ${footerClip.radius}rem 0 0)`,
+        })
+      }
+      applyFooterClip()
+
+      const footerWidthTrigger = {
+        trigger: clientsScene,
+        start: footerCoverStart,
+        end: () => footerCoverStart() + 0.8 * footerCoverPhasePx,
+        scrub: 1,
+      }
+
+      gsap.to(footerClip, {
+        insetX: 0,
+        ease: "none",
+        scrollTrigger: footerWidthTrigger,
+        onUpdate: applyFooterClip,
+      })
+
+      gsap.to(footerClip, {
+        radius: 0,
+        ease: "none",
+        scrollTrigger: {
+          trigger: clientsScene,
+          start: () => footerCoverStart() + 0.6 * footerCoverPhasePx,
+          end: () => footerCoverStart() + 0.8 * footerCoverPhasePx,
+          scrub: 1,
+        },
+        onUpdate: applyFooterClip,
+      })
+
+      // Le contenu du pré-footer, désormais recouvert, rétrécit légèrement
+      // (même traitement que .clients-intro pendant le recouvrement précédent).
+      gsap.fromTo(
+        ".pre-footer-content",
+        { scale: 1 },
+        { scale: 0.8, ease: "none", scrollTrigger: footerCoverScrollTrigger },
+      )
+
+      // Reveal en cascade du contenu du footer (opacité + translateY), déclenché
+      // quand le footer a recouvert 50% de l'écran (moitié de la phase de cover).
+      const footerRevealTargets = [".footer-logo", ".footer-signature", ".footer-nav", ".footer-right"]
+      gsap.set(footerRevealTargets, { opacity: 0, y: 40 })
+
+      const footerContentTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: clientsScene,
+          start: () => footerCoverStart() + 0.5 * footerCoverPhasePx,
+          end: footerCoverEnd,
+          scrub: 1,
+        },
+      })
+
+      footerRevealTargets.forEach((selector, i) => {
+        footerContentTl.to(
+          selector,
+          { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" },
+          i * 0.25,
+        )
+      })
     }
 
     clientCards.forEach((card, i) => {
