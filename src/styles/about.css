@@ -164,3 +164,99 @@ body {
     border-radius: 2.1vw;
   }
 }
+
+/* --- SECTION APPROACH --- */
+.about-approach {
+  position: relative;
+  z-index: 20; /* au-dessus du Hero pinné (position:fixed) — stacking explicite, pas implicite */
+  height: 100vh;
+  margin-top: -100vh;
+  overflow: hidden; /* masque les cards en left:100% hors champ */
+  background-color: var(--c-bg);
+  /* Panneau étroit + coins arrondis dès le premier paint, avant le JS —
+     même filet de sécurité que #pre-footer sur la Home. */
+  clip-path: inset(0 8vw 0 8vw round 1.5rem 1.5rem 0 0);
+}
+
+.about-approach-intro {
+  position: absolute;
+  top: 12.85vw; /* 222px sur base 1728 */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 34.66vw; /* 599px — largeur exacte pour conserver le retour à la ligne de Figma */
+  display: flex;
+  flex-direction: column;
+  gap: 2.9vw; /* 50px */
+  text-align: center;
+}
+
+.about-approach-label {
+  font-family: var(--font-regular);
+  font-weight: 700;
+  font-size: clamp(0.9rem, 1.16vw, 1.25rem); /* 20px */
+  letter-spacing: 0.29vw; /* 5px */
+  line-height: 1; /* leading-none dans Figma — ne pas hériter du line-height du body */
+  text-transform: uppercase;
+  color: var(--c-black);
+}
+
+.about-approach-title {
+  font-family: var(--font-regular);
+  font-weight: 500;
+  font-size: clamp(1.75rem, 2.31vw, 2.5rem); /* 40px */
+  line-height: 1.5;
+  color: var(--c-black);
+}
+
+.about-approach-row {
+  position: absolute;
+  top: 28vw; /* espace texte -> cards, à ajuster */
+  left: 0;
+  width: 100%;
+  height: 18.75vw; /* 324px sur base 1728 */
+  overflow: hidden;
+}
+
+.about-approach-card {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  width: 29.5vw; /* 510px */
+  height: 100%;
+  padding: 3.47vw; /* 60px */
+  border-radius: 1.45vw; /* 25px */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: var(--c-bg);
+  will-change: transform;
+  isolation: isolate; /* stacking scopé à la card, indépendant du z-index:-1 implicite */
+}
+
+.about-approach-card-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.about-approach-card-title {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-special);
+  font-weight: 400;
+  font-size: clamp(1.1rem, 1.45vw, 1.5625rem); /* 25px */
+  line-height: 1;
+}
+
+.about-approach-card-text {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-regular);
+  font-weight: 500;
+  font-size: clamp(1.2rem, 1.74vw, 1.875rem); /* 30px */
+  line-height: 1.3;
+}

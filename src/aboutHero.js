@@ -1,16 +1,3 @@
-// Hero de la page About : anneau d'images en orbite 3D autour d'un texte
-// central, repris aussi fidèlement que possible de /references/about/hero
-// ("mwg_effect106"). Le moteur original (placement radial sin/cos, tilt
-// souris/tactile, contre-rotation, auto-rotation 12s, boost molette avec
-// reset 120ms) est conservé tel quel.
-//
-// Adaptations Mirage : (1) le scroll de page n'est plus bloqué, un
-// ScrollTrigger pin fini (heroScrollDistance) maintient juste la scène à
-// l'écran ; (2) le texte central est intégré dans le même contexte 3D que
-// les cards (voir .about-hero-text) pour profiter de la profondeur déjà
-// produite par rotateX(90) + preserve-3d, plutôt que d'inventer un système
-// de profondeur séparé — voir le commentaire sur textEl dans renderTilt().
-
 export function initAboutHero(gsap, ScrollTrigger) {
   const root = document.querySelector(".about-hero")
   if (!root) return
@@ -19,7 +6,10 @@ export function initAboutHero(gsap, ScrollTrigger) {
   const medias = root.querySelectorAll(".about-hero-media")
   const textEl = root.querySelector(".about-hero-text")
 
-  const baseAngles = Array.from({ length: medias.length }, (_, i) => (i / medias.length) * Math.PI * 2)
+  const baseAngles = Array.from(
+    { length: medias.length },
+    (_, i) => (i / medias.length) * Math.PI * 2,
+  )
 
   const DESKTOP_MEDIA_VW = 10.7
   const MOBILE_MEDIA_VW = 27
@@ -50,8 +40,7 @@ export function initAboutHero(gsap, ScrollTrigger) {
   function renderTilt() {
     const { translateX, translateY, rotateX, rotateY, rotateZ } = transform
     const { translateZ } = layout
-    mediasContainer.style.transform =
-      `translate3d(${translateX}vw, ${translateY}vw, ${translateZ}vw) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`
+    mediasContainer.style.transform = `translate3d(${translateX}vw, ${translateY}vw, ${translateZ}vw) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`
     medias.forEach((el) => {
       gsap.set(el, { rotationX: -rotateX, rotationY: -rotateY, rotation: -rotateZ })
     })
@@ -66,7 +55,8 @@ export function initAboutHero(gsap, ScrollTrigger) {
     root.style.perspective = `${100 + wheelIntensity.value * 30}vw`
     const offset = autoOffset.value + wheelOffset.value
     const { w, radiusDivisor, minDivisor, wheelRadiusFactor } = layout
-    const radius = w / Math.max(minDivisor, radiusDivisor - wheelIntensity.value * wheelRadiusFactor)
+    const radius =
+      w / Math.max(minDivisor, radiusDivisor - wheelIntensity.value * wheelRadiusFactor)
     medias.forEach((el, i) => {
       const angle = offset + baseAngles[i]
       gsap.set(el, { x: Math.sin(angle) * radius, y: Math.cos(angle) * radius })
@@ -82,7 +72,11 @@ export function initAboutHero(gsap, ScrollTrigger) {
     ease: "power2.out",
     onUpdate: updateScene,
   })
-  const setWheelOffset = gsap.quickTo(wheelOffset, "value", { duration: 0.5, ease: "power2", onUpdate: updateScene })
+  const setWheelOffset = gsap.quickTo(wheelOffset, "value", {
+    duration: 0.5,
+    ease: "power2",
+    onUpdate: updateScene,
+  })
 
   let wheelSpeed = 0
   let wheelResetTimer
@@ -149,16 +143,102 @@ export function initAboutHero(gsap, ScrollTrigger) {
   // maintenir la scène à l'écran ; il ne pilote rien du moteur ci-dessus. ---
   const heroScrollDistance = 1.8 // multiplicateur de window.innerHeight, à ajuster après test visuel
 
+  // Cover Hero -> Approach : même langage que Clients -> Pre-footer sur la
+  // Home, sans yPercent — Approach (en flux normal, margin-top:-100vh dans
+  // about.css) remonte naturellement avec le scroll pendant que Hero reste
+  // pinné ; seuls le clip-path et le scale du Hero sont pilotés ici.
+  // Fonction (pas une valeur figée) pour rester correcte après un
+  // resize/ScrollTrigger.refresh, exactement comme heroScrollDistance.
+  const approachCoverDistance = 1 // multiplicateur de window.innerHeight, à ajuster après test visuel
+  const approachCoverPhasePx = () => window.innerHeight * approachCoverDistance
+
   const heroST = ScrollTrigger.create({
     trigger: root,
     start: "top top",
-    end: () => "+=" + window.innerHeight * heroScrollDistance,
+    end: () => "+=" + (window.innerHeight * heroScrollDistance + approachCoverPhasePx()),
     pin: true,
   })
 
   // Le texte est visible dès le départ (plus de reveal d'opacité scrubé) —
   // sa lisibilité au-dessus des images est assurée par mix-blend-mode:
   // difference (voir about.css), pas par une temporisation.
+
+  // Frontière stricte entre le comportement Hero existant (moteur 3D, pin) et
+  // la phase de cover : tout ce qui précède coverEnd() reste inchangé, la
+  // phase de cover ne commence qu'à partir de là.
+  const coverEnd = () => heroST.start + window.innerHeight * heroScrollDistance
+  const approachCoverEnd = () => coverEnd() + approachCoverPhasePx()
+
+  const approachEl = document.querySelector(".about-approach")
+  let insetXTween, radiusTween, heroScaleTween, approachRevealTl
+
+  if (approachEl) {
+    const coverScrollTrigger = { trigger: root, start: coverEnd, end: approachCoverEnd, scrub: 1 }
+
+    const approachClip = { insetX: 8, radius: 1.5 }
+    function applyApproachClip() {
+      gsap.set(approachEl, {
+        clipPath:
+          `inset(0 ${approachClip.insetX}vw 0 ${approachClip.insetX}vw ` +
+          `round ${approachClip.radius}rem ${approachClip.radius}rem 0 0)`,
+      })
+    }
+    applyApproachClip()
+
+    insetXTween = gsap.to(approachClip, {
+      insetX: 0,
+      ease: "none",
+      scrollTrigger: {
+        trigger: root,
+        start: coverEnd,
+        end: () => coverEnd() + 0.8 * approachCoverPhasePx(),
+        scrub: 1,
+      },
+      onUpdate: applyApproachClip,
+    })
+
+    radiusTween = gsap.to(approachClip, {
+      radius: 0,
+      ease: "none",
+      scrollTrigger: {
+        trigger: root,
+        start: () => coverEnd() + 0.6 * approachCoverPhasePx(),
+        end: () => coverEnd() + 0.8 * approachCoverPhasePx(),
+        scrub: 1,
+      },
+      onUpdate: applyApproachClip,
+    })
+
+    heroScaleTween = gsap.fromTo(
+      ".about-hero-container",
+      { scale: 1 },
+      { scale: 0.8, ease: "none", scrollTrigger: coverScrollTrigger },
+    )
+
+    // Reveal en cascade du contenu Approach (opacité + translateY), déclenché
+    // quand le panneau a recouvert 50% de l'écran (moitié de la phase de cover).
+    gsap.set([".about-approach-label", ".about-approach-title", ".about-approach-card"], {
+      opacity: 0,
+      y: 40,
+    })
+
+    approachRevealTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: root,
+        start: () => coverEnd() + 0.5 * approachCoverPhasePx(),
+        end: approachCoverEnd,
+        scrub: 1,
+      },
+    })
+
+    approachRevealTl.to(".about-approach-label", { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0)
+    approachRevealTl.to(".about-approach-title", { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0.25)
+    approachRevealTl.to(
+      ".about-approach-card",
+      { opacity: 1, y: 0, duration: 0.4, ease: "power2.out", stagger: 0.08 },
+      0.5,
+    )
+  }
 
   function destroy() {
     autoTween.kill()
@@ -169,6 +249,10 @@ export function initAboutHero(gsap, ScrollTrigger) {
     root.removeEventListener("wheel", handleWheel)
     mm.revert()
     heroST.kill()
+    ;[insetXTween, radiusTween, heroScaleTween, approachRevealTl].forEach((t) => {
+      t?.scrollTrigger?.kill()
+      t?.kill()
+    })
   }
 
   return { destroy }

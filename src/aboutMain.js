@@ -3,6 +3,7 @@ import gsap from 'gsap'
 import ScrollTrigger from 'gsap/ScrollTrigger'
 import Lenis from '@studio-freight/lenis'
 import { initAboutHero } from './aboutHero'
+import { initAboutApproach } from './aboutApproach'
 
 document.addEventListener('DOMContentLoaded', () => {
   gsap.registerPlugin(ScrollTrigger)
@@ -21,4 +22,5 @@ document.addEventListener('DOMContentLoaded', () => {
   gsap.ticker.lagSmoothing(0)
 
   initAboutHero(gsap, ScrollTrigger)
+  initAboutApproach(gsap, ScrollTrigger)
 })
