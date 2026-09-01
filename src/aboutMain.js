@@ -6,8 +6,10 @@ import { initAboutHero } from './aboutHero'
 import { initAboutApproach } from './aboutApproach'
 import { initAboutNumbers } from './aboutNumbers'
 import { createAboutNumbersWebGL } from './aboutNumbersWebGL'
+import { initAboutManifesto } from './aboutManifesto'
+import SplitText from 'gsap/SplitText'
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   gsap.registerPlugin(ScrollTrigger)
 
   const lenisEasing = (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
@@ -31,4 +33,13 @@ document.addEventListener('DOMContentLoaded', () => {
   if (numbersEl) {
     createAboutNumbersWebGL(numbersEl)
   }
+
+  // SplitText doit mesurer les mots avec Gloock déjà chargé, sinon la
+  // découpe en lignes se fait sur les métriques du fallback ("serif") et
+  // reste figée après coup — seul Manifesto attend ce signal.
+  await document.fonts.ready
+
+  initAboutManifesto(gsap, ScrollTrigger, SplitText)
+
+  ScrollTrigger.refresh()
 })
