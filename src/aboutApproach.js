@@ -30,7 +30,7 @@ export function initAboutApproach(gsap, ScrollTrigger) {
   // Ratio dérivé de la référence : master ≈0.31 pour n=4 vs ≈0.649 pour n=9
   // (≈0.478), appliqué aux ~700vh de scroll effectif de la référence
   // (800vh de pin-height - 100vh de viewport) → ≈334vh.
-  const approachScrollDistance = 3.34 // multiplicateur de window.innerHeight, à ajuster après test visuel
+  const approachScrollDistance = 1.5 // multiplicateur de window.innerHeight, à ajuster après test visuel
 
   const master = gsap.timeline({
     scrollTrigger: {

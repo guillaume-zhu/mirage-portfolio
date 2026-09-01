@@ -141,7 +141,7 @@ export function initAboutHero(gsap, ScrollTrigger) {
   // occuper une place réelle dans une page scrollable, contrairement à la
   // référence qui bloque le scroll et tourne à l'infini. Le pin ne fait que
   // maintenir la scène à l'écran ; il ne pilote rien du moteur ci-dessus. ---
-  const heroScrollDistance = 1.8 // multiplicateur de window.innerHeight, à ajuster après test visuel
+  const heroScrollDistance = 0.8 // multiplicateur de window.innerHeight, à ajuster après test visuel
 
   // Cover Hero -> Approach : même langage que Clients -> Pre-footer sur la
   // Home, sans yPercent — Approach (en flux normal, margin-top:-100vh dans
@@ -231,8 +231,16 @@ export function initAboutHero(gsap, ScrollTrigger) {
       },
     })
 
-    approachRevealTl.to(".about-approach-label", { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0)
-    approachRevealTl.to(".about-approach-title", { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0.25)
+    approachRevealTl.to(
+      ".about-approach-label",
+      { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" },
+      0,
+    )
+    approachRevealTl.to(
+      ".about-approach-title",
+      { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" },
+      0.25,
+    )
     approachRevealTl.to(
       ".about-approach-card",
       { opacity: 1, y: 0, duration: 0.4, ease: "power2.out", stagger: 0.08 },
