@@ -31,12 +31,17 @@ export function initAboutApproach(gsap, ScrollTrigger) {
   // (≈0.478), appliqué aux ~700vh de scroll effectif de la référence
   // (800vh de pin-height - 100vh de viewport) → ≈334vh.
   const approachScrollDistance = 1.5 // multiplicateur de window.innerHeight, à ajuster après test visuel
+  // Cover Approach -> Numbers : même langage que Hero -> Approach. Numbers
+  // (en flux normal, margin-top:-100vh dans about.css) remonte naturellement
+  // pendant qu'Approach reste pinnée ; déclaré ici (avant la création du
+  // ScrollTrigger) pour être disponible dès la première évaluation de `end`.
+  const numbersCoverDistance = 1 // multiplicateur de window.innerHeight, à ajuster après test visuel
 
   const master = gsap.timeline({
     scrollTrigger: {
       trigger: root,
       start: "top top",
-      end: () => "+=" + window.innerHeight * approachScrollDistance,
+      end: () => "+=" + window.innerHeight * (approachScrollDistance + numbersCoverDistance),
       pin: true,
       scrub: true,
     },
@@ -65,9 +70,95 @@ export function initAboutApproach(gsap, ScrollTrigger) {
     master.add(tl, (i - (COLS - 1)) * stagger + startCol * duration)
   })
 
+  // Hold calculé (jamais codé en dur) pour préserver exactement la vitesse
+  // actuelle du convoyeur : ancienne vitesse = A/S, nouvelle = (A+hold)/(S+C)
+  // avec hold = A×(C/S) => (A+hold)/(S+C) = A/S, identique quel que soit A/S/C.
+  const approachAnimationDuration = master.duration()
+  const coverHoldDuration = approachAnimationDuration * (numbersCoverDistance / approachScrollDistance)
+  master.to({}, { duration: coverHoldDuration })
+
+  const coverEnd = () => master.scrollTrigger.start + window.innerHeight * approachScrollDistance
+  const numbersCoverPhasePx = () => window.innerHeight * numbersCoverDistance
+  const numbersCoverEnd = () => coverEnd() + numbersCoverPhasePx()
+
+  const numbersEl = document.querySelector(".about-numbers")
+  let insetXTween, radiusTween, approachScaleTween, numbersRevealTl
+
+  if (numbersEl) {
+    const coverScrollTrigger = { trigger: root, start: coverEnd, end: numbersCoverEnd, scrub: 1 }
+
+    const numbersClip = { insetX: 8, radius: 1.5 }
+    function applyNumbersClip() {
+      gsap.set(numbersEl, {
+        clipPath:
+          `inset(0 ${numbersClip.insetX}vw 0 ${numbersClip.insetX}vw ` +
+          `round ${numbersClip.radius}rem ${numbersClip.radius}rem 0 0)`,
+      })
+    }
+    applyNumbersClip()
+
+    insetXTween = gsap.to(numbersClip, {
+      insetX: 0,
+      ease: "none",
+      scrollTrigger: {
+        trigger: root,
+        start: coverEnd,
+        end: () => coverEnd() + 0.8 * numbersCoverPhasePx(),
+        scrub: 1,
+      },
+      onUpdate: applyNumbersClip,
+    })
+
+    radiusTween = gsap.to(numbersClip, {
+      radius: 0,
+      ease: "none",
+      scrollTrigger: {
+        trigger: root,
+        start: () => coverEnd() + 0.6 * numbersCoverPhasePx(),
+        end: () => coverEnd() + 0.8 * numbersCoverPhasePx(),
+        scrub: 1,
+      },
+      onUpdate: applyNumbersClip,
+    })
+
+    approachScaleTween = gsap.fromTo(
+      [".about-approach-intro", ".about-approach-row"],
+      { scale: 1 },
+      { scale: 0.8, ease: "none", scrollTrigger: coverScrollTrigger },
+    )
+
+    // Reveal en cascade du contenu Numbers (opacité + translateY), déclenché
+    // quand le panneau a recouvert 50% de l'écran — même traitement que la
+    // cascade Approach (aboutHero.js). Seul le premier état (visible dès le
+    // départ, avant tout flip) a besoin de ce reveal : les états suivants
+    // démarrent déjà cachés par rotationY:90 côté aboutNumbers.js.
+    const firstValue = numbersEl.querySelector(".about-numbers-state:first-child .about-numbers-value")
+    const firstCaption = numbersEl.querySelector(".about-numbers-state:first-child .about-numbers-caption")
+    const numbersLabel = numbersEl.querySelector(".about-numbers-label")
+
+    gsap.set([numbersLabel, firstValue, firstCaption], { opacity: 0, y: 40 })
+
+    numbersRevealTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: root,
+        start: () => coverEnd() + 0.5 * numbersCoverPhasePx(),
+        end: numbersCoverEnd,
+        scrub: 1,
+      },
+    })
+
+    numbersRevealTl.to(numbersLabel, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0)
+    numbersRevealTl.to(firstValue, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0.25)
+    numbersRevealTl.to(firstCaption, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0.5)
+  }
+
   function destroy() {
     master.scrollTrigger?.kill()
     master.kill()
+    ;[insetXTween, radiusTween, approachScaleTween, numbersRevealTl].forEach((t) => {
+      t?.scrollTrigger?.kill()
+      t?.kill()
+    })
   }
 
   return { destroy }

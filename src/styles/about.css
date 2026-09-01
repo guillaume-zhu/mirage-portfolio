@@ -214,7 +214,11 @@ body {
   left: 0;
   width: 100%;
   height: 18.75vw; /* 324px sur base 1728 */
-  overflow: hidden;
+  /* Pas d'overflow:hidden ici : .about-approach (même largeur, jamais scalée)
+     masque déjà les cards hors-champ. Un clip redondant sur CET élément,
+     dont la transform:scale change à chaque frame pendant le cover, créait
+     un trait d'anti-aliasing transitoire au bord pendant le scroll. */
+  will-change: transform;
 }
 
 .about-approach-card {
@@ -231,6 +235,7 @@ body {
   justify-content: space-between;
   color: var(--c-bg);
   will-change: transform;
+  backface-visibility: hidden; /* évite le trait de seam au bord du clip parent scalé */
   isolation: isolate; /* stacking scopé à la card, indépendant du z-index:-1 implicite */
 }
 
@@ -264,8 +269,13 @@ body {
 /* --- SECTION NUMBERS --- */
 .about-numbers {
   position: relative;
+  z-index: 30; /* au-dessus d'Approach pinnée (position:fixed) — stacking explicite */
   height: 100vh;
+  margin-top: -100vh;
   overflow: hidden;
+  /* Panneau étroit + coins arrondis dès le premier paint, avant le JS —
+     même filet de sécurité que .about-approach / #pre-footer sur la Home. */
+  clip-path: inset(0 8vw 0 8vw round 1.5rem 1.5rem 0 0);
 }
 
 .about-numbers-background {
