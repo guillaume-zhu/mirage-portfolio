@@ -5,6 +5,7 @@ import Lenis from '@studio-freight/lenis'
 import { initAboutHero } from './aboutHero'
 import { initAboutApproach } from './aboutApproach'
 import { initAboutNumbers } from './aboutNumbers'
+import { createAboutNumbersWebGL } from './aboutNumbersWebGL'
 
 document.addEventListener('DOMContentLoaded', () => {
   gsap.registerPlugin(ScrollTrigger)
@@ -25,4 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initAboutHero(gsap, ScrollTrigger)
   initAboutApproach(gsap, ScrollTrigger)
   initAboutNumbers(gsap, ScrollTrigger)
+
+  const numbersEl = document.querySelector('.about-numbers')
+  if (numbersEl) {
+    createAboutNumbersWebGL(numbersEl)
+  }
 })
