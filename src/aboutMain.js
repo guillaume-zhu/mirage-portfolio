@@ -7,6 +7,8 @@ import { initAboutApproach } from './aboutApproach'
 import { initAboutNumbers } from './aboutNumbers'
 import { createAboutNumbersWebGL } from './aboutNumbersWebGL'
 import { initAboutManifesto } from './aboutManifesto'
+import { initAboutFooter } from './aboutFooter'
+import { createFooterWebGL } from './footerWebGL'
 import SplitText from 'gsap/SplitText'
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -34,12 +36,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     createAboutNumbersWebGL(numbersEl)
   }
 
+  // Aucune dépendance typographique : peut être initialisé avant l'attente des fonts.
+  const footerEl = document.querySelector('#footer')
+  if (footerEl) {
+    createFooterWebGL(footerEl)
+  }
+
   // SplitText doit mesurer les mots avec Gloock déjà chargé, sinon la
   // découpe en lignes se fait sur les métriques du fallback ("serif") et
   // reste figée après coup — seul Manifesto attend ce signal.
   await document.fonts.ready
 
   initAboutManifesto(gsap, ScrollTrigger, SplitText)
+
+  // Le hold dépend de la géométrie finale de Manifesto : ses ScrollTriggers
+  // internes doivent être créés sur sa géométrie naturelle avant qu'un pin
+  // externe ne soit ajouté sur sa racine.
+  initAboutFooter(gsap, ScrollTrigger)
 
   ScrollTrigger.refresh()
 })
