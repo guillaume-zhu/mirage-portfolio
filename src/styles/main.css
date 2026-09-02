@@ -79,8 +79,26 @@ body {
   transition: transform 0.6s var(--ease-out-expo);
 }
 
+.logo {
+  display: flex;
+}
+
 .logo img {
   width: 100px;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.site-nav a {
+  font-family: var(--font-regular);
+  font-size: var(--fs-body);
+  font-weight: 550;
+  color: inherit;
+  text-decoration: none;
 }
 
 /* --- SECTION HERO --- */
@@ -944,7 +962,7 @@ section {
    sont déjà en display:block ci-dessus, ils héritent donc juste du reste).
    `em` pour l'offset/l'épaisseur : la ligne reste proportionnée à la taille de
    police, du petit texte du header jusqu'aux gros liens de la nav footer. */
-.site-header nav span,
+.site-header nav a,
 .footer-nav a,
 .footer-column a,
 .footer-legal a {
@@ -952,7 +970,7 @@ section {
   display: inline-block;
 }
 
-.site-header nav span::after,
+.site-header nav a::after,
 .footer-nav a::after,
 .footer-column a::after,
 .footer-legal a::after {
@@ -968,7 +986,7 @@ section {
   transition: transform 0.45s var(--ease-out-expo);
 }
 
-.site-header nav span:hover::after,
+.site-header nav a:hover::after,
 .footer-nav a:hover::after,
 .footer-column a:hover::after,
 .footer-legal a:hover::after {
