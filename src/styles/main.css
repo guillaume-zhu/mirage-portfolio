@@ -340,7 +340,6 @@ section {
 }
 
 .project-item {
-  cursor: pointer;
   position: relative;
   display: grid;
   grid-template-columns: 259px 1fr 259px;
@@ -352,8 +351,8 @@ section {
     filter 0.3s ease-out;
 }
 
-/* Dim other items on hover */
-.project-list:has(.project-item:hover) .project-item:not(:hover) {
+/* Dim other items on hover (hover pris uniquement sur le nom du projet) */
+.project-list:has(.project-title:hover) .project-item:not(:has(.project-title:hover)) {
   opacity: 0.3;
   filter: blur(10px);
 }
@@ -368,6 +367,9 @@ section {
   display: inline-block;
   position: relative;
   text-align: center;
+  cursor: pointer;
+  /* La boîte épouse le texte : le hover ne déborde pas dans la colonne vide. */
+  justify-self: center;
 }
 
 .project-meta {
@@ -381,7 +383,7 @@ section {
   color: var(--c-black);
 }
 
-.project-item:hover .project-meta {
+.project-item:has(.project-title:hover) .project-meta {
   position: relative;
   z-index: 6;
   color: #fff;

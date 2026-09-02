@@ -684,7 +684,11 @@ export function initAnimations() {
       workDisplacements.push(displacement)
       workTurbulences.push(turbulence)
 
-      item.addEventListener("mouseenter", () => {
+      // Le hover ne doit réagir que sur le nom du projet, pas sur toute la ligne
+      // (les colonnes latérales et le vide de la grille sont exclus).
+      const hoverTarget = title || item
+
+      hoverTarget.addEventListener("mouseenter", () => {
         const imgLeft = item.querySelector(".project-img-left")?.getAttribute("src")
         const imgRight = item.querySelector(".project-img-right")?.getAttribute("src")
 
@@ -715,7 +719,7 @@ export function initAnimations() {
         })
       })
 
-      item.addEventListener("mouseleave", () => {
+      hoverTarget.addEventListener("mouseleave", () => {
         // Animate Out Images
         gsap.to([previewLeftContainer, previewRightContainer], {
           opacity: 0,
@@ -898,8 +902,8 @@ export function initAnimations() {
     path.style.strokeDashoffset = length
     path.style.opacity = 0 // Start invisible
 
-    // 2. Animate on Hover
-    item.addEventListener("mouseenter", () => {
+    // 2. Animate on Hover (uniquement sur le nom du projet)
+    title.addEventListener("mouseenter", () => {
       gsap.to(path, {
         strokeDashoffset: 0,
         opacity: 1,
@@ -909,7 +913,7 @@ export function initAnimations() {
       })
     })
 
-    item.addEventListener("mouseleave", () => {
+    title.addEventListener("mouseleave", () => {
       gsap.to(path, {
         strokeDashoffset: length,
         opacity: 0,
