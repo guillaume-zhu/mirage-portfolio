@@ -567,6 +567,11 @@ export function initAnimations() {
       },
     })
 
+    // Lien "Expertises" : #expertise est pinné et son contenu est translaté
+    // pendant l'approche — on vise le début du pin, là où la section est calée
+    // en haut de l'écran et centrée.
+    anchorResolvers["#expertise"] = () => expTl.scrollTrigger.start
+
     // --- 2. PHASE 1 : hold (0 -> 0.4) ---
     expTl.to({}, { duration: 0.4 }, 0)
 
@@ -852,6 +857,10 @@ export function initAnimations() {
 
     worksRevealChain(worksTl, worksSplit, workItems.length, 0)
     worksTl.to({}, { duration: 0.3 })
+
+    // Lien "Projets" : #works est pinné, on vise le début du pin (section calée
+    // en haut, contenu centré).
+    anchorResolvers["#works"] = () => worksTl.scrollTrigger.start
   }
 
   // --- ANIMATIONS: SCRATCH EFFECT ---
