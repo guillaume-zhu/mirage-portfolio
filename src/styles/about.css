@@ -369,8 +369,13 @@ body {
 /* --- SECTION MANIFESTO --- */
 .about-manifesto {
   position: relative;
+  z-index: 40; /* au-dessus de Numbers pinnée (position:fixed) — stacking explicite */
+  margin-top: -100vh;
   background-color: var(--c-bg);
   color: var(--c-black);
+  /* Panneau étroit + coins arrondis dès le premier paint, avant le JS —
+     même filet de sécurité que .about-approach / .about-numbers. */
+  clip-path: inset(0 8vw 0 8vw round 1.5rem 1.5rem 0 0);
   /* Respiration d'entrée/sortie unique (haut/bas de tout le flux), reprise
      de la marge du bloc centré dans le frame Figma (1117px) — pas dupliquée
      par séquence, contrairement à l'ancien height:100vh. */
