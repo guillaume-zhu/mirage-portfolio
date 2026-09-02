@@ -3,6 +3,7 @@ import gsap from 'gsap'
 import ScrollTrigger from 'gsap/ScrollTrigger'
 import Lenis from '@studio-freight/lenis'
 import { initProjectHero } from './projectHero'
+import { initProjectTestimonial } from './projectTestimonial'
 
 // Empêche le navigateur de restaurer l'ancienne position de scroll au reload
 // (sinon la page peut se recharger au milieu du Hero, ScrollTrigger/Lenis
@@ -36,27 +37,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   initProjectHero(gsap, ScrollTrigger)
 
-  // Reveal Project Context : trop court pour justifier un module dédié
-  // (aucune géométrie complexe, contrairement au Hero) — ScrollTrigger
-  // déclenche une timeline normale (aucun scrub), jouée une seule fois.
-  const contextLabel = document.querySelector(".project-context-label")
-  const contextParagraphs = document.querySelectorAll(".project-context-copy p")
-  if (contextLabel) {
-    gsap.set([contextLabel, ...contextParagraphs], { opacity: 0, y: 30 })
+  // Reveal éditorial en cascade (label puis paragraphes), one-shot, sans
+  // scrub — pattern partagé par toutes les sections texte des pages Project.
+  function initEditorialReveal(sectionSelector, labelSelector, paragraphsSelector) {
+    const section = document.querySelector(sectionSelector)
+    if (!section) return
+    const label = section.querySelector(labelSelector)
+    if (!label) return
+    const paragraphs = section.querySelectorAll(paragraphsSelector)
 
-    const contextRevealTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: ".project-context",
-        start: "top 50%",
-        toggleActions: "play none none none",
-      },
+    gsap.set([label, ...paragraphs], { opacity: 0, y: 30 })
+
+    const tl = gsap.timeline({
+      scrollTrigger: { trigger: section, start: "top 50%", toggleActions: "play none none none" },
     })
-
-    contextRevealTl.to(contextLabel, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0)
-    contextParagraphs.forEach((p, i) => {
-      contextRevealTl.to(p, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0.15 + i * 0.15)
+    tl.to(label, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0)
+    paragraphs.forEach((p, i) => {
+      tl.to(p, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0.15 + i * 0.15)
     })
   }
+
+  initEditorialReveal(".project-context", ".project-context-label", ".project-context-copy p")
+  initEditorialReveal(".project-direction", ".project-direction-label", ".project-direction-copy p")
+
+  initProjectTestimonial(gsap, ScrollTrigger)
 
   ScrollTrigger.refresh()
 })

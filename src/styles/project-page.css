@@ -126,7 +126,11 @@ body {
 .project-hero-title {
   font-family: var(--font-special);
   font-weight: 400;
-  font-size: clamp(3rem, 5.79vw, 6.25rem); /* 100px ; min mobile = premier test, non spécifié Figma */
+  font-size: clamp(
+    3rem,
+    5.79vw,
+    6.25rem
+  ); /* 100px ; min mobile = premier test, non spécifié Figma */
   line-height: 0.9;
   color: var(--c-black);
 }
@@ -178,7 +182,8 @@ body {
   text-align: center;
 }
 
-.project-context-label {
+.project-context-label,
+.project-direction-label {
   font-family: var(--font-regular);
   font-weight: 700;
   font-size: clamp(0.9rem, 1.16vw, 1.25rem); /* 20px */
@@ -195,7 +200,8 @@ body {
   gap: 3.47vw; /* 60px = une ligne vide entre les 2 paragraphes dans Figma */
 }
 
-.project-context-copy p {
+.project-context-copy p,
+.project-direction-copy p {
   font-family: var(--font-regular);
   font-weight: 500;
   font-size: clamp(1.75rem, 2.31vw, 2.5rem); /* 40px, identique à .about-approach-title */
@@ -215,7 +221,10 @@ body {
 
 .project-gallery-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* colonnes mesurées strictement égales (582.5px chacune) */
+  grid-template-columns: repeat(
+    2,
+    1fr
+  ); /* colonnes mesurées strictement égales (582.5px chacune) */
   gap: 1.45vw; /* 25/1728 */
   width: 68.86vw; /* 1190/1728 */
   height: 43.11vw; /* 745/1728 */
@@ -235,6 +244,83 @@ body {
   object-fit: cover;
 }
 
-/* Note pour la future section Direction : son padding-top devra être
-   ≈8.8vw (152px), le centrage vertical de Gallery (186px) couvrant déjà
-   une partie de l'écart mesuré sur Frame 7 (338px). */
+/* --- PROJECT DIRECTION --- */
+.project-direction {
+  position: relative;
+  height: 60vh;
+  background-color: var(--c-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.project-direction-inner {
+  width: 53.18vw; /* 919/1728, identique à .project-context-inner */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.89vw; /* 50/1728 */
+  text-align: center;
+}
+
+.project-direction-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3.47vw; /* 60px = une ligne vide, identique à Context */
+}
+
+/* --- PROJECT TESTIMONIAL --- */
+.project-testimonial {
+  position: relative;
+  height: 100vh;
+  margin-top: calc(
+    (100vh - 43.11vw) / -2
+  ); /* chevauche uniquement l'espace vide sous la grille de Gallery 2 (centrage flex, cf. .project-gallery-grid) */
+  overflow: hidden;
+  background-color: var(--c-bg);
+  display: flex;
+  align-items: center;
+}
+
+.project-testimonial-inner {
+  position: relative;
+  margin-left: 9.2vw; /* asymétrique, confirmé Figma (droite ≈10.65vw) */
+  width: 80.15vw; /* 1385/1728 */
+  display: flex;
+  flex-direction: column;
+  gap: 4.4vw; /* 76/1728 */
+}
+
+.project-testimonial-quote {
+  font-family: var(--font-special);
+  font-weight: 400;
+  font-size: clamp(2rem, 5vw, 4.75rem); /* identique à .pre-footer-manifest (Home) */
+  line-height: 1.05;
+  color: var(--c-black);
+}
+
+.project-testimonial-author {
+  font-family: var(--font-regular);
+  font-weight: 700;
+  font-size: clamp(0.9rem, 1.16vw, 1.25rem); /* 20px */
+  letter-spacing: 0.29vw; /* 5px */
+  text-transform: uppercase;
+  color: var(--c-black);
+}
+
+.project-testimonial-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.project-testimonial-letter {
+  display: inline-block;
+  overflow: hidden;
+  padding-bottom: 0.2em;
+  margin-bottom: -0.2em;
+}
+
+.project-testimonial-letter span {
+  display: inline-block;
+  transform-origin: 50% 120%;
+}
