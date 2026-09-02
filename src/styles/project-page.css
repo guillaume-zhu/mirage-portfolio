@@ -164,7 +164,7 @@ body {
   position: relative;
   background-color: var(--c-bg);
   padding-top: 6.77vw; /* 117/1728 : écart avec la fin du Hero */
-  padding-bottom: 16.38vw; /* 283/1728 : écart avant Gallery 1 */
+  padding-bottom: 5.61vw; /* 97/1728 : 283 mesuré sur Frame 5 moins les 186px de centrage vertical déjà apportés par Gallery 1 */
   display: flex;
   justify-content: center;
 }
@@ -202,3 +202,39 @@ body {
   line-height: 1.5;
   color: var(--c-black);
 }
+
+/* --- PROJECT GALLERY --- */
+.project-gallery {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--c-bg);
+}
+
+.project-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* colonnes mesurées strictement égales (582.5px chacune) */
+  gap: 1.45vw; /* 25/1728 */
+  width: 68.86vw; /* 1190/1728 */
+  height: 43.11vw; /* 745/1728 */
+}
+
+.project-gallery-item {
+  position: relative;
+  border-radius: 1.5625rem; /* 25px, valeur fixe, cohérente avec .project-hero-media */
+  overflow: hidden;
+}
+
+.project-gallery-item img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Note pour la future section Direction : son padding-top devra être
+   ≈8.8vw (152px), le centrage vertical de Gallery (186px) couvrant déjà
+   une partie de l'écart mesuré sur Frame 7 (338px). */
