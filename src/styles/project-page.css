@@ -158,3 +158,47 @@ body {
   height: 100%;
   object-fit: cover;
 }
+
+/* --- PROJECT CONTEXT --- */
+.project-context {
+  position: relative;
+  background-color: var(--c-bg);
+  padding-top: 6.77vw; /* 117/1728 : écart avec la fin du Hero */
+  padding-bottom: 16.38vw; /* 283/1728 : écart avant Gallery 1 */
+  display: flex;
+  justify-content: center;
+}
+
+.project-context-inner {
+  width: 53.18vw; /* 919/1728 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.89vw; /* 50/1728 */
+  text-align: center;
+}
+
+.project-context-label {
+  font-family: var(--font-regular);
+  font-weight: 700;
+  font-size: clamp(0.9rem, 1.16vw, 1.25rem); /* 20px */
+  letter-spacing: 0.29vw; /* 5px */
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--c-black);
+}
+
+.project-context-copy {
+  width: 55.03vw; /* 951/1728 */
+  display: flex;
+  flex-direction: column;
+  gap: 3.47vw; /* 60px = une ligne vide entre les 2 paragraphes dans Figma */
+}
+
+.project-context-copy p {
+  font-family: var(--font-regular);
+  font-weight: 500;
+  font-size: clamp(1.75rem, 2.31vw, 2.5rem); /* 40px, identique à .about-approach-title */
+  line-height: 1.5;
+  color: var(--c-black);
+}

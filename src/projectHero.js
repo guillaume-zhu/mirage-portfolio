@@ -54,6 +54,7 @@ export function initProjectHero(gsap, ScrollTrigger) {
   gsap.set(heading, { opacity: 1 })
   gsap.set(label, { opacity: 0, y: 20 })
   gsap.set(titleLetters, { opacity: 0, y: 30 })
+  gsap.set(media, { opacity: 0, y: 40 })
 
   const introTl = gsap.timeline({ delay: 0.4 })
   introTl.to(label, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0.25)
@@ -70,6 +71,8 @@ export function initProjectHero(gsap, ScrollTrigger) {
     },
     0.8,
   )
+  // Reveal de l'image juste après le texte, pour que les deux s'enchaînent.
+  introTl.to(media, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, ">")
 
   const heroScrollDistance = 1 // multiplicateur de window.innerHeight — premier test, ajustable
 
