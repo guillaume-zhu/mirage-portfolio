@@ -6,6 +6,7 @@ export default defineConfig({
             input: {
                 main: 'index.html',
                 about: 'about.html',
+                floraObscura: 'flora-obscura.html',
             },
         },
     },
