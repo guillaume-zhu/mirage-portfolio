@@ -328,6 +328,9 @@ body {
 /* --- PROJECT OTHER UNIVERSES --- */
 .project-other-universes {
   position: relative;
+  z-index: 10; /* au-dessus de Testimonial pinnée (position:fixed) — stacking explicite */
+  margin-top: -100vh;
+  clip-path: inset(0 8vw 0 8vw round 1.5rem 1.5rem 0 0); /* état initial avant JS, comme les autres covers */
   height: 100vh;
   overflow: hidden;
   background-color: var(--c-black);

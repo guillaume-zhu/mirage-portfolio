@@ -3,19 +3,18 @@
 // split mot > lettre > span interne, rotate:-88→0 / xPercent:-20→0 /
 // opacity:0→1, stagger 0.01, ease "back.out(1.1)". Contrairement au
 // Pre-footer (sous-phase d'un pin partagé .clients-scene), Testimonial
-// possède son propre pin local, dédié uniquement à l'attribution.
+// possède son propre pin local.
 //
-// Deux phases distinctes :
+// Trois phases dans le même pin (jamais un second pin) :
 // - Phase A (non pinnée, scrub) : la citation se révèle PENDANT que la
 //   section entre naturellement dans le viewport, avant que son pin ne
-//   s'enclenche — pendant que Gallery 2 est encore visible. Se termine
-//   exactement au scroll où la Phase B démarre (aucun trou, aucun
-//   chevauchement), via une référence directe à pinnedTl.scrollTrigger.start
-//   (même principe que coverEnd/numbersCoverEnd ailleurs dans ce codebase).
-// - Phase B (pin à "top top") : ne porte plus que l'attribution, sur une
-//   distance dédiée et courte (testimonialPinDistance), pour ne pas créer
-//   un hold après la citation. La future transition vers "Autres univers"
-//   pourra prolonger ce pin séparément, plus tard.
+//   s'enclenche. Se termine exactement au scroll où la Phase B démarre
+//   (pinnedTl.scrollTrigger.start).
+// - Phase B (pin à "top top") : attribution.
+// - Phase C : cover Testimonial → Autres univers, même langage que les
+//   autres transitions Mirage (Numbers→Manifesto, Manifesto→Footer) —
+//   pin étendu + hold calculé pour ne pas ralentir l'attribution, clip-path
+//   du panneau entrant, scale du contenu sortant.
 
 export function initProjectTestimonial(gsap, ScrollTrigger) {
   const section = document.querySelector(".project-testimonial")
@@ -51,17 +50,18 @@ export function initProjectTestimonial(gsap, ScrollTrigger) {
   gsap.set(letters, { rotate: -88, xPercent: -20, opacity: 0 })
   gsap.set(author, { opacity: 0, y: 30 })
 
-  const testimonialPinDistance = 0.35 // multiplicateur de window.innerHeight — premier test, ajustable (attribution seule, pas de hold)
+  const testimonialPinDistance = 0.35 // multiplicateur de window.innerHeight — Phase B (attribution)
+  const otherUniversesCoverDistance = 1 // multiplicateur de window.innerHeight — Phase C (cover)
 
-  // Phase B : pin, ne porte plus que l'attribution. Créée en premier pour
-  // servir de source de vérité géométrique à la Phase A ci-dessous.
+  // Phase B : pin, ne porte que l'attribution. Créée en premier pour servir
+  // de source de vérité géométrique à la Phase A ci-dessous et à la Phase C.
   const pinnedTl = gsap.timeline({
     scrollTrigger: {
       trigger: section,
       start: "top top",
-      end: () => "+=" + window.innerHeight * testimonialPinDistance,
+      end: () => "+=" + window.innerHeight * (testimonialPinDistance + otherUniversesCoverDistance),
       pin: true,
-      pinSpacing: true, // réserve l'espace nécessaire pour que la future section Autres Univers arrive normalement après la libération du pin
+      pinSpacing: true, // réserve l'espace nécessaire pour que Autres Univers arrive normalement après la libération du pin
       scrub: 1,
     },
   })
@@ -73,6 +73,13 @@ export function initProjectTestimonial(gsap, ScrollTrigger) {
     ease: "none",
   })
 
+  // Hold calculé (jamais codé en dur) pour préserver exactement la vitesse
+  // actuelle de la reveal de l'attribution : ancienne vitesse = A/S, nouvelle
+  // = (A+hold)/(S+C) avec hold = A×(C/S) => identique quel que soit A/S/C.
+  const attributionAnimationDuration = pinnedTl.duration()
+  const coverHoldDuration = attributionAnimationDuration * (otherUniversesCoverDistance / testimonialPinDistance)
+  pinnedTl.to({}, { duration: coverHoldDuration })
+
   // Phase A : reveal de la citation AVANT le pin, pendant que Gallery 2 est
   // encore visible et que Testimonial entre naturellement par le bas. Se
   // termine exactement quand la Phase B démarre (aucun trou, aucun
@@ -80,7 +87,7 @@ export function initProjectTestimonial(gsap, ScrollTrigger) {
   const preRevealTl = gsap.timeline({
     scrollTrigger: {
       trigger: quote,
-      start: "top 80%", // valeur de premier test : la citation doit devenir visible pendant que Gallery 2 est encore à l'écran
+      start: "top 80%",
       end: () => pinnedTl.scrollTrigger.start,
       scrub: 1,
     },
@@ -95,11 +102,108 @@ export function initProjectTestimonial(gsap, ScrollTrigger) {
     ease: "back.out(1.1)",
   })
 
+  // Phase C : cover vers Autres Univers, même langage que les transitions
+  // déjà validées ailleurs (Numbers→Manifesto, Manifesto→Footer).
+  const coverStart = () => pinnedTl.scrollTrigger.start + window.innerHeight * testimonialPinDistance
+  const coverPhasePx = () => window.innerHeight * otherUniversesCoverDistance
+  const coverEnd = () => coverStart() + coverPhasePx()
+
+  const otherUniversesEl = document.querySelector(".project-other-universes")
+  const otherTitleEl = otherUniversesEl?.querySelector(".project-other-title")
+  let insetXTween, radiusTween, testimonialScaleTween, otherTitleTween
+
+  if (otherUniversesEl) {
+    const otherClip = { insetX: 8, radius: 1.5 }
+    function applyOtherClip() {
+      gsap.set(otherUniversesEl, {
+        clipPath:
+          `inset(0 ${otherClip.insetX}vw 0 ${otherClip.insetX}vw ` +
+          `round ${otherClip.radius}rem ${otherClip.radius}rem 0 0)`,
+      })
+    }
+    applyOtherClip()
+
+    insetXTween = gsap.to(otherClip, {
+      insetX: 0,
+      ease: "none",
+      scrollTrigger: {
+        trigger: section,
+        start: coverStart,
+        end: () => coverStart() + 0.8 * coverPhasePx(),
+        scrub: 1,
+      },
+      onUpdate: applyOtherClip,
+    })
+
+    radiusTween = gsap.to(otherClip, {
+      radius: 0,
+      ease: "none",
+      scrollTrigger: {
+        trigger: section,
+        start: () => coverStart() + 0.6 * coverPhasePx(),
+        end: () => coverStart() + 0.8 * coverPhasePx(),
+        scrub: 1,
+      },
+      onUpdate: applyOtherClip,
+    })
+
+    // Non interactif tant que le panneau n'est pas presque totalement
+    // installé (progress > 0.9) — évite de pouvoir drag/cliquer Autres
+    // Univers alors que Testimonial est encore largement visible derrière.
+    // Réutilise ce même ScrollTrigger (il couvre exactement coverStart→coverEnd),
+    // aucun trigger supplémentaire nécessaire.
+    gsap.set(otherUniversesEl, { pointerEvents: "none" })
+
+    // Reveal du titre, scrub-driven et donc réversible avec le reste du
+    // cover : commence à mi-parcours de la phase, comme les autres reveals
+    // de contenu déjà utilisés sur les transitions Mirage.
+    if (otherTitleEl) {
+      gsap.set(otherTitleEl, { opacity: 0, y: 30 })
+      otherTitleTween = gsap.to(otherTitleEl, {
+        opacity: 1,
+        y: 0,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: section,
+          start: () => coverStart() + 0.5 * coverPhasePx(),
+          end: coverEnd,
+          scrub: 1,
+        },
+      })
+    }
+
+    testimonialScaleTween = gsap.fromTo(
+      ".project-testimonial-inner",
+      { scale: 1 },
+      {
+        scale: 0.8,
+        ease: "none",
+        scrollTrigger: {
+          trigger: section,
+          start: coverStart,
+          end: coverEnd,
+          scrub: 1,
+          onUpdate: (self) => {
+            gsap.set(otherUniversesEl, { pointerEvents: self.progress > 0.9 ? "auto" : "none" })
+          },
+        },
+      },
+    )
+  }
+
   function destroy() {
     pinnedTl.scrollTrigger?.kill()
     pinnedTl.kill()
     preRevealTl.scrollTrigger?.kill()
     preRevealTl.kill()
+    insetXTween?.scrollTrigger?.kill()
+    insetXTween?.kill()
+    radiusTween?.scrollTrigger?.kill()
+    radiusTween?.kill()
+    testimonialScaleTween?.scrollTrigger?.kill()
+    testimonialScaleTween?.kill()
+    otherTitleTween?.scrollTrigger?.kill()
+    otherTitleTween?.kill()
   }
 
   return { destroy }

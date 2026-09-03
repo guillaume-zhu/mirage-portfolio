@@ -310,7 +310,7 @@ export function initProjectOtherUniverses(gsap, ScrollTrigger) {
 
     const introSt = ScrollTrigger.create({
       trigger: root,
-      start: "top 80%",
+      start: "top 25%", // recalé pour le cover Testimonial→Autres univers : ~75% du cover parcouru, premier test
       once: true,
       onEnter: playIntro,
     })
