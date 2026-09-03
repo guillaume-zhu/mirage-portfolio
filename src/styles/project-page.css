@@ -126,7 +126,11 @@ body {
 .project-hero-title {
   font-family: var(--font-special);
   font-weight: 400;
-  font-size: clamp(3rem, 5.79vw, 6.25rem); /* 100px ; min mobile = premier test, non spécifié Figma */
+  font-size: clamp(
+    3rem,
+    5.79vw,
+    6.25rem
+  ); /* 100px ; min mobile = premier test, non spécifié Figma */
   line-height: 0.9;
   color: var(--c-black);
 }
@@ -157,4 +161,567 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* --- PROJECT CONTEXT --- */
+.project-context {
+  position: relative;
+  background-color: var(--c-bg);
+  padding-top: 6.77vw; /* 117/1728 : écart avec la fin du Hero */
+  padding-bottom: 5.61vw; /* 97/1728 : 283 mesuré sur Frame 5 moins les 186px de centrage vertical déjà apportés par Gallery 1 */
+  display: flex;
+  justify-content: center;
+}
+
+.project-context-inner {
+  width: 53.18vw; /* 919/1728 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.89vw; /* 50/1728 */
+  text-align: center;
+}
+
+.project-context-label,
+.project-direction-label {
+  font-family: var(--font-regular);
+  font-weight: 700;
+  font-size: clamp(0.9rem, 1.16vw, 1.25rem); /* 20px */
+  letter-spacing: 0.29vw; /* 5px */
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--c-black);
+}
+
+.project-context-copy {
+  width: 55.03vw; /* 951/1728 */
+  display: flex;
+  flex-direction: column;
+  gap: 3.47vw; /* 60px = une ligne vide entre les 2 paragraphes dans Figma */
+}
+
+.project-context-copy p,
+.project-direction-copy p {
+  font-family: var(--font-regular);
+  font-weight: 500;
+  font-size: clamp(1.75rem, 2.31vw, 2.5rem); /* 40px, identique à .about-approach-title */
+  line-height: 1.5;
+  color: var(--c-black);
+}
+
+/* --- PROJECT GALLERY --- */
+.project-gallery {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--c-bg);
+}
+
+.project-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    2,
+    1fr
+  ); /* colonnes mesurées strictement égales (582.5px chacune) */
+  gap: 1.45vw; /* 25/1728 */
+  width: 68.86vw; /* 1190/1728 */
+  height: 43.11vw; /* 745/1728 */
+}
+
+.project-gallery-item {
+  position: relative;
+  border-radius: 1.5625rem; /* 25px, valeur fixe, cohérente avec .project-hero-media */
+  overflow: hidden;
+}
+
+.project-gallery-item img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --- PROJECT DIRECTION --- */
+.project-direction {
+  position: relative;
+  height: 60vh;
+  background-color: var(--c-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.project-direction-inner {
+  width: 53.18vw; /* 919/1728, identique à .project-context-inner */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.89vw; /* 50/1728 */
+  text-align: center;
+}
+
+.project-direction-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3.47vw; /* 60px = une ligne vide, identique à Context */
+}
+
+/* --- PROJECT TESTIMONIAL --- */
+.project-testimonial {
+  position: relative;
+  height: 100vh;
+  margin-top: calc(
+    (100vh - 43.11vw) / -2
+  ); /* chevauche uniquement l'espace vide sous la grille de Gallery 2 (centrage flex, cf. .project-gallery-grid) */
+  overflow: hidden;
+  background-color: var(--c-bg);
+  display: flex;
+  align-items: center;
+}
+
+.project-testimonial-inner {
+  position: relative;
+  margin-left: 9.2vw; /* asymétrique, confirmé Figma (droite ≈10.65vw) */
+  width: 80.15vw; /* 1385/1728 */
+  display: flex;
+  flex-direction: column;
+  gap: 4.4vw; /* 76/1728 */
+}
+
+.project-testimonial-quote {
+  font-family: var(--font-special);
+  font-weight: 400;
+  font-size: clamp(2rem, 5vw, 4.75rem); /* identique à .pre-footer-manifest (Home) */
+  line-height: 1.05;
+  color: var(--c-black);
+}
+
+.project-testimonial-author {
+  font-family: var(--font-regular);
+  font-weight: 700;
+  font-size: clamp(0.9rem, 1.16vw, 1.25rem); /* 20px */
+  letter-spacing: 0.29vw; /* 5px */
+  text-transform: uppercase;
+  color: var(--c-black);
+}
+
+.project-testimonial-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.project-testimonial-letter {
+  display: inline-block;
+  overflow: hidden;
+  padding-bottom: 0.2em;
+  margin-bottom: -0.2em;
+}
+
+.project-testimonial-letter span {
+  display: inline-block;
+  transform-origin: 50% 120%;
+}
+
+/* --- PROJECT OTHER UNIVERSES --- */
+.project-other-universes {
+  position: relative;
+  z-index: 10; /* au-dessus de Testimonial pinnée (position:fixed) — stacking explicite */
+  margin-top: -100vh;
+  clip-path: inset(0 8vw 0 8vw round 1.5rem 1.5rem 0 0); /* état initial avant JS, comme les autres covers */
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--c-black);
+  color: var(--c-bg);
+  transition: background-color 0.3s, color 0.3s;
+  transition-delay: 0.1s;
+  /* Toutes dérivées de Figma (1728×1117), contraintes en vw ET vh pour ne
+     plus grossir/descendre sur un viewport plus panoramique que le ratio
+     Figma. Valeurs exprimées directement (pas de *, / dans calc()). */
+  --other-card-size: min(25.58vw, 39.57vh); /* 442px */
+  --other-active-size: min(30.09vw, 46.55vh); /* 520px */
+  --other-inactive-offset: min(2.26vw, 3.49vh); /* (520-442)/2 = 39px */
+  --other-card-half-negative: max(-12.79vw, -19.785vh); /* -442/2 */
+  --other-media-top: 35.09vh; /* 392/1117 */
+}
+
+.project-other-universes.is-dragging {
+  background-color: var(--c-bg);
+  color: var(--c-black);
+}
+
+.project-other-title {
+  position: absolute;
+  top: 8.5vh; /* premier test : légèrement remonté */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 29.28vw; /* 506/1728, identique à .project-hero-heading */
+  font-family: var(--font-special);
+  font-weight: 400;
+  font-size: clamp(2.7rem, 5.21vw, 5.625rem); /* 90px, premier test légèrement réduit */
+  line-height: 0.9;
+  text-align: center;
+}
+
+.project-other-label {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-regular);
+  font-weight: 700;
+  font-size: clamp(0.8rem, 1.02vw, 1.1rem); /* légèrement réduit vs 20px, premier ajustement */
+  letter-spacing: 0.29vw; /* 5px */
+  line-height: 1.3; /* valeur Figma exacte pour ce label */
+  text-transform: uppercase;
+}
+
+.project-other-label--idle {
+  top: calc(var(--other-media-top) + var(--other-active-size) + 30px);
+}
+
+.project-other-label--drag {
+  top: calc(
+    var(--other-media-top) + var(--other-inactive-offset) + var(--other-card-size) + 30px
+  );
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Wrapper dédié à la transition Other Universes -> Footer (src/projectFooter.js) :
+   même box que .project-other-universes (inset:0), sert uniquement de cible
+   au scale sortant du cover, sans jamais toucher .project-other-universes
+   elle-même (trigger du pin) ni les cards individuellement. Purement
+   structurel : ne change ni la position ni le contexte de positionnement
+   absolu de .project-other-title / .project-other-label. */
+.project-other-scene {
+  position: absolute;
+  inset: 0;
+}
+
+.project-other-container {
+  position: relative;
+  width: 100%;
+}
+
+.project-other-card img,
+.project-other-drag-card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none; /* le press/click cible le <a>, pas l'image */
+  -webkit-user-drag: none;
+}
+
+/* --- Interaction desktop complète (idle circulaire + drag borné) --- */
+@media (min-width: 901px) and (hover: hover) and (pointer: fine) {
+  .project-other-track {
+    display: none; /* structure source, remplacée par les pistes générées en JS */
+  }
+
+  .project-other-container {
+    position: absolute;
+    top: var(--other-media-top);
+    left: 0;
+    height: var(--other-active-size);
+    overflow: hidden;
+  }
+
+  /* Pendant le scale sortant Other Universes -> Footer (src/projectFooter.js) :
+     ce clip interne (moteur idle, intouché) rétrécit avec .project-other-scene
+     alors que celui de .project-other-universes (jamais scalé) reste aligné
+     sur le vrai bord d'écran — les cartes -1/+1 se retrouvaient coupées net,
+     avec une marge visible entre la coupe et le bord réel. Le clip externe a
+     exactement les mêmes bornes horizontales à cet instant, donc le relâcher
+     ici ne change rien au repos, seulement pendant le scale. */
+  .project-other-universes.is-scaling-out .project-other-container {
+    overflow: visible;
+  }
+
+  .project-other-idle-track {
+    position: absolute;
+    inset: 0;
+    opacity: 1;
+    /* Switch instantané : la continuité idle→drag est portée par le FLIP
+       (JS, transform des dragCards), pas par un fondu entre deux
+       géométries différentes. */
+  }
+
+  .project-other-idle-track .project-other-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--other-card-size);
+    height: var(--other-card-size);
+    margin-top: var(--other-card-half-negative);
+    margin-left: var(--other-card-half-negative);
+    border-radius: 1.5625rem; /* 25px */
+    overflow: hidden;
+    will-change: transform;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .project-other-drag-track {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: max-content;
+    display: flex;
+    align-items: center;
+    gap: 5px; /* valeur MWG 111, non spécifiée par Figma pour cet état */
+    opacity: 0;
+    pointer-events: none; /* purement visuel — le drag est observé sur root, jamais sur ce rail */
+  }
+
+  .project-other-drag-card {
+    position: relative;
+    flex: none;
+    width: var(--other-card-size);
+    height: var(--other-card-size);
+    border-radius: 1.5625rem;
+    overflow: hidden;
+    will-change: transform;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .project-other-universes.is-dragging .project-other-idle-track {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .project-other-universes.is-dragging .project-other-drag-track {
+    opacity: 1;
+    /* pointer-events reste none : rail purement visuel */
+  }
+}
+
+/* --- Mode natif (mobile / touch / pointeur imprécis) --- */
+@media (max-width: 900px), (hover: none), (pointer: coarse) {
+  .project-other-container {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+  .project-other-track {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    height: 100%;
+    gap: 15px;
+    padding: 0 30px;
+  }
+  .project-other-card {
+    position: relative;
+    width: calc(100vw - 60px);
+    height: auto;
+    aspect-ratio: 1 / 1;
+    max-width: 500px;
+    scroll-snap-align: center;
+  }
+  .project-other-label--idle,
+  .project-other-label--drag {
+    display: none;
+  }
+}
+
+/* --- SECTION FOOTER (copié de about.css / main.css, adapté au flux normal
+   Project — même remarque que About : "position:relative + margin-top:-100vh"
+   au lieu de "position:absolute + top:100%" utilisé sur la Home, où le
+   footer fait partie d'une seule scène .clients-scene positionnée en absolu.
+   Valeurs et sélecteurs par ailleurs strictement identiques.) --- */
+#footer {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  z-index: 20; /* au-dessus de .project-other-universes (10) */
+  margin-top: -100vh;
+  overflow: hidden;
+  background-color: var(--c-black);
+  color: var(--c-bg);
+  padding: 0;
+  display: block;
+  clip-path: inset(0 8vw 0 8vw round 1.5rem 1.5rem 0 0);
+}
+
+.footer-background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.footer-background-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.footer-webgl {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.footer-content {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  padding: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.footer-top {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.footer-logo {
+  width: clamp(280px, 35vw, 800px);
+}
+
+.footer-signature {
+  font-family: var(--font-regular);
+  font-size: clamp(1.25rem, 2vw, 1.9rem);
+  line-height: 1.5;
+}
+
+.footer-bottom {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+.footer-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2.5rem;
+}
+
+.footer-nav a {
+  font-family: var(--font-bold);
+  font-weight: 600;
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  color: var(--c-bg);
+  text-decoration: none;
+  line-height: 1;
+}
+
+.footer-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-self: stretch;
+  gap: 2rem;
+}
+
+.footer-columns {
+  display: grid;
+  grid-template-columns: 260px 260px;
+  column-gap: 6rem;
+}
+
+.footer-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+.footer-column-title {
+  font-family: var(--font-bold);
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.25rem;
+  text-transform: uppercase;
+}
+
+.footer-column a {
+  font-family: var(--font-regular);
+  font-size: 1.25rem;
+  color: var(--c-bg);
+  text-decoration: none;
+}
+
+.footer-legal {
+  display: grid;
+  grid-template-columns: 260px 260px;
+  column-gap: 6rem;
+  justify-items: start;
+  font-family: var(--font-regular);
+  font-size: 1.25rem;
+}
+
+.footer-legal a {
+  color: var(--c-bg);
+  text-decoration: none;
+}
+
+@media (min-width: 901px) {
+  .footer-legal p,
+  .footer-legal a {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 900px) {
+  .footer-bottom {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .footer-right {
+    align-self: stretch;
+  }
+
+  .footer-columns,
+  .footer-legal {
+    column-gap: 2rem;
+  }
+}
+
+.footer-nav a,
+.footer-column a,
+.footer-legal a {
+  position: relative;
+  display: inline-block;
+}
+
+.footer-nav a::after,
+.footer-column a::after,
+.footer-legal a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.15em;
+  width: 100%;
+  height: max(1px, 0.06em);
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.45s var(--ease-out-expo);
+}
+
+.footer-nav a:hover::after,
+.footer-column a:hover::after,
+.footer-legal a:hover::after {
+  transform: scaleX(1);
 }
