@@ -391,6 +391,17 @@ body {
   z-index: 2;
 }
 
+/* Wrapper dédié à la transition Other Universes -> Footer (src/projectFooter.js) :
+   même box que .project-other-universes (inset:0), sert uniquement de cible
+   au scale sortant du cover, sans jamais toucher .project-other-universes
+   elle-même (trigger du pin) ni les cards individuellement. Purement
+   structurel : ne change ni la position ni le contexte de positionnement
+   absolu de .project-other-title / .project-other-label. */
+.project-other-scene {
+  position: absolute;
+  inset: 0;
+}
+
 .project-other-container {
   position: relative;
   width: 100%;
@@ -419,6 +430,17 @@ body {
     left: 0;
     height: var(--other-active-size);
     overflow: hidden;
+  }
+
+  /* Pendant le scale sortant Other Universes -> Footer (src/projectFooter.js) :
+     ce clip interne (moteur idle, intouché) rétrécit avec .project-other-scene
+     alors que celui de .project-other-universes (jamais scalé) reste aligné
+     sur le vrai bord d'écran — les cartes -1/+1 se retrouvaient coupées net,
+     avec une marge visible entre la coupe et le bord réel. Le clip externe a
+     exactement les mêmes bornes horizontales à cet instant, donc le relâcher
+     ici ne change rien au repos, seulement pendant le scale. */
+  .project-other-universes.is-scaling-out .project-other-container {
+    overflow: visible;
   }
 
   .project-other-idle-track {
@@ -507,4 +529,199 @@ body {
   .project-other-label--drag {
     display: none;
   }
+}
+
+/* --- SECTION FOOTER (copié de about.css / main.css, adapté au flux normal
+   Project — même remarque que About : "position:relative + margin-top:-100vh"
+   au lieu de "position:absolute + top:100%" utilisé sur la Home, où le
+   footer fait partie d'une seule scène .clients-scene positionnée en absolu.
+   Valeurs et sélecteurs par ailleurs strictement identiques.) --- */
+#footer {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  z-index: 20; /* au-dessus de .project-other-universes (10) */
+  margin-top: -100vh;
+  overflow: hidden;
+  background-color: var(--c-black);
+  color: var(--c-bg);
+  padding: 0;
+  display: block;
+  clip-path: inset(0 8vw 0 8vw round 1.5rem 1.5rem 0 0);
+}
+
+.footer-background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.footer-background-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.footer-webgl {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.footer-content {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  padding: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.footer-top {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.footer-logo {
+  width: clamp(280px, 35vw, 800px);
+}
+
+.footer-signature {
+  font-family: var(--font-regular);
+  font-size: clamp(1.25rem, 2vw, 1.9rem);
+  line-height: 1.5;
+}
+
+.footer-bottom {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+.footer-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2.5rem;
+}
+
+.footer-nav a {
+  font-family: var(--font-bold);
+  font-weight: 600;
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  color: var(--c-bg);
+  text-decoration: none;
+  line-height: 1;
+}
+
+.footer-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-self: stretch;
+  gap: 2rem;
+}
+
+.footer-columns {
+  display: grid;
+  grid-template-columns: 260px 260px;
+  column-gap: 6rem;
+}
+
+.footer-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+.footer-column-title {
+  font-family: var(--font-bold);
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.25rem;
+  text-transform: uppercase;
+}
+
+.footer-column a {
+  font-family: var(--font-regular);
+  font-size: 1.25rem;
+  color: var(--c-bg);
+  text-decoration: none;
+}
+
+.footer-legal {
+  display: grid;
+  grid-template-columns: 260px 260px;
+  column-gap: 6rem;
+  justify-items: start;
+  font-family: var(--font-regular);
+  font-size: 1.25rem;
+}
+
+.footer-legal a {
+  color: var(--c-bg);
+  text-decoration: none;
+}
+
+@media (min-width: 901px) {
+  .footer-legal p,
+  .footer-legal a {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 900px) {
+  .footer-bottom {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .footer-right {
+    align-self: stretch;
+  }
+
+  .footer-columns,
+  .footer-legal {
+    column-gap: 2rem;
+  }
+}
+
+.footer-nav a,
+.footer-column a,
+.footer-legal a {
+  position: relative;
+  display: inline-block;
+}
+
+.footer-nav a::after,
+.footer-column a::after,
+.footer-legal a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.15em;
+  width: 100%;
+  height: max(1px, 0.06em);
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.45s var(--ease-out-expo);
+}
+
+.footer-nav a:hover::after,
+.footer-column a:hover::after,
+.footer-legal a:hover::after {
+  transform: scaleX(1);
 }

@@ -5,6 +5,8 @@ import Lenis from '@studio-freight/lenis'
 import { initProjectHero } from './projectHero'
 import { initProjectTestimonial } from './projectTestimonial'
 import { initProjectOtherUniverses } from './projectOtherUniverses'
+import { initProjectFooter } from './projectFooter'
+import { createFooterWebGL } from './footerWebGL'
 
 // Empêche le navigateur de restaurer l'ancienne position de scroll au reload
 // (sinon la page peut se recharger au milieu du Hero, ScrollTrigger/Lenis
@@ -38,6 +40,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   initProjectHero(gsap, ScrollTrigger)
 
+  // Aucune dépendance typographique : peut être initialisé avant l'attente
+  // des fonts (même remarque que sur About/Home).
+  const footerEl = document.querySelector('#footer')
+  if (footerEl) {
+    createFooterWebGL(footerEl)
+  }
+
   // Reveal éditorial en cascade (label puis paragraphes), one-shot, sans
   // scrub — pattern partagé par toutes les sections texte des pages Project.
   function initEditorialReveal(sectionSelector, labelSelector, paragraphsSelector) {
@@ -64,6 +73,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   initProjectTestimonial(gsap, ScrollTrigger)
 
   initProjectOtherUniverses(gsap, ScrollTrigger)
+
+  // Dépend de la géométrie naturelle de .project-other-universes (start:
+  // "bottom bottom") : initialisé après son propre setup, avant qu'un pin
+  // externe supplémentaire ne s'ajoute sur sa racine.
+  initProjectFooter(gsap, ScrollTrigger)
 
   ScrollTrigger.refresh()
 })
