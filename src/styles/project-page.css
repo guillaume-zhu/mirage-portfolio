@@ -425,7 +425,9 @@ body {
     position: absolute;
     inset: 0;
     opacity: 1;
-    transition: opacity 0.3s;
+    /* Switch instantané : la continuité idle→drag est portée par le FLIP
+       (JS, transform des dragCards), pas par un fondu entre deux
+       géométries différentes. */
   }
 
   .project-other-idle-track .project-other-card {
@@ -454,7 +456,6 @@ body {
     gap: 5px; /* valeur MWG 111, non spécifiée par Figma pour cet état */
     opacity: 0;
     pointer-events: none; /* purement visuel — le drag est observé sur root, jamais sur ce rail */
-    transition: opacity 0.3s;
   }
 
   .project-other-drag-card {

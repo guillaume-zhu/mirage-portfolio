@@ -59,6 +59,7 @@ export function initProjectOtherUniverses(gsap, ScrollTrigger) {
     let isPressed = false
     let isDragging = false
     let isIdleTransitioning = false
+    let isReturning = false
     let dragDistance = 0
 
     // --- IDLE TRACK : 5 emplacements à rôle fixe -2..+2 ---
@@ -131,7 +132,10 @@ export function initProjectOtherUniverses(gsap, ScrollTrigger) {
       })
     }
 
-    function shiftIdle(delta) {
+    // revealLabel:false (reverse FLIP drag→idle) prépare le texte du nouvel
+    // actif sans jamais rendre labelIdle visible — le reveal appartient alors
+    // au switch final (maybeFinishReturn), pas à shiftIdle lui-même.
+    function shiftIdle(delta, onComplete, { revealLabel = true } = {}) {
       if (delta === 0) return
       isIdleTransitioning = true
       activeProjectIndex = mod3(activeProjectIndex + delta)
@@ -144,11 +148,20 @@ export function initProjectOtherUniverses(gsap, ScrollTrigger) {
         layoutIdleSlot(slot, {
           onSettled: () => {
             pending -= 1
-            if (pending === 0) isIdleTransitioning = false
+            if (pending === 0) {
+              isIdleTransitioning = false
+              onComplete?.()
+            }
           },
         })
       })
-      updateIdleLabel()
+      if (revealLabel) {
+        updateIdleLabel()
+      } else {
+        gsap.killTweensOf(labelIdle)
+        labelIdle.textContent = projects[activeProjectIndex].title
+        gsap.set(labelIdle, { autoAlpha: 0 })
+      }
     }
 
     // --- DRAG TRACK : exactement 3 cartes, rail flex naturel ---
@@ -167,6 +180,8 @@ export function initProjectOtherUniverses(gsap, ScrollTrigger) {
     let incrTick = 0
     let mediaCenters = []
     let lastCenteredIndex = -1
+    let dragMorphTween = null
+    let returnMorphTween = null
 
     function syncDragCenters() {
       mediaCenters = dragCards.map((el) => el.offsetLeft + el.offsetWidth / 2)
@@ -222,8 +237,27 @@ export function initProjectOtherUniverses(gsap, ScrollTrigger) {
       incrTick = centerX
     }
 
+    // FLIP idle → drag : les 3 dragCards démarrent superposées pixel pour
+    // pixel aux idle slots -1/0/+1 qu'elles remplacent (First = rect idle
+    // avant repositionnement, Last = rect drag naturelle une fois le rail
+    // centré), puis se détendent vers leur repos (x:0,y:0,scale:1). Le switch
+    // idle↔drag (classList "is-dragging") reste instantané : c'est ce tween
+    // qui porte la continuité visuelle, plus le crossfade opacity.
     function beginDrag() {
+      const idleVisible = [-1, 0, 1].map((r) => idleSlots.find((s) => s.role === r))
+      const idleRectsBefore = idleVisible.map((s) => s.el.getBoundingClientRect())
+
       populateDragTrack()
+
+      dragCards.forEach((el, i) => {
+        const from = idleRectsBefore[i]
+        const to = el.getBoundingClientRect()
+        const deltaX = (from.left + from.width / 2) - (to.left + to.width / 2)
+        const deltaY = (from.top + from.height / 2) - (to.top + to.height / 2)
+        const scale = from.width / to.width
+        gsap.set(el, { x: deltaX, y: deltaY, scale })
+      })
+
       isDragging = true
       root.classList.add("is-dragging")
       lastCenteredIndex = 1
@@ -231,6 +265,9 @@ export function initProjectOtherUniverses(gsap, ScrollTrigger) {
       gsap.set(labelDrag, { visibility: "visible" })
       gsap.to(labelIdle, { autoAlpha: 0, duration: 0.3, ease: EASE })
       gsap.to(labelDrag, { autoAlpha: 1, duration: 0.3, ease: EASE, delay: 0.1 })
+
+      dragMorphTween?.kill()
+      dragMorphTween = gsap.to(dragCards, { x: 0, y: 0, scale: 1, duration: 0.4, ease: EASE })
     }
 
     const obs = Observer.create({
@@ -238,7 +275,7 @@ export function initProjectOtherUniverses(gsap, ScrollTrigger) {
       type: "pointer,touch",
       preventDefault: false,
       onPress: () => {
-        if (isIdleTransitioning) return
+        if (isIdleTransitioning || isReturning) return
         isPressed = true
         dragDistance = 0
       },
@@ -260,17 +297,79 @@ export function initProjectOtherUniverses(gsap, ScrollTrigger) {
         isPressed = false
         if (isDragging) {
           isDragging = false
-          root.classList.remove("is-dragging")
+          // "is-dragging" reste actif : le drag track reste la couche
+          // visible tant que le reverse FLIP et le buffer idle ne sont pas
+          // TOUS DEUX prêts (cf. maybeFinishReturn) — sinon l'idle réapparaît
+          // un instant dans son ancien ordre avant le shift.
+          isReturning = true
+          dragMorphTween?.kill() // conserve la position visuelle courante
+          dragMorphTween = null
+
           gsap.to(labelDrag, { autoAlpha: 0, duration: 0.3, ease: EASE })
+
           const closest = findClosest() // 0=previous, 1=current, 2=next
           const delta = closest === 0 ? -1 : closest === 2 ? 1 : 0
-          if (delta === 0) {
-            // Le projet actif n'a pas changé : son texte est déjà correct,
-            // il suffit de faire réapparaître le label idle (updateIdleLabel
-            // ne serait jamais appelé puisque shiftIdle(0) ne fait rien).
+          const finalActiveIndex = mod3(activeProjectIndex + delta)
+          const containerRect = container.getBoundingClientRect()
+          const targetCenterY = containerRect.top + containerRect.height / 2
+
+          let reverseMorphDone = false
+          let idleReady = delta === 0
+
+          // Switch DOM final : atteint seulement quand les dragCards sont
+          // exactement sur leur cible idle ET que le buffer est prêt — le
+          // reveal du label idle appartient désormais entièrement à cette
+          // étape (jamais avant), pour tous les cas de delta.
+          function maybeFinishReturn() {
+            if (!reverseMorphDone || !idleReady) return
+            root.classList.remove("is-dragging")
+            gsap.set(dragCards, { x: 0, y: 0, scale: 1 })
             gsap.to(labelIdle, { autoAlpha: 1, duration: 0.3, ease: EASE })
-          } else {
-            shiftIdle(delta)
+            isReturning = false
+            returnMorphTween = null
+          }
+
+          // Reverse FLIP par identité de projet (pas par ancien rôle idle) :
+          // chaque dragCard rejoint la géométrie idle du projet qu'elle
+          // affiche réellement, calculée depuis sa position visuelle
+          // courante (dragTrack.x reste figé, seuls les transforms enfants
+          // compensent).
+          returnMorphTween?.kill()
+          returnMorphTween = gsap.timeline({
+            onComplete: () => {
+              reverseMorphDone = true
+              maybeFinishReturn()
+            },
+          })
+          dragCards.forEach((el, i) => {
+            const projectIndex = mod3(activeProjectIndex - 1 + i)
+            const diff = mod3(projectIndex - finalActiveIndex)
+            const finalRole = diff === 2 ? -1 : diff
+            const targetCenterX = containerRect.left + containerRect.width / 2 + finalRole * step()
+            const targetScale = finalRole === 0 ? ACTIVE_SCALE : 1
+
+            const rect = el.getBoundingClientRect()
+            const currentX = Number(gsap.getProperty(el, "x")) || 0
+            const currentY = Number(gsap.getProperty(el, "y")) || 0
+
+            returnMorphTween.to(el, {
+              x: currentX + (targetCenterX - (rect.left + rect.width / 2)),
+              y: currentY + (targetCenterY - (rect.top + rect.height / 2)),
+              scale: targetScale,
+              duration: TRANSITION_DURATION,
+              ease: EASE,
+            }, 0)
+          })
+
+          if (delta !== 0) {
+            shiftIdle(
+              delta,
+              () => {
+                idleReady = true
+                maybeFinishReturn()
+              },
+              { revealLabel: false },
+            )
           }
         }
       },
@@ -319,6 +418,9 @@ export function initProjectOtherUniverses(gsap, ScrollTrigger) {
       introSt.kill()
       obs.kill()
       introTl?.kill()
+      dragMorphTween?.kill()
+      returnMorphTween?.kill()
+      isReturning = false
       gsap.killTweensOf(idleSlots.map((s) => s.el).concat(dragCards, [labelIdle, labelDrag]))
       root.removeEventListener("click", handleCardClick)
       window.removeEventListener("resize", handleResize)
