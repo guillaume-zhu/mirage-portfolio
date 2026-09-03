@@ -21,6 +21,60 @@ export function initAnimations() {
   gsap.ticker.add((time) => lenis.raf(time * 1000))
   gsap.ticker.lagSmoothing(0)
 
+  // --- NAVIGATION ANCRE (header) ---
+  // Certaines cibles (#footer) vivent dans un conteneur pinné et transformé :
+  // leur position réelle de scroll ne peut pas être lue depuis le DOM. Les
+  // modules d'animation enregistrent ici un résolveur -> position de scroll (px).
+  const anchorResolvers = {}
+
+  const scrollToAnchor = (hash, opts) => {
+    const resolver = anchorResolvers[hash]
+    if (resolver) {
+      lenis.scrollTo(resolver(), opts)
+      return true
+    }
+    const target = document.querySelector(hash)
+    if (!target) return false
+    lenis.scrollTo(target, opts)
+    return true
+  }
+
+  // Les liens vers une ancre de la page courante défilent en douceur via Lenis ;
+  // les liens vers une autre page (ex. /#works depuis about.html) suivent la
+  // navigation native, et l'ancre est rejouée au chargement ci-dessous.
+  document.querySelectorAll('a[href*="#"]').forEach((link) => {
+    const url = new URL(link.href, window.location.href)
+    if (url.pathname !== window.location.pathname || !url.hash || url.hash === "#") return
+
+    link.addEventListener("click", (e) => {
+      e.preventDefault()
+      if (scrollToAnchor(url.hash)) history.pushState(null, "", url.hash)
+    })
+  })
+
+  // Logo -> home tout en haut. Sur la home même, on évite le rechargement et on
+  // remonte en douceur via Lenis.
+  const logoLink = document.querySelector(".site-header .logo")
+  if (logoLink) {
+    logoLink.addEventListener("click", (e) => {
+      const url = new URL(logoLink.href, window.location.href)
+      if (url.pathname !== window.location.pathname) return // vers la home depuis une autre page
+      e.preventDefault()
+      lenis.scrollTo(0)
+      history.pushState(null, "", url.pathname)
+    })
+  }
+
+  // Ancre présente au chargement (arrivée depuis une autre page) : on saute après
+  // que les ScrollTrigger (pin de #works, #clients, etc.) soient positionnés.
+  if (window.location.hash && window.location.hash !== "#") {
+    const hash = window.location.hash
+    window.addEventListener("load", () => {
+      ScrollTrigger.refresh()
+      scrollToAnchor(hash, { immediate: true })
+    })
+  }
+
   // --- ANIMATIONS: HERO ---
 
   // Setup initial
@@ -513,6 +567,11 @@ export function initAnimations() {
       },
     })
 
+    // Lien "Expertises" : #expertise est pinné et son contenu est translaté
+    // pendant l'approche — on vise le début du pin, là où la section est calée
+    // en haut de l'écran et centrée.
+    anchorResolvers["#expertise"] = () => expTl.scrollTrigger.start
+
     // --- 2. PHASE 1 : hold (0 -> 0.4) ---
     expTl.to({}, { duration: 0.4 }, 0)
 
@@ -684,7 +743,11 @@ export function initAnimations() {
       workDisplacements.push(displacement)
       workTurbulences.push(turbulence)
 
-      item.addEventListener("mouseenter", () => {
+      // Le hover ne doit réagir que sur le nom du projet, pas sur toute la ligne
+      // (les colonnes latérales et le vide de la grille sont exclus).
+      const hoverTarget = title || item
+
+      hoverTarget.addEventListener("mouseenter", () => {
         const imgLeft = item.querySelector(".project-img-left")?.getAttribute("src")
         const imgRight = item.querySelector(".project-img-right")?.getAttribute("src")
 
@@ -715,7 +778,7 @@ export function initAnimations() {
         })
       })
 
-      item.addEventListener("mouseleave", () => {
+      hoverTarget.addEventListener("mouseleave", () => {
         // Animate Out Images
         gsap.to([previewLeftContainer, previewRightContainer], {
           opacity: 0,
@@ -794,6 +857,10 @@ export function initAnimations() {
 
     worksRevealChain(worksTl, worksSplit, workItems.length, 0)
     worksTl.to({}, { duration: 0.3 })
+
+    // Lien "Projets" : #works est pinné, on vise le début du pin (section calée
+    // en haut, contenu centré).
+    anchorResolvers["#works"] = () => worksTl.scrollTrigger.start
   }
 
   // --- ANIMATIONS: SCRATCH EFFECT ---
@@ -898,8 +965,8 @@ export function initAnimations() {
     path.style.strokeDashoffset = length
     path.style.opacity = 0 // Start invisible
 
-    // 2. Animate on Hover
-    item.addEventListener("mouseenter", () => {
+    // 2. Animate on Hover (uniquement sur le nom du projet)
+    title.addEventListener("mouseenter", () => {
       gsap.to(path, {
         strokeDashoffset: 0,
         opacity: 1,
@@ -909,7 +976,7 @@ export function initAnimations() {
       })
     })
 
-    item.addEventListener("mouseleave", () => {
+    title.addEventListener("mouseleave", () => {
       gsap.to(path, {
         strokeDashoffset: length,
         opacity: 0,
@@ -999,6 +1066,10 @@ export function initAnimations() {
     const coverEnd = () => sceneST.start + clientsDistance + coverPhasePx
     const footerCoverStart = () => coverEnd() + footerHoldPhasePx
     const footerCoverEnd = () => footerCoverStart() + footerCoverPhasePx
+
+    // Lien "Contact" : on vise la fin de l'animation d'entrée du footer, quand il
+    // recouvre tout l'écran. Clamp de 1px pour rester dans la plage du pin.
+    anchorResolvers["#footer"] = () => Math.max(0, footerCoverEnd() - 1)
 
     const clientsScrollTween = gsap.to(clientsCardsContainer, {
       x: -clientsDistance,
