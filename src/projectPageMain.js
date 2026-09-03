@@ -4,6 +4,7 @@ import ScrollTrigger from 'gsap/ScrollTrigger'
 import Lenis from '@studio-freight/lenis'
 import { initProjectHero } from './projectHero'
 import { initProjectTestimonial } from './projectTestimonial'
+import { initProjectOtherUniverses } from './projectOtherUniverses'
 
 // Empêche le navigateur de restaurer l'ancienne position de scroll au reload
 // (sinon la page peut se recharger au milieu du Hero, ScrollTrigger/Lenis
@@ -61,6 +62,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   initEditorialReveal(".project-direction", ".project-direction-label", ".project-direction-copy p")
 
   initProjectTestimonial(gsap, ScrollTrigger)
+
+  initProjectOtherUniverses(gsap, ScrollTrigger)
 
   ScrollTrigger.refresh()
 })

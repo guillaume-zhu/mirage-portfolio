@@ -324,3 +324,183 @@ body {
   display: inline-block;
   transform-origin: 50% 120%;
 }
+
+/* --- PROJECT OTHER UNIVERSES --- */
+.project-other-universes {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--c-black);
+  color: var(--c-bg);
+  transition: background-color 0.3s, color 0.3s;
+  transition-delay: 0.1s;
+  /* Toutes dérivées de Figma (1728×1117), contraintes en vw ET vh pour ne
+     plus grossir/descendre sur un viewport plus panoramique que le ratio
+     Figma. Valeurs exprimées directement (pas de *, / dans calc()). */
+  --other-card-size: min(25.58vw, 39.57vh); /* 442px */
+  --other-active-size: min(30.09vw, 46.55vh); /* 520px */
+  --other-inactive-offset: min(2.26vw, 3.49vh); /* (520-442)/2 = 39px */
+  --other-card-half-negative: max(-12.79vw, -19.785vh); /* -442/2 */
+  --other-media-top: 35.09vh; /* 392/1117 */
+}
+
+.project-other-universes.is-dragging {
+  background-color: var(--c-bg);
+  color: var(--c-black);
+}
+
+.project-other-title {
+  position: absolute;
+  top: 8.5vh; /* premier test : légèrement remonté */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 29.28vw; /* 506/1728, identique à .project-hero-heading */
+  font-family: var(--font-special);
+  font-weight: 400;
+  font-size: clamp(2.7rem, 5.21vw, 5.625rem); /* 90px, premier test légèrement réduit */
+  line-height: 0.9;
+  text-align: center;
+}
+
+.project-other-label {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-regular);
+  font-weight: 700;
+  font-size: clamp(0.8rem, 1.02vw, 1.1rem); /* légèrement réduit vs 20px, premier ajustement */
+  letter-spacing: 0.29vw; /* 5px */
+  line-height: 1.3; /* valeur Figma exacte pour ce label */
+  text-transform: uppercase;
+}
+
+.project-other-label--idle {
+  top: calc(var(--other-media-top) + var(--other-active-size) + 30px);
+}
+
+.project-other-label--drag {
+  top: calc(
+    var(--other-media-top) + var(--other-inactive-offset) + var(--other-card-size) + 30px
+  );
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.project-other-container {
+  position: relative;
+  width: 100%;
+}
+
+.project-other-card img,
+.project-other-drag-card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none; /* le press/click cible le <a>, pas l'image */
+  -webkit-user-drag: none;
+}
+
+/* --- Interaction desktop complète (idle circulaire + drag borné) --- */
+@media (min-width: 901px) and (hover: hover) and (pointer: fine) {
+  .project-other-track {
+    display: none; /* structure source, remplacée par les pistes générées en JS */
+  }
+
+  .project-other-container {
+    position: absolute;
+    top: var(--other-media-top);
+    left: 0;
+    height: var(--other-active-size);
+    overflow: hidden;
+  }
+
+  .project-other-idle-track {
+    position: absolute;
+    inset: 0;
+    opacity: 1;
+    transition: opacity 0.3s;
+  }
+
+  .project-other-idle-track .project-other-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--other-card-size);
+    height: var(--other-card-size);
+    margin-top: var(--other-card-half-negative);
+    margin-left: var(--other-card-half-negative);
+    border-radius: 1.5625rem; /* 25px */
+    overflow: hidden;
+    will-change: transform;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .project-other-drag-track {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: max-content;
+    display: flex;
+    align-items: center;
+    gap: 5px; /* valeur MWG 111, non spécifiée par Figma pour cet état */
+    opacity: 0;
+    pointer-events: none; /* purement visuel — le drag est observé sur root, jamais sur ce rail */
+    transition: opacity 0.3s;
+  }
+
+  .project-other-drag-card {
+    position: relative;
+    flex: none;
+    width: var(--other-card-size);
+    height: var(--other-card-size);
+    border-radius: 1.5625rem;
+    overflow: hidden;
+    will-change: transform;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .project-other-universes.is-dragging .project-other-idle-track {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .project-other-universes.is-dragging .project-other-drag-track {
+    opacity: 1;
+    /* pointer-events reste none : rail purement visuel */
+  }
+}
+
+/* --- Mode natif (mobile / touch / pointeur imprécis) --- */
+@media (max-width: 900px), (hover: none), (pointer: coarse) {
+  .project-other-container {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+  .project-other-track {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    height: 100%;
+    gap: 15px;
+    padding: 0 30px;
+  }
+  .project-other-card {
+    position: relative;
+    width: calc(100vw - 60px);
+    height: auto;
+    aspect-ratio: 1 / 1;
+    max-width: 500px;
+    scroll-snap-align: center;
+  }
+  .project-other-label--idle,
+  .project-other-label--drag {
+    display: none;
+  }
+}
