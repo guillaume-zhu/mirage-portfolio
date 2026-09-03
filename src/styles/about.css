@@ -40,9 +40,9 @@ body {
   background-color: var(--c-bg);
   color: var(--c-black);
   font-family: var(--font-regular);
-  font-weight: 400;
-  font-size: var(--fs-body);
-  line-height: 1.6;
+  font-weight: var(--type-body-weight);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-leading);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -82,8 +82,8 @@ body {
 
 .site-nav a {
   font-family: var(--font-regular);
-  font-size: var(--fs-body);
-  font-weight: 550;
+  font-size: var(--type-body-size);
+  font-weight: 700;
   color: inherit;
   text-decoration: none;
 }
@@ -167,9 +167,10 @@ body {
 .about-hero-text p {
   font-family: var(--font-special);
   font-weight: 400;
-  /* Agrandi vs la valeur Figma (60px) */
-  font-size: clamp(3.5rem, 5.5vw, 7rem);
-  line-height: 1.1;
+  /* Exception Display Hero : agrandi vs la valeur Figma (60px), plus grand
+     que Display XL et unique sur le site — cf. --type-display-hero-*. */
+  font-size: var(--type-display-hero-size);
+  line-height: var(--type-display-hero-leading);
   color: var(--c-bg);
   margin: 0;
 }
@@ -210,19 +211,19 @@ body {
 
 .about-approach-label {
   font-family: var(--font-regular);
-  font-weight: 700;
-  font-size: clamp(0.9rem, 1.16vw, 1.25rem); /* 20px */
-  letter-spacing: 0.29vw; /* 5px */
-  line-height: 1; /* leading-none dans Figma — ne pas hériter du line-height du body */
+  font-weight: var(--type-label-weight);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--type-label-tracking);
+  line-height: var(--type-label-leading); /* leading-none dans Figma — ne pas hériter du line-height du body */
   text-transform: uppercase;
   color: var(--c-black);
 }
 
 .about-approach-title {
   font-family: var(--font-regular);
-  font-weight: 500;
-  font-size: clamp(1.75rem, 2.31vw, 2.5rem); /* 40px */
-  line-height: 1.5;
+  font-weight: var(--type-copy-lg-weight);
+  font-size: var(--type-copy-lg-size);
+  line-height: var(--type-copy-lg-leading);
   color: var(--c-black);
 }
 
@@ -271,8 +272,8 @@ body {
   z-index: 1;
   font-family: var(--font-special);
   font-weight: 400;
-  font-size: clamp(1.1rem, 1.45vw, 1.5625rem); /* 25px */
-  line-height: 1;
+  font-size: var(--type-card-title-size);
+  line-height: var(--type-card-title-leading);
 }
 
 .about-approach-card-text {
@@ -337,10 +338,10 @@ body {
 
 .about-numbers-label {
   font-family: var(--font-regular);
-  font-weight: 700;
-  font-size: clamp(0.9rem, 1.16vw, 1.25rem); /* 20px */
-  letter-spacing: 0.29vw; /* 5px */
-  line-height: 1;
+  font-weight: var(--type-label-weight);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--type-label-tracking);
+  line-height: var(--type-label-leading);
   text-transform: uppercase;
 }
 
@@ -421,26 +422,18 @@ body {
 
 .about-manifesto-label {
   font-family: var(--font-regular);
-  font-weight: 700;
-  font-size: clamp(
-    0.9rem,
-    1.16vw,
-    1.25rem
-  ); /* 20px — identique à .about-approach-label / .about-numbers-label */
-  letter-spacing: 0.29vw; /* 5px */
-  line-height: 1;
+  font-weight: var(--type-label-weight);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--type-label-tracking);
+  line-height: var(--type-label-leading);
   text-transform: uppercase;
 }
 
 .about-manifesto-text {
   font-family: var(--font-special);
   font-weight: 400;
-  font-size: clamp(
-    2.5rem,
-    4.4vw,
-    4.75rem
-  ); /* 76px sur base 1728 ; min mobile = valeur de premier test, Figma desktop only */
-  line-height: 1.3;
+  font-size: var(--type-display-lg-size);
+  line-height: var(--type-display-lg-leading);
 }
 
 .about-manifesto-line {
@@ -512,8 +505,9 @@ body {
 
 .footer-signature {
   font-family: var(--font-regular);
-  font-size: clamp(1.25rem, 2vw, 1.9rem);
-  line-height: 1.5;
+  font-size: var(--type-copy-lg-size);
+  font-weight: var(--type-copy-lg-weight);
+  line-height: var(--type-copy-lg-leading);
 }
 
 .footer-bottom {
@@ -534,11 +528,11 @@ body {
 
 .footer-nav a {
   font-family: var(--font-bold);
-  font-weight: 600;
-  font-size: clamp(2rem, 5vw, 4.5rem);
+  font-weight: var(--type-nav-footer-weight);
+  font-size: var(--type-nav-footer-size);
   color: var(--c-bg);
   text-decoration: none;
-  line-height: 1;
+  line-height: var(--type-nav-footer-leading);
 }
 
 .footer-right {
@@ -564,15 +558,18 @@ body {
 
 .footer-column-title {
   font-family: var(--font-bold);
-  font-weight: 700;
-  font-size: 0.9rem;
-  letter-spacing: 0.25rem;
+  font-weight: var(--type-label-weight);
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-leading);
+  letter-spacing: var(--type-label-tracking);
   text-transform: uppercase;
 }
 
 .footer-column a {
   font-family: var(--font-regular);
-  font-size: 1.25rem;
+  font-size: var(--type-body-size);
+  font-weight: var(--type-body-weight);
+  line-height: var(--type-body-leading);
   color: var(--c-bg);
   text-decoration: none;
 }
@@ -583,7 +580,9 @@ body {
   column-gap: 6rem;
   justify-items: start;
   font-family: var(--font-regular);
-  font-size: 1.25rem;
+  font-size: var(--type-body-size);
+  font-weight: var(--type-body-weight);
+  line-height: var(--type-body-leading);
 }
 
 .footer-legal a {

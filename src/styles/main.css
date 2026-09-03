@@ -38,24 +38,12 @@ body {
   background-color: var(--c-bg);
   color: var(--c-black);
   font-family: var(--font-regular);
-  font-weight: 400;
-  font-size: var(--fs-body);
-  line-height: 1.6;
+  font-weight: var(--type-body-weight);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-leading);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-.subtitle {
-  font-family: var(--font-regular);
-  text-transform: uppercase;
-  font-size: 0.75rem;
-  letter-spacing: 0.2em;
-  /* Wider tracking */
-  color: var(--c-accent);
-  margin-bottom: 1.5rem;
-  display: block;
-  font-weight: 500;
 }
 
 /* --- HEADER --- */
@@ -95,8 +83,10 @@ body {
 
 .site-nav a {
   font-family: var(--font-regular);
-  font-size: var(--fs-body);
-  font-weight: 550;
+  /* Exception BODY : même taille que le corps de texte standard, mais en gras
+     pour la nav principale (cf. audit typographique — pas de système séparé). */
+  font-size: var(--type-body-size);
+  font-weight: 700;
   color: inherit;
   text-decoration: none;
 }
@@ -195,7 +185,7 @@ section {
   bottom: 2rem;
   left: 50%;
   transform: translateX(-50%);
-  font-size: var(--fs-body);
+  font-size: var(--type-body-size);
   color: rgba(255, 255, 255, 0.7);
   z-index: 4;
   font-family: var(--font-regular);
@@ -247,9 +237,9 @@ section {
 
 .reveal-paragraph {
   font-family: var(--font-bold);
-  font-size: clamp(2rem, 3.25vw, 4rem);
-  font-weight: 700;
-  line-height: 1.2;
+  font-size: var(--type-concept-size);
+  font-weight: var(--type-concept-weight);
+  line-height: var(--type-concept-leading);
   color: var(--c-text);
   letter-spacing: -0.02em;
   width: 35vw;
@@ -333,7 +323,9 @@ section {
 
 .works-label {
   font-family: var(--font-regular);
-  font-size: var(--fs-body);
+  font-size: var(--type-body-size);
+  font-weight: var(--type-body-weight);
+  line-height: var(--type-body-leading);
   color: var(--c-black);
   margin-bottom: 3rem;
 }
@@ -378,9 +370,8 @@ section {
 .project-title {
   font-family: var(--font-special);
   font-weight: 400;
-  font-size: clamp(3rem, 6vw, 4.75rem);
-  /* 76px */
-  line-height: 1;
+  font-size: var(--type-display-lg-size);
+  line-height: var(--type-display-lg-leading);
   color: var(--c-black);
   display: inline-block;
   position: relative;
@@ -388,15 +379,18 @@ section {
   cursor: pointer;
   /* La boîte épouse le texte : le hover ne déborde pas dans la colonne vide. */
   justify-self: center;
+  /* .project-title est maintenant un <a> (lien vers la page projet) :
+     text-decoration:none rétablit son rendu exact d'avant (identique au
+     <span> précédent, aucun soulignement par défaut du navigateur). */
+  text-decoration: none;
 }
 
 .project-meta {
   font-family: var(--font-bold);
-  font-weight: 700;
-  font-size: 1.25rem;
-  /* 20px */
-  letter-spacing: 0.3125rem;
-  /* 5px */
+  font-weight: var(--type-label-weight);
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-leading);
+  letter-spacing: var(--type-label-tracking);
   text-transform: uppercase;
   color: var(--c-black);
 }
@@ -497,9 +491,8 @@ section {
 .expertise-title {
   font-family: var(--font-special);
   font-weight: 400;
-  font-size: clamp(2rem, 2.9vw, 3.125rem);
-  /* 50px */
-  line-height: 1.4;
+  font-size: var(--type-display-lg-size);
+  line-height: var(--type-display-lg-leading);
   color: var(--c-black);
 }
 
@@ -511,10 +504,9 @@ section {
 .expertise-lead {
   grid-area: 1 / 1;
   font-family: var(--font-regular);
-  font-weight: 400;
-  font-size: clamp(1rem, 1.16vw, 1.25rem);
-  /* 20px */
-  line-height: 1.5;
+  font-weight: var(--type-body-weight);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-leading);
   color: var(--c-black);
 }
 
@@ -568,18 +560,16 @@ section {
 .expertise-card-title {
   font-family: var(--font-special);
   font-weight: 400;
-  font-size: clamp(1.25rem, 1.74vw, 1.875rem);
-  /* 30px */
-  line-height: 1.2;
+  font-size: var(--type-card-title-size);
+  line-height: var(--type-card-title-leading);
   white-space: nowrap;
 }
 
 .expertise-card-text {
   font-family: var(--font-regular);
-  font-weight: 400;
-  font-size: clamp(0.9rem, 1.16vw, 1.25rem);
-  /* 20px */
-  line-height: 1.5;
+  font-weight: var(--type-body-weight);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-leading);
 }
 
 /* Split lettre par lettre du grand titre */
@@ -642,11 +632,10 @@ section {
 
 .pre-footer-label {
   font-family: var(--font-regular);
-  font-weight: 300;
-  font-size: 1.25rem;
-  /* 20px */
-  letter-spacing: 0.3125rem;
-  /* 5px */
+  font-weight: var(--type-label-weight);
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-leading);
+  letter-spacing: var(--type-label-tracking);
   text-transform: uppercase;
   color: var(--c-bg);
 }
@@ -660,9 +649,8 @@ section {
 .pre-footer-manifest {
   font-family: var(--font-special);
   font-weight: 400;
-  font-size: clamp(2rem, 5vw, 4.75rem);
-  /* 76px */
-  line-height: 1.05;
+  font-size: var(--type-display-lg-size);
+  line-height: var(--type-display-lg-leading);
   color: var(--c-bg);
 }
 
@@ -709,11 +697,10 @@ section {
 
 .clients-label {
   font-family: var(--font-bold);
-  font-weight: 700;
-  font-size: 1.25rem;
-  /* 20px */
-  letter-spacing: 0.3125rem;
-  /* 5px */
+  font-weight: var(--type-label-weight);
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-leading);
+  letter-spacing: var(--type-label-tracking);
   text-transform: uppercase;
   color: var(--c-black);
 }
@@ -721,9 +708,8 @@ section {
 .clients-title {
   font-family: var(--font-special);
   font-weight: 400;
-  font-size: clamp(3rem, 8vw, 6.25rem);
-  /* jusqu'à 100px */
-  line-height: 0.9;
+  font-size: var(--type-display-xl-size);
+  line-height: var(--type-display-xl-leading);
   color: var(--c-black);
 }
 
@@ -847,8 +833,9 @@ section {
 
 .footer-signature {
   font-family: var(--font-regular);
-  font-size: clamp(1.25rem, 2vw, 1.9rem);
-  line-height: 1.5;
+  font-size: var(--type-copy-lg-size);
+  font-weight: var(--type-copy-lg-weight);
+  line-height: var(--type-copy-lg-leading);
 }
 
 .footer-bottom {
@@ -874,11 +861,11 @@ section {
 
 .footer-nav a {
   font-family: var(--font-bold);
-  font-weight: 600;
-  font-size: clamp(2rem, 5vw, 4.5rem);
+  font-weight: var(--type-nav-footer-weight);
+  font-size: var(--type-nav-footer-size);
   color: var(--c-bg);
   text-decoration: none;
-  line-height: 1;
+  line-height: var(--type-nav-footer-leading);
 }
 
 /* Groupe de droite : colonnes + ligne légale, alignés sur la hauteur de la nav */
@@ -907,15 +894,18 @@ section {
 
 .footer-column-title {
   font-family: var(--font-bold);
-  font-weight: 700;
-  font-size: 0.9rem;
-  letter-spacing: 0.25rem;
+  font-weight: var(--type-label-weight);
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-leading);
+  letter-spacing: var(--type-label-tracking);
   text-transform: uppercase;
 }
 
 .footer-column a {
   font-family: var(--font-regular);
-  font-size: 1.25rem;
+  font-size: var(--type-body-size);
+  font-weight: var(--type-body-weight);
+  line-height: var(--type-body-leading);
   color: var(--c-bg);
   text-decoration: none;
 }
@@ -926,7 +916,9 @@ section {
   column-gap: 6rem;
   justify-items: start;
   font-family: var(--font-regular);
-  font-size: 1.25rem;
+  font-size: var(--type-body-size);
+  font-weight: var(--type-body-weight);
+  line-height: var(--type-body-leading);
 }
 
 .footer-legal a {
