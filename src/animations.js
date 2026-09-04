@@ -2,7 +2,7 @@ import gsap from "gsap"
 import ScrollTrigger from "gsap/ScrollTrigger"
 import Lenis from "@studio-freight/lenis"
 
-export function initAnimations() {
+export function initAnimations(pendingHash) {
   // --- CONFIGURATION ---
   gsap.registerPlugin(ScrollTrigger)
 
@@ -62,16 +62,6 @@ export function initAnimations() {
       e.preventDefault()
       lenis.scrollTo(0)
       history.pushState(null, "", url.pathname)
-    })
-  }
-
-  // Ancre présente au chargement (arrivée depuis une autre page) : on saute après
-  // que les ScrollTrigger (pin de #works, #clients, etc.) soient positionnés.
-  if (window.location.hash && window.location.hash !== "#") {
-    const hash = window.location.hash
-    window.addEventListener("load", () => {
-      ScrollTrigger.refresh()
-      scrollToAnchor(hash, { immediate: true })
     })
   }
 
@@ -858,9 +848,12 @@ export function initAnimations() {
     worksRevealChain(worksTl, worksSplit, workItems.length, 0)
     worksTl.to({}, { duration: 0.3 })
 
-    // Lien "Projets" : #works est pinné, on vise le début du pin (section calée
-    // en haut, contenu centré).
-    anchorResolvers["#works"] = () => worksTl.scrollTrigger.start
+    // Lien "Projets" : viser le DÉBUT du pin atterrit avec seulement la 1ère
+    // moitié des projets révélée (l'autre moitié se révèle pendant le pin,
+    // via worksRevealChain ci-dessus) — donne l'impression de ne pas avoir
+    // quitté Expertise. On vise donc la FIN du pin (-1px, même technique que
+    // #footer plus bas) : tous les projets sont alors révélés.
+    anchorResolvers["#works"] = () => worksTl.scrollTrigger.end - 1
   }
 
   // --- ANIMATIONS: SCRATCH EFFECT ---
@@ -1373,6 +1366,32 @@ export function initAnimations() {
           end: "right 10%",
           scrub: true,
         },
+      })
+    })
+  }
+
+  // --- NAVIGATION ANCRE : arrivée cross-page (pendingHash) ---
+  // Placé après TOUT le reste (conceptTl, expertise, worksTl, clients scene,
+  // footer resolver...) pour garantir que anchorResolvers est complet. Attend
+  // un état "page réellement prête" robuste, y compris si `load` est déjà
+  // passé (readyState "complete"), puis force refresh + resize AVANT de
+  // calculer et rejouer la destination — jamais avant, sinon lenis.limit
+  // (recalculé par défaut avec 250ms de debounce) est encore l'ancienne
+  // valeur et clampe silencieusement scrollTo() en dessous de la vraie cible.
+  if (pendingHash) {
+    const pageLoaded =
+      document.readyState === "complete"
+        ? Promise.resolve()
+        : new Promise((resolve) => window.addEventListener("load", resolve, { once: true }))
+
+    Promise.all([pageLoaded, document.fonts.ready]).then(() => {
+      ScrollTrigger.refresh()
+      lenis.resize()
+      requestAnimationFrame(() => {
+        scrollToAnchor(pendingHash, { immediate: true, force: true })
+        ScrollTrigger.update()
+        history.replaceState(null, "", window.location.pathname + window.location.search + pendingHash)
+        history.scrollRestoration = "auto"
       })
     })
   }

@@ -1,97 +1,100 @@
 /* --- VARIABLES --- */
 :root {
-    /* Palette Mirage (Warm Minimalism) */
-    --c-bg: #F4F1EA;
-    /* Slightly warmer off-white */
-    --c-text: #1C1B1A;
-    /* Softer black */
-    --c-accent: #9E9A93;
-    /* Warm grey */
-    --c-inactive: #D8D4CD;
-    /* Warm light grey */
+  /* Palette Mirage (Warm Minimalism) */
+  --c-bg: #f4f1ea;
+  /* Slightly warmer off-white */
+  --c-text: #1c1b1a;
+  /* Softer black */
+  --c-accent: #9e9a93;
+  /* Warm grey */
+  --c-inactive: #d8d4cd;
+  /* Warm light grey */
 
-    --c-black: #181616;
-    /* Noir "normal" du site, remplace --c-text sur les textes standards */
+  --c-black: #181616;
+  /* Noir "normal" du site, remplace --c-text sur les textes standards */
 
-    /* Palette Dégradé (Reveal texte, effet scratch) */
-    --c-red: #A8131A;
-    --c-orange: #C56C2C;
-    --c-yellow: #E9B523;
-    --c-rose: #E7B3AD;
+  --c-white: #ffffff;
+  /* Blanc pur (distinct de --c-bg, le cream) — header (mix-blend-mode:difference) */
 
-    /* Glassmorphism */
-    --c-glass: rgba(244, 241, 234, 0.7);
-    --blur-glass: 12px;
+  /* Palette Dégradé (Reveal texte, effet scratch) */
+  --c-red: #a8131a;
+  --c-orange: #c56c2c;
+  --c-yellow: #e9b523;
+  --c-rose: #e7b3ad;
 
-    /* Dimensions */
-    --gutter: clamp(2rem, 5vw, 4rem);
-    /* Responsive gutter */
-    --header-h: 100px;
-    /* More breathing room */
+  /* Glassmorphism */
+  --c-glass: rgba(244, 241, 234, 0.7);
+  --blur-glass: 12px;
 
-    /* Easings */
-    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-    --ease-fluid: cubic-bezier(0.4, 0, 0, 1);
-    /* Lenis-like feel */
+  /* Dimensions */
+  --gutter: clamp(2rem, 5vw, 4rem);
+  /* Responsive gutter */
+  --header-h: 100px;
+  /* More breathing room */
 
-    /* Typographie */
-    --font-regular: "Plus Jakarta Sans Variable", sans-serif;
-    /* Corps de texte */
-    --font-bold: "Plus Jakarta Sans Variable", sans-serif;
-    /* Gros textes design */
-    --font-special: "Gloock", serif;
-    /* Cas spéciaux */
+  /* Easings */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-fluid: cubic-bezier(0.4, 0, 0, 1);
+  /* Lenis-like feel */
 
-    /* Taille de corps unique, responsive */
-    --fs-body: clamp(0.95rem, 0.9rem + 0.3vw, 1.1rem);
+  /* Typographie */
+  --font-regular: "Plus Jakarta Sans Variable", sans-serif;
+  /* Corps de texte */
+  --font-bold: "Plus Jakarta Sans Variable", sans-serif;
+  /* Gros textes design */
+  --font-special: "Gloock", serif;
+  /* Cas spéciaux */
 
-    /* --- SYSTÈME TYPOGRAPHIQUE MIRAGE ---
+  /* Taille de corps unique, responsive */
+  --fs-body: clamp(0.95rem, 0.9rem + 0.3vw, 1.1rem);
+
+  /* --- SYSTÈME TYPOGRAPHIQUE MIRAGE ---
        Tokens sémantiques par rôle de design (pas par niveau de titre HTML).
        Audit complet + valeurs validées : cf. discussion d'uniformisation
        typographique. Chaque rôle centralise des selectors qui jouaient déjà
        (à quelques dérives historiques près) exactement le même rôle visuel. */
 
-    /* Typography — Label (petits labels uppercase : PROJECT, Context,
+  /* Typography — Label (petits labels uppercase : PROJECT, Context,
        Direction, attributions, Clients, Pre-footer/Manifesto, Other
        Universes, colonnes footer...) */
-    --type-label-size: clamp(0.9rem, 1.16vw, 1.25rem);
-    --type-label-weight: 700;
-    --type-label-leading: 1;
-    --type-label-tracking: 0.29vw;
+  --type-label-size: clamp(0.9rem, 1.16vw, 1.25rem);
+  --type-label-weight: 700;
+  --type-label-leading: 1;
+  --type-label-tracking: 0.29vw;
 
-    /* Typography — Body (petits corps de texte standards) */
-    --type-body-size: var(--fs-body);
-    --type-body-weight: 400;
-    --type-body-leading: 1.6;
+  /* Typography — Body (petits corps de texte standards) */
+  --type-body-size: var(--fs-body);
+  --type-body-weight: 400;
+  --type-body-leading: 1.6;
 
-    /* Typography — Editorial copy (grande copie éditoriale Plus Jakarta Sans) */
-    --type-copy-lg-size: clamp(1.75rem, 2.31vw, 2.5rem);
-    --type-copy-lg-weight: 500;
-    --type-copy-lg-leading: 1.5;
+  /* Typography — Editorial copy (grande copie éditoriale Plus Jakarta Sans) */
+  --type-copy-lg-size: clamp(1.75rem, 2.31vw, 2.5rem);
+  --type-copy-lg-weight: 500;
+  --type-copy-lg-leading: 1.5;
 
-    /* Typography — Footer nav (exception volontaire, gros liens du footer) */
-    --type-nav-footer-size: clamp(2rem, 5vw, 4.5rem);
-    --type-nav-footer-weight: 600;
-    --type-nav-footer-leading: 1;
+  /* Typography — Footer nav (exception volontaire, gros liens du footer) */
+  --type-nav-footer-size: clamp(2rem, 3vw, 4rem);
+  --type-nav-footer-weight: 600;
+  --type-nav-footer-leading: 1;
 
-    /* Typography — Concept (exception volontaire, Home #concept) */
-    --type-concept-size: clamp(2rem, 3.25vw, 4rem);
-    --type-concept-weight: 700;
-    --type-concept-leading: 1.2;
+  /* Typography — Concept (exception volontaire, Home #concept) */
+  --type-concept-size: clamp(2rem, 3.25vw, 4rem);
+  --type-concept-weight: 700;
+  --type-concept-leading: 1.2;
 
-    /* Typography — Card title (Gloock 400, titres de petites cards :
+  /* Typography — Card title (Gloock 400, titres de petites cards :
        Expertise Home + About Approach) */
-    --type-card-title-size: clamp(1.25rem, 1.74vw, 1.875rem);
-    --type-card-title-leading: 1.2;
+  --type-card-title-size: clamp(1.25rem, 1.74vw, 1.875rem);
+  --type-card-title-leading: 1.2;
 
-    /* Typography — Display (Gloock 400, grands textes éditoriaux) */
-    --type-display-lg-size: clamp(2rem, 5vw, 4.75rem);
-    --type-display-lg-leading: 1.05;
-    --type-display-xl-size: clamp(3rem, 6vw, 6.25rem);
-    --type-display-xl-leading: 0.9;
-    /* Exception volontaire : statement d'ouverture About Hero, plus grand que
+  /* Typography — Display (Gloock 400, grands textes éditoriaux) */
+  --type-display-lg-size: clamp(2rem, 5vw, 4.75rem);
+  --type-display-lg-leading: 1.05;
+  --type-display-xl-size: clamp(3rem, 6vw, 6.25rem);
+  --type-display-xl-leading: 0.9;
+  /* Exception volontaire : statement d'ouverture About Hero, plus grand que
        XL et unique sur le site — garde sa propre variable dans la famille
        Display plutôt que de forcer un rattachement à LG ou XL. */
-    --type-display-hero-size: clamp(3.5rem, 5.5vw, 7rem);
-    --type-display-hero-leading: 1.1;
+  --type-display-hero-size: clamp(3.5rem, 5.5vw, 7rem);
+  --type-display-hero-leading: 1.1;
 }

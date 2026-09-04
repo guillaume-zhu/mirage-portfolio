@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite'
+import { headerPlugin } from './vite-plugin-header.js'
 
 export default defineConfig({
+    plugins: [headerPlugin()],
     build: {
         rollupOptions: {
             input: {

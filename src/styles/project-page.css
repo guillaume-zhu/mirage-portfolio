@@ -1,4 +1,5 @@
 @import "./vars.css";
+@import "./header.css";
 
 /* --- FONT FACES (Plus Jakarta Sans, self-hosted via @fontsource-variable) ---
    Nécessaire pour que --font-regular/--font-bold se rendent correctement ;
@@ -46,49 +47,6 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-/* --- HEADER (convention Home : fond clair dès le premier paint) --- */
-.site-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: var(--header-h);
-  padding: 0 var(--gutter);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 100;
-  color: var(--c-black);
-  transition: transform 0.6s var(--ease-out-expo);
-}
-
-.logo img {
-  width: 100px;
-}
-
-/* Soulignement animé du "Menu", identique à main.css/about.css */
-.site-header nav span {
-  position: relative;
-  display: inline-block;
-}
-
-.site-header nav span::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -0.15em;
-  width: 100%;
-  height: max(1px, 0.06em);
-  background-color: currentColor;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.45s var(--ease-out-expo);
-}
-
-.site-header nav span:hover::after {
-  transform: scaleX(1);
 }
 
 /* --- PROJECT HERO --- */
