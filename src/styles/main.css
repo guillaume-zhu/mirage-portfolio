@@ -740,6 +740,10 @@ section {
   /* Panneau étroit + coins arrondis au premier paint, identique au pre-footer,
      avant même que le JS ne s'exécute. */
   clip-path: inset(0 8vw 0 8vw round 1.5rem 1.5rem 0 0);
+  /* Géométrie des 2 colonnes de droite (.footer-columns / .footer-legal),
+     centralisée pour ne jamais la répéter. */
+  --footer-column-width: 300px;
+  --footer-column-gap: 6rem;
 }
 
 .footer-background {
@@ -834,11 +838,15 @@ section {
 }
 
 /* Grille à 2 colonnes fixes, partagée avec .footer-legal ci-dessous pour que
-   "Mentions légales" tombe exactement sous la colonne "Retrouvez-nous". */
+   "Mentions légales" tombe exactement sous la colonne "Retrouvez-nous".
+   Largeur centralisée : 300px (au lieu de 260px) — nécessaire depuis que
+   CONTACTEZ-NOUS/RETROUVEZ-NOUS utilisent le token LABEL (letter-spacing en
+   vw, sans plafond), qui ne tenait plus sur une ligne à 260px sur desktop
+   courant (~1728-1920px de large). */
 .footer-columns {
   display: grid;
-  grid-template-columns: 260px 260px;
-  column-gap: 6rem;
+  grid-template-columns: var(--footer-column-width) var(--footer-column-width);
+  column-gap: var(--footer-column-gap);
 }
 
 .footer-column {
@@ -868,8 +876,8 @@ section {
 
 .footer-legal {
   display: grid;
-  grid-template-columns: 260px 260px;
-  column-gap: 6rem;
+  grid-template-columns: var(--footer-column-width) var(--footer-column-width);
+  column-gap: var(--footer-column-gap);
   justify-items: start;
   font-family: var(--font-regular);
   font-size: var(--type-body-size);
@@ -883,6 +891,7 @@ section {
 }
 
 @media (min-width: 901px) {
+  .footer-column-title,
   .footer-legal p,
   .footer-legal a {
     white-space: nowrap;

@@ -394,6 +394,10 @@ body {
   padding: 0;
   display: block;
   clip-path: inset(0 8vw 0 8vw round 1.5rem 1.5rem 0 0);
+  /* Géométrie des 2 colonnes de droite (.footer-columns / .footer-legal),
+     centralisée pour ne jamais la répéter. */
+  --footer-column-width: 300px;
+  --footer-column-gap: 6rem;
 }
 
 .footer-background {
@@ -482,8 +486,8 @@ body {
 
 .footer-columns {
   display: grid;
-  grid-template-columns: 260px 260px;
-  column-gap: 6rem;
+  grid-template-columns: var(--footer-column-width) var(--footer-column-width);
+  column-gap: var(--footer-column-gap);
 }
 
 .footer-column {
@@ -513,8 +517,8 @@ body {
 
 .footer-legal {
   display: grid;
-  grid-template-columns: 260px 260px;
-  column-gap: 6rem;
+  grid-template-columns: var(--footer-column-width) var(--footer-column-width);
+  column-gap: var(--footer-column-gap);
   justify-items: start;
   font-family: var(--font-regular);
   font-size: var(--type-body-size);
@@ -528,6 +532,7 @@ body {
 }
 
 @media (min-width: 901px) {
+  .footer-column-title,
   .footer-legal p,
   .footer-legal a {
     white-space: nowrap;
