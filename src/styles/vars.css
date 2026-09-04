@@ -98,3 +98,43 @@
   --type-display-hero-size: clamp(3.5rem, 5.5vw, 7rem);
   --type-display-hero-leading: 1.1;
 }
+
+/* --- RESPONSIVE TYPOGRAPHIE — Option C (validée) ---
+     Desktop (>=1100px) : tokens ci-dessus strictement inchangés.
+     Tablet (768-1099px) : interpolation continue entre la valeur Desktop
+     à 1100px et la cible Tablet à 834px (pente négative assumée : la
+     taille peut augmenter en repassant sous 1100px), puis plateau à la
+     cible Tablet entre 834px et 768px.
+     Mobile (<768px) : interpolation continue entre la cible Tablet à
+     768px (continuité exacte avec le plateau ci-dessus) et la cible
+     Mobile à 390px, puis floor à la cible Mobile sous 390px.
+     Aucun breakpoint supplémentaire (seuils 1099/767 uniquement).
+     Cibles 834/390 = baseline validée, retunable au niveau du token
+     uniquement. DISPLAY HERO est figé (Desktop ~95 / Tablet 80 / Mobile 40). */
+@media (max-width: 1099px) {
+  :root {
+    --type-label-size: clamp(0.9rem, 1.8305rem - 1.3534vw, 1.125rem);
+    --type-body-size: clamp(1.1rem, 1.7203rem - 0.9023vw, 1.25rem);
+    --type-copy-lg-size: clamp(1.75rem, 4.8515rem - 4.5113vw, 2.5rem);
+    --type-nav-footer-size: clamp(2.0625rem, 9.0409rem - 10.1504vw, 3.75rem);
+    --type-concept-size: clamp(2.2344rem, 5.9174rem - 5.3571vw, 3.125rem);
+    --type-card-title-size: clamp(1.25rem, 3.8346rem - 3.7594vw, 1.875rem);
+    --type-display-lg-size: clamp(3.4375rem, 4.7298rem - 1.8797vw, 3.75rem);
+    --type-display-xl-size: clamp(4.125rem, 12.9126rem - 12.782vw, 6.25rem);
+    --type-display-hero-size: clamp(3.7813rem, 8.8212rem - 7.3308vw, 5rem);
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --type-label-size: clamp(0.75rem, 0.3631rem + 1.5873vw, 1.125rem);
+    --type-body-size: clamp(0.875rem, 0.4881rem + 1.5873vw, 1.25rem);
+    --type-copy-lg-size: clamp(1.5rem, 0.4683rem + 4.2328vw, 2.5rem);
+    --type-nav-footer-size: clamp(1.875rem, -0.0595rem + 7.9365vw, 3.75rem);
+    --type-concept-size: clamp(1.625rem, 0.0774rem + 6.3492vw, 3.125rem);
+    --type-card-title-size: clamp(1.5rem, 1.1131rem + 1.5873vw, 1.875rem);
+    --type-display-lg-size: clamp(2.5rem, 1.2103rem + 5.291vw, 3.75rem);
+    --type-display-xl-size: clamp(3.125rem, -0.0992rem + 13.2275vw, 6.25rem);
+    --type-display-hero-size: clamp(2.5rem, -0.0794rem + 10.582vw, 5rem);
+  }
+}
