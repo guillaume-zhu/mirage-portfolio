@@ -19,6 +19,9 @@ html.lenis body {
   height: auto;
 }
 
+html {
+  overflow-x: clip;
+}
 .lenis.lenis-smooth {
   scroll-behavior: auto !important;
 }

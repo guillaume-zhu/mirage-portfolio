@@ -66,11 +66,50 @@ export function initAnimations(pendingHash) {
   }
 
   // --- ANIMATIONS: HERO ---
+  const siteHeader = document.querySelector(".site-header")
+
+  if (siteHeader) {
+    const enableHeaderBlend = () => {
+      // Le blanc est ici la couleur technique de difference : sur le fond
+      // clair suivant, son rendu rejoint presque le noir de fin de transition.
+      gsap.set(siteHeader, {
+        color: "var(--c-white)",
+        mixBlendMode: "difference",
+      })
+    }
+
+    const disableHeaderBlend = () => {
+      gsap.set(siteHeader, {
+        color: "var(--c-black)",
+        mixBlendMode: "normal",
+      })
+    }
+
+    gsap
+      .timeline({
+        scrollTrigger: {
+          trigger: "#hero",
+          // La transition couvre le passage de la limite basse de la Hero
+          // depuis le bas du header jusqu'à son bord supérieur.
+          start: () => `bottom ${siteHeader.offsetHeight}px`,
+          end: "bottom top",
+          scrub: true,
+          invalidateOnRefresh: true,
+          onLeave: enableHeaderBlend,
+          onEnterBack: disableHeaderBlend,
+          // Couvre aussi un chargement dont le scroll est restauré sous la Hero.
+          onRefresh: (self) => {
+            if (self.progress === 1) enableHeaderBlend()
+          },
+        },
+      })
+      .to(siteHeader, { color: "var(--c-black)", ease: "none" }, 0)
+  }
 
   // Setup initial
   gsap.set(".hero-center-img", { xPercent: -50, yPercent: -50, scale: 1.1, filter: "blur(10px)" })
   gsap.set(".hero-center-container", { scale: 0, opacity: 0 })
-  gsap.set(".hero-logo-container h1", { y: 100, opacity: 0, filter: "blur(20px)" })
+  gsap.set(".hero-logo-img", { y: 100, opacity: 0, filter: "blur(20px)" })
 
   // Intro Timeline (Slow & Sequenced)
   const tlHero = gsap.timeline({ defaults: { ease: "power4.out" } })
@@ -97,7 +136,7 @@ export function initAnimations(pendingHash) {
 
   // 3. Logo floats in (Dreamy)
   tlHero.to(
-    ".hero-logo-container h1",
+    ".hero-logo-img",
     { y: 0, opacity: 1, filter: "blur(0px)", duration: 2, ease: "power3.out" },
     1.2,
   )
