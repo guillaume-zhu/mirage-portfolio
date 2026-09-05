@@ -503,168 +503,275 @@ export function initAnimations(pendingHash) {
       if (lineIndex < expLines.length - 1) expTitle.appendChild(document.createElement("br"))
     })
 
-    // Décalage au repos : positions Figma (cartes de 317px, centres à ±168px sur 653px)
-    const expOffset = 53 // xPercent
-
-    // États initiaux (avant l'intro)
-    gsap.set(expTitleLetters, { opacity: 0, y: 30 })
-    gsap.set(expLead1, { opacity: 0, y: 30 })
-    gsap.set(expLead2, { opacity: 0, y: 30 })
-    gsap.set(expCardsA, { xPercent: -expOffset, opacity: 0, y: 40 })
-    gsap.set(expCardsB, { xPercent: expOffset, opacity: 0, y: 40 })
-
-    // Faces visibles (recto = cards 1/2, verso = cards 3/4), cf. référence mwg_effect056
+    // [COMMUN] Faces visibles (recto = cards 1/2, verso = cards 3/4), cf. mwg_effect056.
+    // Helper utilisé par la seule branche Desktop (écrit .style.visibility en brut,
+    // donc nettoyé manuellement au changement de breakpoint).
     function expSetFace(index) {
       expFacesA.forEach((f, i) => (f.style.visibility = i === index ? "visible" : "hidden"))
       expFacesB.forEach((f, i) => (f.style.visibility = i === index ? "visible" : "hidden"))
     }
-    expSetFace(0)
 
-    // --- 1. APPROCHE (avant le pin) : le contenu apparaît plus haut, descend jusqu'à
-    // sa position centrée et se révèle — supprime le temps mort après #concept. ---
-    gsap.set(".expertise-inner", { y: "-18vh" })
+    const mm = gsap.matchMedia()
 
-    const expApproachTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: "#expertise",
-        start: "top bottom",
-        end: "top top",
-        scrub: true,
-      },
-    })
+    // ================================================================
+    // DESKTOP (>=1100px) — logique existante, strictement identique.
+    // (corps réindenté +2 uniquement : vérifiable via `git diff -w`)
+    // ================================================================
+    mm.add("(min-width: 1100px)", () => {
+      // Décalage au repos : positions Figma (cartes de 317px, centres à ±168px sur 653px)
+      const expOffset = 53 // xPercent
 
-    // Le reveal est retardé : au début de l'approche le contenu est encore sous
-    // l'écran, il ne doit se révéler qu'en entrant réellement dans le viewport.
-    const expRevealStart = 3.0
-    const expRevealSpan = 3.1 // du début du reveal à la fin de la dernière card
-    const expApproachDuration = expRevealStart + expRevealSpan
+      // États initiaux (avant l'intro)
+      gsap.set(expTitleLetters, { opacity: 0, y: 30 })
+      gsap.set(expLead1, { opacity: 0, y: 30 })
+      gsap.set(expLead2, { opacity: 0, y: 30 })
+      gsap.set(expCardsA, { xPercent: -expOffset, opacity: 0, y: 40 })
+      gsap.set(expCardsB, { xPercent: expOffset, opacity: 0, y: 40 })
 
-    // La descente couvre toute l'approche : position centrée atteinte pile au pin.
-    expApproachTl.to(
-      ".expertise-inner",
-      { y: "0vh", ease: "none", duration: expApproachDuration },
-      0,
-    )
+      expSetFace(0)
 
-    // Le titre se révèle ligne par ligne : chaque ligne démarre quand la précédente
-    // est presque terminée (~68% de sa durée).
-    const expLineDuration = 0.7
-    const expLineStagger = 0.03
-    let expLineStart = 0
+      // --- 1. APPROCHE (avant le pin) : le contenu apparaît plus haut, descend jusqu'à
+      // sa position centrée et se révèle — supprime le temps mort après #concept. ---
+      gsap.set(".expertise-inner", { y: "-18vh" })
 
-    expTitleLines.forEach((lineLetters) => {
+      const expApproachTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: "#expertise",
+          start: "top bottom",
+          end: "top top",
+          scrub: true,
+        },
+      })
+
+      // Le reveal est retardé : au début de l'approche le contenu est encore sous
+      // l'écran, il ne doit se révéler qu'en entrant réellement dans le viewport.
+      const expRevealStart = 3.0
+      const expRevealSpan = 3.1 // du début du reveal à la fin de la dernière card
+      const expApproachDuration = expRevealStart + expRevealSpan
+
+      // La descente couvre toute l'approche : position centrée atteinte pile au pin.
       expApproachTl.to(
-        lineLetters,
-        {
-          keyframes: {
-            "0%": { y: 30, opacity: 0 },
-            "50%": { y: -6, opacity: 1, ease: "power2.out" },
-            "75%": { y: 2, ease: "power1.inOut" },
-            "100%": { y: 0, ease: "power1.out" },
+        ".expertise-inner",
+        { y: "0vh", ease: "none", duration: expApproachDuration },
+        0,
+      )
+
+      // Le titre se révèle ligne par ligne : chaque ligne démarre quand la précédente
+      // est presque terminée (~68% de sa durée).
+      const expLineDuration = 0.7
+      const expLineStagger = 0.03
+      let expLineStart = 0
+
+      expTitleLines.forEach((lineLetters) => {
+        expApproachTl.to(
+          lineLetters,
+          {
+            keyframes: {
+              "0%": { y: 30, opacity: 0 },
+              "50%": { y: -6, opacity: 1, ease: "power2.out" },
+              "75%": { y: 2, ease: "power1.inOut" },
+              "100%": { y: 0, ease: "power1.out" },
+            },
+            stagger: expLineStagger,
+            duration: expLineDuration,
           },
-          stagger: expLineStagger,
-          duration: expLineDuration,
+          expRevealStart + expLineStart,
+        )
+
+        const lineSpan = expLineDuration + (lineLetters.length - 1) * expLineStagger
+        expLineStart += lineSpan * 0.68
+      })
+
+      // Cascade : titre -> corps, puis les cards enchaînent dès l'apparition du corps
+      const expTween = (target, at) =>
+        expApproachTl.to(
+          target,
+          { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+          expRevealStart + at,
+        )
+
+      expTween(expLead1, 2.35)
+      expTween(expCardsA, 2.45)
+      expTween(expCardsB, 2.6)
+
+      // Bascule des faces au milieu exact du flip (t=0.9), rapportée à la durée
+      // réelle de la timeline — sinon le seuil dérive et laisse un trou sans face visible.
+      const expFlipMid = 0.9
+
+      const expTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: "#expertise",
+          start: "top top",
+          end: "+=225%",
+          pin: true,
+          scrub: true,
+          onUpdate: (self) => {
+            expSetFace(self.progress * expTl.duration() < expFlipMid ? 0 : 1)
+          },
         },
-        expRevealStart + expLineStart,
+      })
+
+      // Lien "Expertises" : #expertise est pinné et son contenu est translaté
+      // pendant l'approche — on vise le début du pin, là où la section est calée
+      // en haut de l'écran et centrée.
+      anchorResolvers["#expertise"] = () => expTl.scrollTrigger.start
+
+      // --- 2. PHASE 1 : hold (0 -> 0.4) ---
+      expTl.to({}, { duration: 0.4 }, 0)
+
+      // --- 3. FLIP (0.4 -> 1.4) — logique reprise de mwg_effect056 ---
+      const expRx = (Math.random() - 0.5) * 40
+      const expRz = (Math.random() - 0.5) * 40
+
+      expTl.to(
+        expCardsA,
+        { xPercent: expOffset, rotateY: "+=180", duration: 1, ease: "power2.inOut" },
+        0.4,
+      )
+      expTl.to(expCardsA, { z: -150, duration: 0.5, yoyo: true, repeat: 1, ease: "power2.inOut" }, 0.4)
+      expTl.to(
+        expCardsB,
+        { xPercent: -expOffset, rotateY: "-=180", duration: 1, ease: "power2.inOut" },
+        0.4,
+      )
+      expTl.to(expCardsB, { z: 150, duration: 0.5, yoyo: true, repeat: 1, ease: "power2.inOut" }, 0.4)
+      expTl.to(
+        [expCardsA, expCardsB],
+        {
+          rotateX: expRx,
+          rotateZ: expRz,
+          scale: 1.1,
+          duration: 0.5,
+          repeat: 1,
+          yoyo: true,
+          ease: "power2.in",
+        },
+        0.4,
       )
 
-      const lineSpan = expLineDuration + (lineLetters.length - 1) * expLineStagger
-      expLineStart += lineSpan * 0.68
+      // Cross-fade des paragraphes pendant le flip
+      expTl.to(expLead1, { opacity: 0, y: -30, duration: 0.4, ease: "power2.in" }, 0.4)
+      expTl.to(expLead2, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0.9)
+
+      // --- 4. PHASE 2 : hold (1.4 -> 1.8) ---
+      expTl.to({}, { duration: 0.4 }, 1.4)
+
+      // --- 5. OUTRO en cascade : textes, puis card de gauche, puis card de droite.
+      // Après le flip, B est à gauche (xPercent -53) et A à droite (+53).
+      //
+      // Sortie partielle (0.45vh) : les éléments ne doivent PAS avoir quitté l'écran quand
+      // le pin se libère, sinon une frame totalement vide s'intercale avant l'arrivée de
+      // #works. Ils finissent d'être évacués par le scroll naturel de la section dépinnée —
+      // c'est ce recouvrement qui rend la transition #works -> #clients fluide.
+      //
+      // La cascade vient des DÉPARTS décalés, mais les trois tweens se terminent au même
+      // instant (fin du pin) : sinon chacun atteint sa position finale puis s'y fige
+      // visiblement en attendant la fin du pin, l'un après l'autre.
+      const expExitY = () => -(window.innerHeight * 0.45)
+      const expOutroEnd = 2.54
+      const expExit = (target, at) =>
+        expTl.to(target, { y: expExitY, duration: expOutroEnd - at, ease: "power1.in" }, at)
+
+      expExit(expText, 1.8)
+      expExit(expCardsB, 1.92)
+      expExit(expCardsA, 2.04)
+
+      return () => {
+        delete anchorResolvers["#expertise"]
+        ;[...expFacesA, ...expFacesB].forEach((f) => (f.style.visibility = ""))
+      }
     })
 
-    // Cascade : titre -> corps, puis les cards enchaînent dès l'apparition du corps
-    const expTween = (target, at) =>
-      expApproachTl.to(
-        target,
-        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
-        expRevealStart + at,
+    // ================================================================
+    // RESPONSIVE (<1100px) — pas de flip 3D. Reveal d'approche calé pile
+    // sur le pin, puis pin court : hold état 1 -> crossfade -> hold état 2.
+    // Chaque .expertise-cards est un SLOT à 2 faces superposées, la face
+    // visible est pilotée en opacité (crossfade 1/2 -> 3/4).
+    // ================================================================
+    mm.add("(max-width: 1099px)", () => {
+      gsap.set(expTitleLetters, { opacity: 0, y: 30 })
+      gsap.set([expCardsA, expCardsB], { opacity: 0, y: 30 })
+      gsap.set(expLead1, { opacity: 0, y: 30 })
+      gsap.set(expLead2, { opacity: 0, y: 20 })
+      gsap.set([expFacesA[0], expFacesB[0]], { opacity: 1 })
+      gsap.set([expFacesA[1], expFacesB[1]], { opacity: 0 })
+
+      // (a) Reveal d'approche (non pinné) — se termine exactement au début du pin.
+      const respRevealTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: "#expertise",
+          start: "top 78%",
+          end: "top top",
+          scrub: true,
+        },
+      })
+
+      let respLineStart = 0
+      expTitleLines.forEach((lineLetters) => {
+        respRevealTl.to(
+          lineLetters,
+          {
+            keyframes: {
+              "0%": { y: 30, opacity: 0 },
+              "60%": { y: -4, opacity: 1, ease: "power2.out" },
+              "100%": { y: 0, ease: "power1.out" },
+            },
+            stagger: 0.03,
+            duration: 0.6,
+          },
+          respLineStart,
+        )
+        respLineStart += 0.42
+      })
+
+      const respReveal = (target, at) =>
+        respRevealTl.to(target, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, at)
+
+      respReveal(expLead1, respLineStart + 0.1)
+      respReveal(expCardsA, respLineStart + 0.15)
+      respReveal(expCardsB, respLineStart + 0.25)
+
+      // (b) Pin court : hold état 1 -> crossfade (faces + lead) -> hold état 2.
+      // Durée +=100% (1 viewport) = valeur de base, à ajuster au test réel.
+      const respTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: "#expertise",
+          start: "top top",
+          end: "+=100%",
+          pin: true,
+          scrub: true,
+        },
+      })
+
+      anchorResolvers["#expertise"] = () => respTl.scrollTrigger.start
+
+      respTl.to({}, { duration: 0.35 }) // phase 1 hold
+
+      respTl.to(
+        [expFacesA[0], expFacesB[0]],
+        { opacity: 0, y: -12, duration: 0.3, ease: "power1.inOut" },
+        0.35,
+      )
+      respTl.fromTo(
+        [expFacesA[1], expFacesB[1]],
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.3, ease: "power1.inOut" },
+        0.35,
+      )
+      respTl.to(expLead1, { opacity: 0, y: -20, duration: 0.28, ease: "power2.in" }, 0.35)
+      respTl.fromTo(
+        expLead2,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" },
+        0.4,
       )
 
-    expTween(expLead1, 2.35)
-    expTween(expCardsA, 2.45)
-    expTween(expCardsB, 2.6)
+      respTl.to({}, { duration: 0.35 }) // phase 2 hold
 
-    // Bascule des faces au milieu exact du flip (t=0.9), rapportée à la durée
-    // réelle de la timeline — sinon le seuil dérive et laisse un trou sans face visible.
-    const expFlipMid = 0.9
-
-    const expTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: "#expertise",
-        start: "top top",
-        end: "+=225%",
-        pin: true,
-        scrub: true,
-        onUpdate: (self) => {
-          expSetFace(self.progress * expTl.duration() < expFlipMid ? 0 : 1)
-        },
-      },
+      return () => {
+        delete anchorResolvers["#expertise"]
+      }
     })
-
-    // Lien "Expertises" : #expertise est pinné et son contenu est translaté
-    // pendant l'approche — on vise le début du pin, là où la section est calée
-    // en haut de l'écran et centrée.
-    anchorResolvers["#expertise"] = () => expTl.scrollTrigger.start
-
-    // --- 2. PHASE 1 : hold (0 -> 0.4) ---
-    expTl.to({}, { duration: 0.4 }, 0)
-
-    // --- 3. FLIP (0.4 -> 1.4) — logique reprise de mwg_effect056 ---
-    const expRx = (Math.random() - 0.5) * 40
-    const expRz = (Math.random() - 0.5) * 40
-
-    expTl.to(
-      expCardsA,
-      { xPercent: expOffset, rotateY: "+=180", duration: 1, ease: "power2.inOut" },
-      0.4,
-    )
-    expTl.to(expCardsA, { z: -150, duration: 0.5, yoyo: true, repeat: 1, ease: "power2.inOut" }, 0.4)
-    expTl.to(
-      expCardsB,
-      { xPercent: -expOffset, rotateY: "-=180", duration: 1, ease: "power2.inOut" },
-      0.4,
-    )
-    expTl.to(expCardsB, { z: 150, duration: 0.5, yoyo: true, repeat: 1, ease: "power2.inOut" }, 0.4)
-    expTl.to(
-      [expCardsA, expCardsB],
-      {
-        rotateX: expRx,
-        rotateZ: expRz,
-        scale: 1.1,
-        duration: 0.5,
-        repeat: 1,
-        yoyo: true,
-        ease: "power2.in",
-      },
-      0.4,
-    )
-
-    // Cross-fade des paragraphes pendant le flip
-    expTl.to(expLead1, { opacity: 0, y: -30, duration: 0.4, ease: "power2.in" }, 0.4)
-    expTl.to(expLead2, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0.9)
-
-    // --- 4. PHASE 2 : hold (1.4 -> 1.8) ---
-    expTl.to({}, { duration: 0.4 }, 1.4)
-
-    // --- 5. OUTRO en cascade : textes, puis card de gauche, puis card de droite.
-    // Après le flip, B est à gauche (xPercent -53) et A à droite (+53).
-    //
-    // Sortie partielle (0.45vh) : les éléments ne doivent PAS avoir quitté l'écran quand
-    // le pin se libère, sinon une frame totalement vide s'intercale avant l'arrivée de
-    // #works. Ils finissent d'être évacués par le scroll naturel de la section dépinnée —
-    // c'est ce recouvrement qui rend la transition #works -> #clients fluide.
-    //
-    // La cascade vient des DÉPARTS décalés, mais les trois tweens se terminent au même
-    // instant (fin du pin) : sinon chacun atteint sa position finale puis s'y fige
-    // visiblement en attendant la fin du pin, l'un après l'autre.
-    const expExitY = () => -(window.innerHeight * 0.45)
-    const expOutroEnd = 2.54
-    const expExit = (target, at) =>
-      expTl.to(target, { y: expExitY, duration: expOutroEnd - at, ease: "power1.in" }, at)
-
-    expExit(expText, 1.8)
-    expExit(expCardsB, 1.92)
-    expExit(expCardsA, 2.04)
   }
 
   // --- ANIMATIONS: LOGO LIQUID HOVER ---

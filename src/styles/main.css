@@ -613,17 +613,110 @@ section {
   display: inline-block;
 }
 
-@media (max-width: 1100px) {
-  .expertise-stage {
-    left: auto;
-    right: 4vw;
-    transform: scale(0.8);
-    transform-origin: right center;
+/* --- EXPERTISE RESPONSIVE (<1100px) — cf. gsap.matchMedia() dans animations.js ---
+   Sous 1100px la composition Desktop (texte absolu à gauche / scène 3D
+   superposée à droite, flip horizontal) est abandonnée au profit de la
+   maquette Figma : texte en haut, 2 slots en dessous (2 colonnes Tablet /
+   1 colonne Mobile). Chaque .expertise-cards reste un SLOT contenant ses
+   2 faces superposées ; le flip 3D est neutralisé, la face visible est
+   pilotée en opacité par GSAP (crossfade face1 -> face2). */
+@media (max-width: 1099px) {
+  #expertise {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .expertise-inner {
+    position: static;
+    height: auto;
+    min-height: 100vh;
+    flex-direction: column;
+    justify-content: center;
+    gap: clamp(2.5rem, 6vw, 4rem);
+    width: min(640px, calc(100% - 32px));
+    max-width: 640px;
+    margin: 0 auto;
+    padding-block: var(--gutter);
   }
 
   .expertise-text {
-    left: 6vw;
-    width: 34%;
+    position: static;
+    left: auto;
+    width: 100%;
+    min-width: 0;
+    gap: clamp(1.5rem, 4vw, 2.5rem);
+  }
+
+  .expertise-stage {
+    position: static;
+    left: auto;
+    width: 100%;
+    height: auto;
+    perspective: none;
+    transform: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    place-items: stretch;
+    gap: 24px;
+  }
+
+  .expertise-cards {
+    grid-area: auto;
+    position: relative;
+    width: 100%;
+    aspect-ratio: auto;
+    height: 340px;
+    transform-style: flat;
+    will-change: auto;
+  }
+
+  .expertise-card {
+    padding: 32px;
+    gap: 24px;
+  }
+
+  .expertise-card:nth-child(even) {
+    transform: none;
+  }
+}
+
+/* Breakpoint de COMPOSITION Expertise (local, 640px) : dissocié du breakpoint
+   typo (768). Entre 640 et 1099 on garde la composition Tablet 2 colonnes
+   ([A][B]) ; sous 640 seulement on empile ([A]/[B]). gsap.matchMedia (bascule
+   1100px) est indépendant et inchangé. */
+@media (max-width: 639px) {
+  .expertise-inner {
+    --expertise-mobile-space: clamp(24px, 3.5vh, 32px);
+
+    max-width: none;
+    width: min(78vw, 440px);
+
+    justify-content: flex-start;
+    gap: var(--expertise-mobile-space);
+
+    padding-top: clamp(96px, 12vh, 112px);
+    padding-bottom: var(--expertise-mobile-space);
+  }
+
+  .expertise-text {
+    gap: 1.25rem;
+  }
+
+  .expertise-stage {
+    width: 100%;
+    margin-inline: 0;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .expertise-cards {
+    aspect-ratio: auto;
+    height: clamp(200px, 24vh, 220px);
+  }
+
+  .expertise-card {
+    padding: 20px;
+    gap: 14px;
   }
 }
 
