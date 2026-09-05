@@ -135,9 +135,14 @@ export function initAnimations(pendingHash) {
   )
 
   // 3. Logo floats in (Dreamy)
+  // clearProps:"filter" : une fois l'intro terminée, retire le filter inline
+  // (bloqué à "blur(0px)" par GSAP) pour laisser le CSS reprendre la main
+  // (filter: url(#liquid-distortion)) — sinon la distorsion SVG au hover
+  // reste techniquement pilotée mais invisible, l'image n'utilisant plus
+  // cette référence.
   tlHero.to(
     ".hero-logo-img",
-    { y: 0, opacity: 1, filter: "blur(0px)", duration: 2, ease: "power3.out" },
+    { y: 0, opacity: 1, filter: "blur(0px)", duration: 2, ease: "power3.out", clearProps: "filter" },
     1.2,
   )
 
