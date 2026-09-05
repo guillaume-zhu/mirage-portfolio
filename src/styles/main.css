@@ -905,6 +905,13 @@ section {
   color: var(--c-black);
 }
 
+/* Chaque <p> est volontairement une ligne ("Des visions" / "partagées").
+   .clients-word ne protège que chaque mot ; on empêche ici la ligne entière
+   de wrapper — 2 lignes garanties à tous les formats (cf. Figma). */
+.clients-title p {
+  white-space: nowrap;
+}
+
 .clients-word {
   display: inline-block;
   white-space: nowrap;
@@ -933,14 +940,21 @@ section {
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
 }
 
-/* Responsive Mobile */
-@media (max-width: 768px) {
-  .clients-title {
-    font-size: clamp(2.5rem, 12vw, 4rem);
-  }
-
+/* --- CLIENTS RESPONSIVE — .client-card ---
+   Desktop (>=1100px) : 12vw, inchangé. Interpolation continue sous 1100px
+   (aucune rupture au breakpoint) : 1100->~132px (= 12vw desktop), 834->~167px,
+   plateau 834-768, puis 768->~117px (= 30vw @390 actuel), floor.
+   L'ancien override local de .clients-title (font-size) est supprimé : le token
+   DISPLAY XL responsive (vars.css) s'applique désormais sur tous les formats. */
+@media (max-width: 1099px) {
   .client-card {
-    width: 30vw;
+    width: clamp(132px, 276.74px - 13.16vw, 167px);
+  }
+}
+
+@media (max-width: 767px) {
+  .client-card {
+    width: clamp(117px, 65.41px + 13.23vw, 167px);
   }
 }
 
