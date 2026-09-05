@@ -125,6 +125,21 @@
   }
 }
 
+/* --- TRACKING LABEL — Option C (validée) : continuité Desktop à 1100px,
+     interpolation jusqu'à la cible Tablet (4.5px) à 834px puis plateau
+     jusqu'à 768px, interpolation Mobile jusqu'à 390px puis floor. */
+@media (max-width: 1099px) {
+  :root {
+    --type-label-tracking: clamp(3.19px, 8.6073px - 0.4925vw, 4.5px);
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --type-label-tracking: clamp(3px, 1.4524px + 0.3968vw, 4.5px);
+  }
+}
+
 @media (max-width: 767px) {
   :root {
     --type-label-size: clamp(0.75rem, 0.3631rem + 1.5873vw, 1.125rem);
