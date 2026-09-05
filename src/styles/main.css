@@ -869,6 +869,70 @@ section {
   /* pivot sous la lettre : la rotation la fait sortir de sa boîte (overflow:hidden) au lieu de juste l'incliner sur place */
 }
 
+/* --- PRE-FOOTER RESPONSIVE (<1100px) ---
+   Structure Figma inchangée (bloc aligné à gauche, tokens DISPLAY LG / LABEL,
+   contenu centré vertical via justify-content:center hérité de `section`).
+   height:100vh conservé (cover). On récupère de la hauteur vs les 8rem actuels
+   sans détruire la respiration éditoriale des maquettes. */
+@media (max-width: 1099px) {
+  #pre-footer {
+    padding-block: clamp(4rem, 8vh, 6rem);
+  }
+
+  /* Exception locale : le label passe volontairement sur 2 lignes en
+     Tablet/Mobile (token LABEL = line-height:1, trop serré pour 2 lignes). */
+  .pre-footer-label {
+    line-height: 1.55;
+  }
+
+  .pre-footer-content {
+    gap: clamp(1.75rem, 3.6vh, 2.75rem);
+  }
+}
+
+/* Tablet : mesure éditoriale du manifeste (cible Figma @834). */
+@media (min-width: 640px) and (max-width: 1099px) {
+  .pre-footer-content {
+    max-width: 560px;
+  }
+}
+
+/* Vraie compression réservée aux viewports réellement courts (375x667, 320x568). */
+@media (max-width: 639px) and (max-height: 700px) {
+  #pre-footer {
+    padding-block: 2.5rem;
+  }
+
+  .pre-footer-content {
+    gap: 1.75rem;
+  }
+}
+
+/* Très petites largeurs (320-359px) — stress tests. Exception locale : le
+   cover height:100vh + texte long génère trop de lignes à DISPLAY LG (40px)
+   sous 360px. Le Mobile de référence (390px) reste strictement à 40px. */
+@media (max-width: 359px) {
+  #pre-footer {
+    padding-inline: clamp(20px, 6.7vw, 24px);
+  }
+
+  .pre-footer-manifest {
+    font-size: clamp(2rem, 10vw, 2.25rem);
+  }
+}
+
+/* Cas extrême : très petites largeurs ET petites hauteurs. Après tous les
+   autres paliers Pre-footer pour ne surcharger que dans ce cas. */
+@media (max-width: 359px) and (max-height: 700px) {
+  #pre-footer {
+    padding-block: 1.5rem;
+  }
+
+  .pre-footer-content {
+    gap: 1.25rem;
+  }
+}
+
 .clients-intro {
   position: absolute;
   top: 50%;
