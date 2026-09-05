@@ -429,6 +429,44 @@ body {
   max-width: 90vw;
 }
 
+@media (min-width: 768px) and (max-width: 1099px) {
+  .about-numbers-content {
+    gap: clamp(31.9px, calc(106.7496px - 6.8045vw), 50px);
+  }
+
+  .about-numbers-state {
+    gap: clamp(12.76px, calc(42.6998px - 2.7218vw), 20px);
+  }
+
+  .about-numbers-value {
+    font-size: clamp(190.96px, calc(228.3435px - 3.3985vw), 200px);
+  }
+
+  .about-numbers-caption {
+    font-size: clamp(1.2rem, calc(63.8617px - 4.0602vw), 1.875rem);
+    width: clamp(381.26px, calc(1281.6886px - 81.8571vw), 599px);
+  }
+}
+
+@media (max-width: 767px) {
+  .about-numbers-content {
+    gap: clamp(30px, calc(9.3651px + 5.291vw), 50px);
+  }
+
+  .about-numbers-state {
+    gap: clamp(10px, calc(-0.3175px + 2.6455vw), 20px);
+  }
+
+  .about-numbers-value {
+    font-size: clamp(125px, calc(47.619px + 19.8413vw), 200px);
+  }
+
+  .about-numbers-caption {
+    font-size: clamp(1.375rem, calc(13.746px + 2.1164vw), 1.875rem);
+    width: min(599px, 90vw);
+  }
+}
+
 /* --- SECTION MANIFESTO --- */
 .about-manifesto {
   position: relative;
