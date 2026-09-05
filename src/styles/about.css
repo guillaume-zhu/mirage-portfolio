@@ -276,10 +276,7 @@ body {
 
 @media (min-width: 768px) and (max-width: 1099px) and (orientation: portrait) {
   .about-approach-row {
-    top: min(
-      clamp(308px, calc(1556.8722px - 113.5338vw), 610px),
-      calc(100vh - 384px)
-    );
+    top: min(clamp(308px, calc(1556.8722px - 113.5338vw), 610px), calc(100vh - 384px));
   }
 }
 
@@ -321,10 +318,7 @@ body {
   .about-approach-row {
     top: min(
       clamp(406px, calc(195.5238px + 53.9683vw), 610px),
-      max(
-        406px,
-        calc(100vh - clamp(384px, calc(493.7143px - 14.2857vw), 438px))
-      )
+      max(406px, calc(100vh - clamp(384px, calc(493.7143px - 14.2857vw), 438px)))
     );
   }
 }
@@ -477,20 +471,13 @@ body {
   /* Panneau étroit + coins arrondis dès le premier paint, avant le JS —
      même filet de sécurité que .about-approach / .about-numbers. */
   clip-path: inset(0 8vw 0 8vw round 1.5rem 1.5rem 0 0);
-  /* Respiration d'entrée/sortie unique (haut/bas de tout le flux), reprise
-     de la marge du bloc centré dans le frame Figma (1117px) — pas dupliquée
-     par séquence, contrairement à l'ancien height:100vh. */
-  padding-top: 15.25vw;
-  padding-bottom: 15.25vw;
 }
 
 .about-manifesto-sequence {
   position: relative;
-  height: auto;
-}
-
-.about-manifesto-sequence + .about-manifesto-sequence {
-  margin-top: 10vw; /* valeur de premier test : plus continue que 15.25vw, plus respirante que la référence brute */
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
 }
 
 .about-manifesto-inner {
