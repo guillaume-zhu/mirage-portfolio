@@ -301,6 +301,39 @@ section {
   display: block;
 }
 
+/* --- CONCEPT RESPONSIVE — Option C, cf. vars.css ---
+   Desktop (>=1100px) : 2 colonnes, strictement inchangé.
+   Tablet + Mobile (<1100px) : 1 colonne empilée (texte au-dessus, cluster
+   d'images en dessous), colonne centrée ~68vw conforme à Figma @834 / @390.
+   Le texte utilise le token CONCEPT (vars.css) — aucune font-size locale.
+   Géométrie verticale de #concept inchangée (padding global des sections). */
+@media (max-width: 1099px) {
+  .concept-container {
+    grid-template-columns: 1fr;
+    gap: clamp(3rem, 7vw, 4.5rem);
+    width: min(68vw, 680px);
+    max-width: none;
+  }
+
+  .concept-text {
+    padding-right: 0;
+  }
+
+  .reveal-paragraph {
+    width: 100%;
+  }
+
+  .concept-images {
+    height: 42vh;
+  }
+
+  /* Carte contrainte aussi par la hauteur : sur un viewport large mais peu
+     haut, width:60% seule atteignait ~400px et chevauchait le texte. */
+  .image-card {
+    width: min(55%, 23vh, 270px);
+  }
+}
+
 /* --- SECTION WORKS --- */
 #works {
   min-height: 100vh;
@@ -747,22 +780,6 @@ section {
 
   .client-card {
     width: 30vw;
-  }
-
-  .concept-container {
-    grid-template-columns: 1fr;
-    padding-top: 100px;
-    gap: 2rem;
-    height: auto;
-  }
-
-  .concept-images {
-    height: 50vh;
-    margin-top: 2rem;
-  }
-
-  .image-card {
-    width: 55%;
   }
 }
 
