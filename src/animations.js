@@ -969,42 +969,73 @@ export function initAnimations(pendingHash) {
     // avec seulement le label à l'écran. ---
     const worksSplit = Math.ceil(workItems.length / 2)
 
-    gsap.set(".works-inner", { y: "-65vh" })
+    const worksMm = gsap.matchMedia()
 
-    const worksApproachTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: "#works",
-        start: "top bottom",
-        end: "top top",
-        scrub: true,
-      },
+    // ===== DESKTOP (>=1100px) — comportement actuel strictement identique =====
+    // Approche (.works-inner -65vh -> 0, coordonnée avec l'outro Expertise Desktop)
+    // + pin +=150% qui révèle la 2e moitié des projets.
+    worksMm.add("(min-width: 1100px)", () => {
+      gsap.set(".works-inner", { y: "-65vh" })
+
+      const worksApproachTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: "#works",
+          start: "top bottom",
+          end: "top top",
+          scrub: true,
+        },
+      })
+
+      // La descente couvre toute l'approche : position centrée atteinte pile au pin.
+      worksApproachTl.to(".works-inner", { y: "0vh", ease: "none", duration: 1.5 }, 0)
+      worksApproachTl.to(".works-label", { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, 0)
+      worksRevealChain(worksApproachTl, 0, worksSplit, 0.25)
+
+      // Timeline pinnée : la chaîne se poursuit sur les projets restants
+      const worksTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: "#works",
+          start: "top top",
+          end: "+=150%",
+          pin: true,
+          scrub: 1,
+        },
+      })
+
+      worksRevealChain(worksTl, worksSplit, workItems.length, 0)
+      worksTl.to({}, { duration: 0.3 })
+
+      // Lien "Projets" : viser le DÉBUT du pin atterrit avec seulement la 1ère
+      // moitié des projets révélée (l'autre moitié se révèle pendant le pin,
+      // via worksRevealChain ci-dessus) — donne l'impression de ne pas avoir
+      // quitté Expertise. On vise donc la FIN du pin (-1px, même technique que
+      // #footer plus bas) : tous les projets sont alors révélés.
+      anchorResolvers["#works"] = () => worksTl.scrollTrigger.end - 1
+
+      return () => {
+        delete anchorResolvers["#works"]
+      }
     })
 
-    // La descente couvre toute l'approche : position centrée atteinte pile au pin.
-    worksApproachTl.to(".works-inner", { y: "0vh", ease: "none", duration: 1.5 }, 0)
-    worksApproachTl.to(".works-label", { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, 0)
-    worksRevealChain(worksApproachTl, 0, worksSplit, 0.25)
+    // ===== RESPONSIVE (<1100px) — aucun pin =====
+    // .works-inner reste en place ; l'approche (top 75% -> top top) révèle les
+    // 4 projets + le label, puis la section poursuit son scroll vertical normal.
+    // Aucun resolver #works : le fallback DOM de scrollToAnchor prend le relais.
+    worksMm.add("(max-width: 1099px)", () => {
+      gsap.set(".works-inner", { y: "0vh" })
 
-    // Timeline pinnée : la chaîne se poursuit sur les projets restants
-    const worksTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: "#works",
-        start: "top top",
-        end: "+=150%",
-        pin: true,
-        scrub: 1,
-      },
+      const worksApproachTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: "#works",
+          start: "top 75%",
+          end: "top top",
+          scrub: true,
+        },
+      })
+
+      worksApproachTl.to(".works-label", { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, 0)
+      worksRevealChain(worksApproachTl, 0, workItems.length, 0.25)
     })
-
-    worksRevealChain(worksTl, worksSplit, workItems.length, 0)
-    worksTl.to({}, { duration: 0.3 })
-
-    // Lien "Projets" : viser le DÉBUT du pin atterrit avec seulement la 1ère
-    // moitié des projets révélée (l'autre moitié se révèle pendant le pin,
-    // via worksRevealChain ci-dessus) — donne l'impression de ne pas avoir
-    // quitté Expertise. On vise donc la FIN du pin (-1px, même technique que
-    // #footer plus bas) : tous les projets sont alors révélés.
-    anchorResolvers["#works"] = () => worksTl.scrollTrigger.end - 1
   }
 
   // --- ANIMATIONS: SCRATCH EFFECT ---
