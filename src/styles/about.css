@@ -52,6 +52,9 @@ body {
 
 /* --- SECTION ABOUT HERO --- */
 .about-hero {
+  --about-hero-media-width: 10.7vw;
+  --about-hero-media-radius: 0.85vw;
+
   position: relative;
   width: 100%;
   height: 100vh;
@@ -77,19 +80,19 @@ body {
 
 .about-hero-media {
   position: absolute;
-  top: calc(50% - 6.65vw);
-  left: calc(50% - 5.35vw);
-  width: 10.7vw;
+  inset: 0;
+  width: var(--about-hero-media-width);
   aspect-ratio: 185.53 / 230.596;
-  border-radius: 0.85vw;
+  margin: auto;
+  border-radius: var(--about-hero-media-radius);
   object-fit: cover;
   will-change: transform;
   transform-style: preserve-3d;
 }
 
-/* Centré via flex + inset (jamais via transform: translate), pour ne pas
+/* Centré via flex + inset/marges auto (jamais via transform: translate), pour ne pas
    entrer en conflit avec les transforms GSAP (contre-rotation) appliqués
-   au même élément — même logique que le top/left en dur de .about-hero-media. */
+   au même élément. */
 .about-hero-text {
   position: absolute;
   inset: 0;
@@ -113,12 +116,23 @@ body {
   margin: 0;
 }
 
-@media (max-width: 768px) {
-  .about-hero-media {
-    top: calc(50% - 16.8vw);
-    left: calc(50% - 13.5vw);
-    width: 27vw;
-    border-radius: 2.1vw;
+@media (min-width: 768px) and (max-width: 1099px) {
+  .about-hero {
+    /* 117.7px à 1100px, 185.53px à 834px, puis plateau jusqu'à 768px. */
+    --about-hero-media-width: clamp(117.7px, calc(398.2px - 25.5vw), 185.53px);
+    --about-hero-media-radius: clamp(9.35px, calc(31.1929px - 1.9857vw), 14.632px);
+  }
+}
+
+@media (max-width: 767px) {
+  .about-hero {
+    /* Continuité depuis 768px, cible Figma à 390px, puis floor. */
+    --about-hero-media-width: clamp(
+      112.651px,
+      calc(37.4584px + 19.2802vw),
+      185.53px
+    );
+    --about-hero-media-radius: clamp(8.884px, calc(2.9535px + 1.5206vw), 14.632px);
   }
 }
 
