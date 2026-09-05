@@ -121,16 +121,10 @@ export function createAboutNumbersWebGL(numbersEl, options = {}) {
   let previousScrollY = window.scrollY
 
   let rect = numbersEl.getBoundingClientRect()
-  let rectDirty = false
-
-  function markRectDirty() {
-    rectDirty = true
-  }
-  window.addEventListener("resize", markRectDirty)
+  let resizeTimer = null
 
   function resizeCanvas() {
     rect = numbersEl.getBoundingClientRect()
-    rectDirty = false
     const dpr = Math.min(window.devicePixelRatio || 1, config.maxPixelRatio)
     const width = Math.max(1, Math.round(rect.width * dpr))
     const height = Math.max(1, Math.round(rect.height * dpr))
@@ -140,9 +134,19 @@ export function createAboutNumbersWebGL(numbersEl, options = {}) {
       gl.viewport(0, 0, width, height)
     }
   }
-  resizeCanvas()
 
-  const resizeObserver = new ResizeObserver(() => resizeCanvas())
+  function scheduleCanvasResize() {
+    clearTimeout(resizeTimer)
+    resizeTimer = setTimeout(() => {
+      resizeTimer = null
+      resizeCanvas()
+    }, 150)
+  }
+
+  resizeCanvas()
+  window.addEventListener("resize", scheduleCanvasResize)
+
+  const resizeObserver = new ResizeObserver(scheduleCanvasResize)
   resizeObserver.observe(numbersEl)
 
   let isVisible = false
@@ -170,8 +174,6 @@ export function createAboutNumbersWebGL(numbersEl, options = {}) {
     // rendu, afin qu'un hitch (onglet en arrière-plan, gros GC...) ne fasse
     // pas sauter l'animation d'un coup.
     const dt = Math.min(rawDt, MAX_DT)
-
-    if (rectDirty) resizeCanvas()
 
     // Vitesse de scroll calculée avec rawDt (temps RÉEL entre deux frames),
     // volontairement PAS avec dt clampé : sinon un hitch réduirait
@@ -236,9 +238,10 @@ export function createAboutNumbersWebGL(numbersEl, options = {}) {
 
   function destroy() {
     if (rafId !== null) cancelAnimationFrame(rafId)
+    clearTimeout(resizeTimer)
     intersectionObserver.disconnect()
     resizeObserver.disconnect()
-    window.removeEventListener("resize", markRectDirty)
+    window.removeEventListener("resize", scheduleCanvasResize)
     imageEl.removeEventListener("load", uploadTexture)
     gl.deleteTexture(texture)
     gl.deleteBuffer(positionBuffer)
