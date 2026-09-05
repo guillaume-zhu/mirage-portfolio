@@ -169,6 +169,44 @@ section {
   }
 }
 
+/* --- HERO RESPONSIVE (blob + logo + scroll indicator) — Option C, cf. vars.css ---
+   Desktop (>=1100px) : strictement inchangé.
+   Tablet (768-1099px) : interpolation continue depuis la valeur desktop à
+   1100px vers la cible Figma @834 (blob 702px / logo 569px), puis plateau
+   jusqu'à 768px.
+   Mobile (<768px) : continuité exacte avec le plateau à 768px, interpolation
+   vers la cible Figma @390 (blob 318px / logo 258px), puis floor.
+   .hero-logo-container reste le même noeud (cible parallaxe/sortie GSAP) :
+   seule sa largeur devient responsive, l'image passe à 100%. */
+@media (max-width: 1099px) {
+  .hero-center-container {
+    width: clamp(396px, 1661px - 115.04vw, 702px);
+  }
+
+  .hero-logo-container {
+    width: clamp(330px, 1318.35px - 89.85vw, 569px);
+  }
+
+  .hero-logo-img {
+    width: 100%;
+    max-width: none;
+  }
+
+  .scroll-indicator {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-center-container {
+    width: clamp(318px, 101.59vw - 78.2px, 702px);
+  }
+
+  .hero-logo-container {
+    width: clamp(258px, 82.28vw - 62.87px, 569px);
+  }
+}
+
 /* --- SECTION CONCEPT (Scrollytelling) --- */
 #concept {
   min-height: 100vh;
