@@ -6,6 +6,15 @@ export function initAnimations(pendingHash) {
   // --- CONFIGURATION ---
   gsap.registerPlugin(ScrollTrigger)
 
+  // Confort de scroll tactile : sous 1100px on raccourcit uniquement la DISTANCE
+  // DE SCROLL des scènes pinnées (les timelines visuelles sont inchangées).
+  // >=1100 -> 1 : distances Desktop mathématiquement identiques.
+  const getResponsiveScrollFactor = () => {
+    if (window.innerWidth < 640) return 0.8
+    if (window.innerWidth < 1100) return 0.85
+    return 1
+  }
+
   // Init Lenis (Heavy Inertia)
   const lenisEasing = (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
   const lenis = new Lenis({
@@ -301,7 +310,8 @@ export function initAnimations(pendingHash) {
     scrollTrigger: {
       trigger: "#concept",
       start: "top top",
-      end: "+=100%",
+      // facteur 1 (>=1100) : "+=100%" === innerHeight -> Desktop identique
+      end: () => "+=" + window.innerHeight * getResponsiveScrollFactor(),
       pin: true,
       scrub: 1.5,
     },
@@ -732,12 +742,12 @@ export function initAnimations(pendingHash) {
       respReveal(expCardsB, respLineStart + 0.25)
 
       // (b) Pin court : hold état 1 -> crossfade (faces + lead) -> hold état 2.
-      // Durée +=100% (1 viewport) = valeur de base, à ajuster au test réel.
+      // Distance de scroll = innerHeight * facteur responsive (confort tactile).
       const respTl = gsap.timeline({
         scrollTrigger: {
           trigger: "#expertise",
           start: "top top",
-          end: "+=100%",
+          end: () => "+=" + window.innerHeight * getResponsiveScrollFactor(),
           pin: true,
           scrub: true,
         },
@@ -1222,23 +1232,30 @@ export function initAnimations(pendingHash) {
     const clientCards = clientsRoot.querySelectorAll(".client-card")
     const clientsDistance = clientsCardsContainer.clientWidth - window.innerWidth
     const isPortrait = window.innerWidth < window.innerHeight
-    const coverPhasePx = window.innerHeight
+    // Confort tactile : sous 1100px on raccourcit la distance de SCROLL de la
+    // scène. Le tween horizontal garde x:-clientsDistance (distance graphique
+    // réelle) — seul le scroll requis pour la parcourir est réduit. >=1100 ->
+    // facteur 1 -> distances Desktop exactes. Capté une fois (comme
+    // clientsDistance) : robustesse resize = passe suivante.
+    const scrollFactor = getResponsiveScrollFactor()
+    const driftPhasePx = clientsDistance * scrollFactor
+    const coverPhasePx = window.innerHeight * scrollFactor
     // Court hold : le pré-footer reste immobile, plein écran, avant que le footer
     // ne commence à monter par-dessus.
-    const footerHoldPhasePx = window.innerHeight * 0.35
-    const footerCoverPhasePx = window.innerHeight
+    const footerHoldPhasePx = window.innerHeight * 0.35 * scrollFactor
+    const footerCoverPhasePx = window.innerHeight * scrollFactor
 
     // Pin unique pour toute la scène (drift horizontal + recouvrement pré-footer + hold + recouvrement footer)
     const sceneST = ScrollTrigger.create({
       trigger: clientsScene || "#clients",
       start: "top top",
-      end: "+=" + (clientsDistance + coverPhasePx + footerHoldPhasePx + footerCoverPhasePx),
+      end: "+=" + (driftPhasePx + coverPhasePx + footerHoldPhasePx + footerCoverPhasePx),
       pin: true,
     })
 
     // Positions dérivées du pin principal (seule source de vérité)
-    const driftEnd = () => sceneST.start + clientsDistance
-    const coverEnd = () => sceneST.start + clientsDistance + coverPhasePx
+    const driftEnd = () => sceneST.start + driftPhasePx
+    const coverEnd = () => sceneST.start + driftPhasePx + coverPhasePx
     const footerCoverStart = () => coverEnd() + footerHoldPhasePx
     const footerCoverEnd = () => footerCoverStart() + footerCoverPhasePx
 
