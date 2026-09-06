@@ -118,6 +118,35 @@ body {
   object-fit: cover;
 }
 
+@media (min-width: 768px) and (max-width: 1099px) {
+  .project-hero-heading {
+    top: clamp(110.76px, calc(500.4621px - 35.4271vw), 205px);
+    width: clamp(322.11px, calc(1082.5684px - 69.1329vw), 506px);
+    gap: clamp(28.65px, calc(96.2758px - 6.1482vw), 45px);
+  }
+
+  .project-hero-media {
+    top: clamp(355.84px, calc(1444.0803px - 98.9305vw), 619px);
+    width: clamp(700px, calc(-144.9809px + 101.3167vw), 969.56px);
+    height: clamp(537.91px, calc(1807.8464px - 115.4492vw), 845px);
+  }
+}
+
+@media (max-width: 767px) {
+  .project-hero-heading {
+    top: clamp(171px, calc(135.9206px + 8.9947vw), 205px);
+    width: clamp(390px, calc(270.3175px + 30.6878vw), 506px);
+    max-width: 100vw;
+    gap: 45px;
+  }
+
+  .project-hero-media {
+    top: clamp(454px, calc(283.7619px + 43.6508vw), 619px);
+    width: clamp(329px, calc(-53.7778px + 98.1481vw), 700px);
+    height: 845px;
+  }
+}
+
 /* --- PROJECT CONTEXT --- */
 .project-context {
   position: relative;
