@@ -193,6 +193,44 @@ body {
   color: var(--c-black);
 }
 
+@media (min-width: 768px) and (max-width: 1099px) {
+  .project-context {
+    padding-top: clamp(74.48px, calc(849.9413px - 70.4966vw), 262px);
+    padding-bottom: clamp(61.75px, calc(898.1294px - 76.0347vw), 264px);
+  }
+
+  .project-context-inner {
+    width: clamp(585.01px, calc(622.1818px - 3.3791vw), 594px);
+    gap: clamp(31.83px, calc(106.9732px - 6.8313vw), 50px);
+  }
+
+  .project-context-copy {
+    width: clamp(594px, calc(558.3138px + 4.2789vw), 605.38px);
+    gap: clamp(38.19px, calc(128.3678px - 8.1976vw), 60px);
+  }
+}
+
+@media (max-width: 767px) {
+  .project-context {
+    padding-top: clamp(221px, calc(178.6984px + 10.8466vw), 262px);
+    padding-bottom: clamp(221px, calc(176.6349px + 11.3757vw), 264px);
+  }
+
+  .project-context-inner,
+  .project-context-copy {
+    width: clamp(323px, calc(43.3968px + 71.6931vw), 594px);
+    max-width: calc(100vw - 67px);
+  }
+
+  .project-context-inner {
+    gap: clamp(30px, calc(9.3651px + 5.291vw), 50px);
+  }
+
+  .project-context-copy {
+    gap: clamp(36px, calc(11.2381px + 6.3492vw), 60px);
+  }
+}
+
 /* --- PROJECT GALLERY --- */
 .project-gallery {
   position: relative;
