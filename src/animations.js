@@ -6,6 +6,15 @@ export function initAnimations(pendingHash) {
   // --- CONFIGURATION ---
   gsap.registerPlugin(ScrollTrigger)
 
+  // Confort de scroll tactile : sous 1100px on raccourcit uniquement la DISTANCE
+  // DE SCROLL des scènes pinnées (les timelines visuelles sont inchangées).
+  // >=1100 -> 1 : distances Desktop mathématiquement identiques.
+  const getResponsiveScrollFactor = () => {
+    if (window.innerWidth < 640) return 0.8
+    if (window.innerWidth < 1100) return 0.85
+    return 1
+  }
+
   // Init Lenis (Heavy Inertia)
   const lenisEasing = (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
   const lenis = new Lenis({
@@ -301,7 +310,8 @@ export function initAnimations(pendingHash) {
     scrollTrigger: {
       trigger: "#concept",
       start: "top top",
-      end: "+=100%",
+      // facteur 1 (>=1100) : "+=100%" === innerHeight -> Desktop identique
+      end: () => "+=" + window.innerHeight * getResponsiveScrollFactor(),
       pin: true,
       scrub: 1.5,
     },
@@ -503,168 +513,275 @@ export function initAnimations(pendingHash) {
       if (lineIndex < expLines.length - 1) expTitle.appendChild(document.createElement("br"))
     })
 
-    // Décalage au repos : positions Figma (cartes de 317px, centres à ±168px sur 653px)
-    const expOffset = 53 // xPercent
-
-    // États initiaux (avant l'intro)
-    gsap.set(expTitleLetters, { opacity: 0, y: 30 })
-    gsap.set(expLead1, { opacity: 0, y: 30 })
-    gsap.set(expLead2, { opacity: 0, y: 30 })
-    gsap.set(expCardsA, { xPercent: -expOffset, opacity: 0, y: 40 })
-    gsap.set(expCardsB, { xPercent: expOffset, opacity: 0, y: 40 })
-
-    // Faces visibles (recto = cards 1/2, verso = cards 3/4), cf. référence mwg_effect056
+    // [COMMUN] Faces visibles (recto = cards 1/2, verso = cards 3/4), cf. mwg_effect056.
+    // Helper utilisé par la seule branche Desktop (écrit .style.visibility en brut,
+    // donc nettoyé manuellement au changement de breakpoint).
     function expSetFace(index) {
       expFacesA.forEach((f, i) => (f.style.visibility = i === index ? "visible" : "hidden"))
       expFacesB.forEach((f, i) => (f.style.visibility = i === index ? "visible" : "hidden"))
     }
-    expSetFace(0)
 
-    // --- 1. APPROCHE (avant le pin) : le contenu apparaît plus haut, descend jusqu'à
-    // sa position centrée et se révèle — supprime le temps mort après #concept. ---
-    gsap.set(".expertise-inner", { y: "-18vh" })
+    const mm = gsap.matchMedia()
 
-    const expApproachTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: "#expertise",
-        start: "top bottom",
-        end: "top top",
-        scrub: true,
-      },
-    })
+    // ================================================================
+    // DESKTOP (>=1100px) — logique existante, strictement identique.
+    // (corps réindenté +2 uniquement : vérifiable via `git diff -w`)
+    // ================================================================
+    mm.add("(min-width: 1100px)", () => {
+      // Décalage au repos : positions Figma (cartes de 317px, centres à ±168px sur 653px)
+      const expOffset = 53 // xPercent
 
-    // Le reveal est retardé : au début de l'approche le contenu est encore sous
-    // l'écran, il ne doit se révéler qu'en entrant réellement dans le viewport.
-    const expRevealStart = 3.0
-    const expRevealSpan = 3.1 // du début du reveal à la fin de la dernière card
-    const expApproachDuration = expRevealStart + expRevealSpan
+      // États initiaux (avant l'intro)
+      gsap.set(expTitleLetters, { opacity: 0, y: 30 })
+      gsap.set(expLead1, { opacity: 0, y: 30 })
+      gsap.set(expLead2, { opacity: 0, y: 30 })
+      gsap.set(expCardsA, { xPercent: -expOffset, opacity: 0, y: 40 })
+      gsap.set(expCardsB, { xPercent: expOffset, opacity: 0, y: 40 })
 
-    // La descente couvre toute l'approche : position centrée atteinte pile au pin.
-    expApproachTl.to(
-      ".expertise-inner",
-      { y: "0vh", ease: "none", duration: expApproachDuration },
-      0,
-    )
+      expSetFace(0)
 
-    // Le titre se révèle ligne par ligne : chaque ligne démarre quand la précédente
-    // est presque terminée (~68% de sa durée).
-    const expLineDuration = 0.7
-    const expLineStagger = 0.03
-    let expLineStart = 0
+      // --- 1. APPROCHE (avant le pin) : le contenu apparaît plus haut, descend jusqu'à
+      // sa position centrée et se révèle — supprime le temps mort après #concept. ---
+      gsap.set(".expertise-inner", { y: "-18vh" })
 
-    expTitleLines.forEach((lineLetters) => {
+      const expApproachTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: "#expertise",
+          start: "top bottom",
+          end: "top top",
+          scrub: true,
+        },
+      })
+
+      // Le reveal est retardé : au début de l'approche le contenu est encore sous
+      // l'écran, il ne doit se révéler qu'en entrant réellement dans le viewport.
+      const expRevealStart = 3.0
+      const expRevealSpan = 3.1 // du début du reveal à la fin de la dernière card
+      const expApproachDuration = expRevealStart + expRevealSpan
+
+      // La descente couvre toute l'approche : position centrée atteinte pile au pin.
       expApproachTl.to(
-        lineLetters,
-        {
-          keyframes: {
-            "0%": { y: 30, opacity: 0 },
-            "50%": { y: -6, opacity: 1, ease: "power2.out" },
-            "75%": { y: 2, ease: "power1.inOut" },
-            "100%": { y: 0, ease: "power1.out" },
+        ".expertise-inner",
+        { y: "0vh", ease: "none", duration: expApproachDuration },
+        0,
+      )
+
+      // Le titre se révèle ligne par ligne : chaque ligne démarre quand la précédente
+      // est presque terminée (~68% de sa durée).
+      const expLineDuration = 0.7
+      const expLineStagger = 0.03
+      let expLineStart = 0
+
+      expTitleLines.forEach((lineLetters) => {
+        expApproachTl.to(
+          lineLetters,
+          {
+            keyframes: {
+              "0%": { y: 30, opacity: 0 },
+              "50%": { y: -6, opacity: 1, ease: "power2.out" },
+              "75%": { y: 2, ease: "power1.inOut" },
+              "100%": { y: 0, ease: "power1.out" },
+            },
+            stagger: expLineStagger,
+            duration: expLineDuration,
           },
-          stagger: expLineStagger,
-          duration: expLineDuration,
+          expRevealStart + expLineStart,
+        )
+
+        const lineSpan = expLineDuration + (lineLetters.length - 1) * expLineStagger
+        expLineStart += lineSpan * 0.68
+      })
+
+      // Cascade : titre -> corps, puis les cards enchaînent dès l'apparition du corps
+      const expTween = (target, at) =>
+        expApproachTl.to(
+          target,
+          { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+          expRevealStart + at,
+        )
+
+      expTween(expLead1, 2.35)
+      expTween(expCardsA, 2.45)
+      expTween(expCardsB, 2.6)
+
+      // Bascule des faces au milieu exact du flip (t=0.9), rapportée à la durée
+      // réelle de la timeline — sinon le seuil dérive et laisse un trou sans face visible.
+      const expFlipMid = 0.9
+
+      const expTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: "#expertise",
+          start: "top top",
+          end: "+=225%",
+          pin: true,
+          scrub: true,
+          onUpdate: (self) => {
+            expSetFace(self.progress * expTl.duration() < expFlipMid ? 0 : 1)
+          },
         },
-        expRevealStart + expLineStart,
+      })
+
+      // Lien "Expertises" : #expertise est pinné et son contenu est translaté
+      // pendant l'approche — on vise le début du pin, là où la section est calée
+      // en haut de l'écran et centrée.
+      anchorResolvers["#expertise"] = () => expTl.scrollTrigger.start
+
+      // --- 2. PHASE 1 : hold (0 -> 0.4) ---
+      expTl.to({}, { duration: 0.4 }, 0)
+
+      // --- 3. FLIP (0.4 -> 1.4) — logique reprise de mwg_effect056 ---
+      const expRx = (Math.random() - 0.5) * 40
+      const expRz = (Math.random() - 0.5) * 40
+
+      expTl.to(
+        expCardsA,
+        { xPercent: expOffset, rotateY: "+=180", duration: 1, ease: "power2.inOut" },
+        0.4,
+      )
+      expTl.to(expCardsA, { z: -150, duration: 0.5, yoyo: true, repeat: 1, ease: "power2.inOut" }, 0.4)
+      expTl.to(
+        expCardsB,
+        { xPercent: -expOffset, rotateY: "-=180", duration: 1, ease: "power2.inOut" },
+        0.4,
+      )
+      expTl.to(expCardsB, { z: 150, duration: 0.5, yoyo: true, repeat: 1, ease: "power2.inOut" }, 0.4)
+      expTl.to(
+        [expCardsA, expCardsB],
+        {
+          rotateX: expRx,
+          rotateZ: expRz,
+          scale: 1.1,
+          duration: 0.5,
+          repeat: 1,
+          yoyo: true,
+          ease: "power2.in",
+        },
+        0.4,
       )
 
-      const lineSpan = expLineDuration + (lineLetters.length - 1) * expLineStagger
-      expLineStart += lineSpan * 0.68
+      // Cross-fade des paragraphes pendant le flip
+      expTl.to(expLead1, { opacity: 0, y: -30, duration: 0.4, ease: "power2.in" }, 0.4)
+      expTl.to(expLead2, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0.9)
+
+      // --- 4. PHASE 2 : hold (1.4 -> 1.8) ---
+      expTl.to({}, { duration: 0.4 }, 1.4)
+
+      // --- 5. OUTRO en cascade : textes, puis card de gauche, puis card de droite.
+      // Après le flip, B est à gauche (xPercent -53) et A à droite (+53).
+      //
+      // Sortie partielle (0.45vh) : les éléments ne doivent PAS avoir quitté l'écran quand
+      // le pin se libère, sinon une frame totalement vide s'intercale avant l'arrivée de
+      // #works. Ils finissent d'être évacués par le scroll naturel de la section dépinnée —
+      // c'est ce recouvrement qui rend la transition #works -> #clients fluide.
+      //
+      // La cascade vient des DÉPARTS décalés, mais les trois tweens se terminent au même
+      // instant (fin du pin) : sinon chacun atteint sa position finale puis s'y fige
+      // visiblement en attendant la fin du pin, l'un après l'autre.
+      const expExitY = () => -(window.innerHeight * 0.45)
+      const expOutroEnd = 2.54
+      const expExit = (target, at) =>
+        expTl.to(target, { y: expExitY, duration: expOutroEnd - at, ease: "power1.in" }, at)
+
+      expExit(expText, 1.8)
+      expExit(expCardsB, 1.92)
+      expExit(expCardsA, 2.04)
+
+      return () => {
+        delete anchorResolvers["#expertise"]
+        ;[...expFacesA, ...expFacesB].forEach((f) => (f.style.visibility = ""))
+      }
     })
 
-    // Cascade : titre -> corps, puis les cards enchaînent dès l'apparition du corps
-    const expTween = (target, at) =>
-      expApproachTl.to(
-        target,
-        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
-        expRevealStart + at,
+    // ================================================================
+    // RESPONSIVE (<1100px) — pas de flip 3D. Reveal d'approche calé pile
+    // sur le pin, puis pin court : hold état 1 -> crossfade -> hold état 2.
+    // Chaque .expertise-cards est un SLOT à 2 faces superposées, la face
+    // visible est pilotée en opacité (crossfade 1/2 -> 3/4).
+    // ================================================================
+    mm.add("(max-width: 1099px)", () => {
+      gsap.set(expTitleLetters, { opacity: 0, y: 30 })
+      gsap.set([expCardsA, expCardsB], { opacity: 0, y: 30 })
+      gsap.set(expLead1, { opacity: 0, y: 30 })
+      gsap.set(expLead2, { opacity: 0, y: 20 })
+      gsap.set([expFacesA[0], expFacesB[0]], { opacity: 1 })
+      gsap.set([expFacesA[1], expFacesB[1]], { opacity: 0 })
+
+      // (a) Reveal d'approche (non pinné) — se termine exactement au début du pin.
+      const respRevealTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: "#expertise",
+          start: "top 78%",
+          end: "top top",
+          scrub: true,
+        },
+      })
+
+      let respLineStart = 0
+      expTitleLines.forEach((lineLetters) => {
+        respRevealTl.to(
+          lineLetters,
+          {
+            keyframes: {
+              "0%": { y: 30, opacity: 0 },
+              "60%": { y: -4, opacity: 1, ease: "power2.out" },
+              "100%": { y: 0, ease: "power1.out" },
+            },
+            stagger: 0.03,
+            duration: 0.6,
+          },
+          respLineStart,
+        )
+        respLineStart += 0.42
+      })
+
+      const respReveal = (target, at) =>
+        respRevealTl.to(target, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, at)
+
+      respReveal(expLead1, respLineStart + 0.1)
+      respReveal(expCardsA, respLineStart + 0.15)
+      respReveal(expCardsB, respLineStart + 0.25)
+
+      // (b) Pin court : hold état 1 -> crossfade (faces + lead) -> hold état 2.
+      // Distance de scroll = innerHeight * facteur responsive (confort tactile).
+      const respTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: "#expertise",
+          start: "top top",
+          end: () => "+=" + window.innerHeight * getResponsiveScrollFactor(),
+          pin: true,
+          scrub: true,
+        },
+      })
+
+      anchorResolvers["#expertise"] = () => respTl.scrollTrigger.start
+
+      respTl.to({}, { duration: 0.35 }) // phase 1 hold
+
+      respTl.to(
+        [expFacesA[0], expFacesB[0]],
+        { opacity: 0, y: -12, duration: 0.3, ease: "power1.inOut" },
+        0.35,
+      )
+      respTl.fromTo(
+        [expFacesA[1], expFacesB[1]],
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.3, ease: "power1.inOut" },
+        0.35,
+      )
+      respTl.to(expLead1, { opacity: 0, y: -20, duration: 0.28, ease: "power2.in" }, 0.35)
+      respTl.fromTo(
+        expLead2,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" },
+        0.4,
       )
 
-    expTween(expLead1, 2.35)
-    expTween(expCardsA, 2.45)
-    expTween(expCardsB, 2.6)
+      respTl.to({}, { duration: 0.35 }) // phase 2 hold
 
-    // Bascule des faces au milieu exact du flip (t=0.9), rapportée à la durée
-    // réelle de la timeline — sinon le seuil dérive et laisse un trou sans face visible.
-    const expFlipMid = 0.9
-
-    const expTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: "#expertise",
-        start: "top top",
-        end: "+=225%",
-        pin: true,
-        scrub: true,
-        onUpdate: (self) => {
-          expSetFace(self.progress * expTl.duration() < expFlipMid ? 0 : 1)
-        },
-      },
+      return () => {
+        delete anchorResolvers["#expertise"]
+      }
     })
-
-    // Lien "Expertises" : #expertise est pinné et son contenu est translaté
-    // pendant l'approche — on vise le début du pin, là où la section est calée
-    // en haut de l'écran et centrée.
-    anchorResolvers["#expertise"] = () => expTl.scrollTrigger.start
-
-    // --- 2. PHASE 1 : hold (0 -> 0.4) ---
-    expTl.to({}, { duration: 0.4 }, 0)
-
-    // --- 3. FLIP (0.4 -> 1.4) — logique reprise de mwg_effect056 ---
-    const expRx = (Math.random() - 0.5) * 40
-    const expRz = (Math.random() - 0.5) * 40
-
-    expTl.to(
-      expCardsA,
-      { xPercent: expOffset, rotateY: "+=180", duration: 1, ease: "power2.inOut" },
-      0.4,
-    )
-    expTl.to(expCardsA, { z: -150, duration: 0.5, yoyo: true, repeat: 1, ease: "power2.inOut" }, 0.4)
-    expTl.to(
-      expCardsB,
-      { xPercent: -expOffset, rotateY: "-=180", duration: 1, ease: "power2.inOut" },
-      0.4,
-    )
-    expTl.to(expCardsB, { z: 150, duration: 0.5, yoyo: true, repeat: 1, ease: "power2.inOut" }, 0.4)
-    expTl.to(
-      [expCardsA, expCardsB],
-      {
-        rotateX: expRx,
-        rotateZ: expRz,
-        scale: 1.1,
-        duration: 0.5,
-        repeat: 1,
-        yoyo: true,
-        ease: "power2.in",
-      },
-      0.4,
-    )
-
-    // Cross-fade des paragraphes pendant le flip
-    expTl.to(expLead1, { opacity: 0, y: -30, duration: 0.4, ease: "power2.in" }, 0.4)
-    expTl.to(expLead2, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0.9)
-
-    // --- 4. PHASE 2 : hold (1.4 -> 1.8) ---
-    expTl.to({}, { duration: 0.4 }, 1.4)
-
-    // --- 5. OUTRO en cascade : textes, puis card de gauche, puis card de droite.
-    // Après le flip, B est à gauche (xPercent -53) et A à droite (+53).
-    //
-    // Sortie partielle (0.45vh) : les éléments ne doivent PAS avoir quitté l'écran quand
-    // le pin se libère, sinon une frame totalement vide s'intercale avant l'arrivée de
-    // #works. Ils finissent d'être évacués par le scroll naturel de la section dépinnée —
-    // c'est ce recouvrement qui rend la transition #works -> #clients fluide.
-    //
-    // La cascade vient des DÉPARTS décalés, mais les trois tweens se terminent au même
-    // instant (fin du pin) : sinon chacun atteint sa position finale puis s'y fige
-    // visiblement en attendant la fin du pin, l'un après l'autre.
-    const expExitY = () => -(window.innerHeight * 0.45)
-    const expOutroEnd = 2.54
-    const expExit = (target, at) =>
-      expTl.to(target, { y: expExitY, duration: expOutroEnd - at, ease: "power1.in" }, at)
-
-    expExit(expText, 1.8)
-    expExit(expCardsB, 1.92)
-    expExit(expCardsA, 2.04)
   }
 
   // --- ANIMATIONS: LOGO LIQUID HOVER ---
@@ -862,42 +979,73 @@ export function initAnimations(pendingHash) {
     // avec seulement le label à l'écran. ---
     const worksSplit = Math.ceil(workItems.length / 2)
 
-    gsap.set(".works-inner", { y: "-65vh" })
+    const worksMm = gsap.matchMedia()
 
-    const worksApproachTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: "#works",
-        start: "top bottom",
-        end: "top top",
-        scrub: true,
-      },
+    // ===== DESKTOP (>=1100px) — comportement actuel strictement identique =====
+    // Approche (.works-inner -65vh -> 0, coordonnée avec l'outro Expertise Desktop)
+    // + pin +=150% qui révèle la 2e moitié des projets.
+    worksMm.add("(min-width: 1100px)", () => {
+      gsap.set(".works-inner", { y: "-65vh" })
+
+      const worksApproachTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: "#works",
+          start: "top bottom",
+          end: "top top",
+          scrub: true,
+        },
+      })
+
+      // La descente couvre toute l'approche : position centrée atteinte pile au pin.
+      worksApproachTl.to(".works-inner", { y: "0vh", ease: "none", duration: 1.5 }, 0)
+      worksApproachTl.to(".works-label", { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, 0)
+      worksRevealChain(worksApproachTl, 0, worksSplit, 0.25)
+
+      // Timeline pinnée : la chaîne se poursuit sur les projets restants
+      const worksTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: "#works",
+          start: "top top",
+          end: "+=150%",
+          pin: true,
+          scrub: 1,
+        },
+      })
+
+      worksRevealChain(worksTl, worksSplit, workItems.length, 0)
+      worksTl.to({}, { duration: 0.3 })
+
+      // Lien "Projets" : viser le DÉBUT du pin atterrit avec seulement la 1ère
+      // moitié des projets révélée (l'autre moitié se révèle pendant le pin,
+      // via worksRevealChain ci-dessus) — donne l'impression de ne pas avoir
+      // quitté Expertise. On vise donc la FIN du pin (-1px, même technique que
+      // #footer plus bas) : tous les projets sont alors révélés.
+      anchorResolvers["#works"] = () => worksTl.scrollTrigger.end - 1
+
+      return () => {
+        delete anchorResolvers["#works"]
+      }
     })
 
-    // La descente couvre toute l'approche : position centrée atteinte pile au pin.
-    worksApproachTl.to(".works-inner", { y: "0vh", ease: "none", duration: 1.5 }, 0)
-    worksApproachTl.to(".works-label", { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, 0)
-    worksRevealChain(worksApproachTl, 0, worksSplit, 0.25)
+    // ===== RESPONSIVE (<1100px) — aucun pin =====
+    // .works-inner reste en place ; l'approche (top 75% -> top top) révèle les
+    // 4 projets + le label, puis la section poursuit son scroll vertical normal.
+    // Aucun resolver #works : le fallback DOM de scrollToAnchor prend le relais.
+    worksMm.add("(max-width: 1099px)", () => {
+      gsap.set(".works-inner", { y: "0vh" })
 
-    // Timeline pinnée : la chaîne se poursuit sur les projets restants
-    const worksTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: "#works",
-        start: "top top",
-        end: "+=150%",
-        pin: true,
-        scrub: 1,
-      },
+      const worksApproachTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: "#works",
+          start: "top 75%",
+          end: "top top",
+          scrub: true,
+        },
+      })
+
+      worksApproachTl.to(".works-label", { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, 0)
+      worksRevealChain(worksApproachTl, 0, workItems.length, 0.25)
     })
-
-    worksRevealChain(worksTl, worksSplit, workItems.length, 0)
-    worksTl.to({}, { duration: 0.3 })
-
-    // Lien "Projets" : viser le DÉBUT du pin atterrit avec seulement la 1ère
-    // moitié des projets révélée (l'autre moitié se révèle pendant le pin,
-    // via worksRevealChain ci-dessus) — donne l'impression de ne pas avoir
-    // quitté Expertise. On vise donc la FIN du pin (-1px, même technique que
-    // #footer plus bas) : tous les projets sont alors révélés.
-    anchorResolvers["#works"] = () => worksTl.scrollTrigger.end - 1
   }
 
   // --- ANIMATIONS: SCRATCH EFFECT ---
@@ -1082,40 +1230,49 @@ export function initAnimations(pendingHash) {
     const clientsScene = document.querySelector(".clients-scene")
     const clientsCardsContainer = clientsRoot.querySelector(".clients-cards")
     const clientCards = clientsRoot.querySelectorAll(".client-card")
-    const clientsDistance = clientsCardsContainer.clientWidth - window.innerWidth
-    const isPortrait = window.innerWidth < window.innerHeight
-    const coverPhasePx = window.innerHeight
+    // Mesures dynamiques : tout est recalculé à chaque ScrollTrigger.refresh()
+    // (resize largeur/hauteur, orientation, franchissement 640/1100). Aucune
+    // valeur métier changée (0.8 Mobile / 0.85 Tablet / 1 Desktop, hold 0.35).
+    // getClientsDistance = distance GRAPHIQUE réelle du rail ; le facteur ne
+    // raccourcit que la distance de SCROLL nécessaire pour la parcourir.
+    const getClientsDistance = () => clientsCardsContainer.clientWidth - window.innerWidth
+    const getScrollFactor = () => getResponsiveScrollFactor()
+    const getDriftPhasePx = () => getClientsDistance() * getScrollFactor()
+    const getCoverPhasePx = () => window.innerHeight * getScrollFactor()
     // Court hold : le pré-footer reste immobile, plein écran, avant que le footer
     // ne commence à monter par-dessus.
-    const footerHoldPhasePx = window.innerHeight * 0.35
-    const footerCoverPhasePx = window.innerHeight
+    const getFooterHoldPhasePx = () => window.innerHeight * 0.35 * getScrollFactor()
+    const getFooterCoverPhasePx = () => window.innerHeight * getScrollFactor()
 
     // Pin unique pour toute la scène (drift horizontal + recouvrement pré-footer + hold + recouvrement footer)
     const sceneST = ScrollTrigger.create({
       trigger: clientsScene || "#clients",
       start: "top top",
-      end: "+=" + (clientsDistance + coverPhasePx + footerHoldPhasePx + footerCoverPhasePx),
+      end: () =>
+        "+=" +
+        (getDriftPhasePx() + getCoverPhasePx() + getFooterHoldPhasePx() + getFooterCoverPhasePx()),
       pin: true,
     })
 
     // Positions dérivées du pin principal (seule source de vérité)
-    const driftEnd = () => sceneST.start + clientsDistance
-    const coverEnd = () => sceneST.start + clientsDistance + coverPhasePx
-    const footerCoverStart = () => coverEnd() + footerHoldPhasePx
-    const footerCoverEnd = () => footerCoverStart() + footerCoverPhasePx
+    const driftEnd = () => sceneST.start + getDriftPhasePx()
+    const coverEnd = () => driftEnd() + getCoverPhasePx()
+    const footerCoverStart = () => coverEnd() + getFooterHoldPhasePx()
+    const footerCoverEnd = () => footerCoverStart() + getFooterCoverPhasePx()
 
     // Lien "Contact" : on vise la fin de l'animation d'entrée du footer, quand il
     // recouvre tout l'écran. Clamp de 1px pour rester dans la plage du pin.
     anchorResolvers["#footer"] = () => Math.max(0, footerCoverEnd() - 1)
 
     const clientsScrollTween = gsap.to(clientsCardsContainer, {
-      x: -clientsDistance,
+      x: () => -getClientsDistance(),
       ease: "none",
       scrollTrigger: {
         trigger: clientsScene || "#clients",
         start: () => sceneST.start,
         end: driftEnd,
         scrub: true,
+        invalidateOnRefresh: true,
       },
     })
 
@@ -1152,7 +1309,7 @@ export function initAnimations(pendingHash) {
       const preFooterWidthTrigger = {
         trigger: clientsScene,
         start: driftEnd,
-        end: () => driftEnd() + 0.8 * coverPhasePx,
+        end: () => driftEnd() + 0.8 * getCoverPhasePx(),
         scrub: 1,
       }
 
@@ -1168,8 +1325,8 @@ export function initAnimations(pendingHash) {
         ease: "none",
         scrollTrigger: {
           trigger: clientsScene,
-          start: () => driftEnd() + 0.6 * coverPhasePx, // dès 60% de la hauteur du viewport recouvert
-          end: () => driftEnd() + 0.8 * coverPhasePx,
+          start: () => driftEnd() + 0.6 * getCoverPhasePx(), // dès 60% de la hauteur du viewport recouvert
+          end: () => driftEnd() + 0.8 * getCoverPhasePx(),
           scrub: 1,
         },
         onUpdate: applyPreFooterClip,
@@ -1189,8 +1346,8 @@ export function initAnimations(pendingHash) {
         ease: "none",
         scrollTrigger: {
           trigger: clientsScene,
-          start: () => driftEnd() + 0.5 * coverPhasePx,
-          end: () => driftEnd() + 0.68 * coverPhasePx, // termine avant manifestRevealStart (0.7)
+          start: () => driftEnd() + 0.5 * getCoverPhasePx(),
+          end: () => driftEnd() + 0.68 * getCoverPhasePx(), // termine avant manifestRevealStart (0.7)
           scrub: 1,
         },
       })
@@ -1268,7 +1425,7 @@ export function initAnimations(pendingHash) {
         // donc pas de trigger fiable sur #pre-footer lui-même) :
         // le reveal démarre plus tard dans le recouvrement (60% parcouru) et se
         // termine pile quand le pré-footer a fini de recouvrir Clients.
-        const manifestRevealStart = () => driftEnd() + 0.7 * coverPhasePx
+        const manifestRevealStart = () => driftEnd() + 0.7 * getCoverPhasePx()
         const manifestRevealEnd = coverEnd
 
         gsap.to(manifestLetters, {
@@ -1320,7 +1477,7 @@ export function initAnimations(pendingHash) {
       const footerWidthTrigger = {
         trigger: clientsScene,
         start: footerCoverStart,
-        end: () => footerCoverStart() + 0.8 * footerCoverPhasePx,
+        end: () => footerCoverStart() + 0.8 * getFooterCoverPhasePx(),
         scrub: 1,
       }
 
@@ -1336,8 +1493,8 @@ export function initAnimations(pendingHash) {
         ease: "none",
         scrollTrigger: {
           trigger: clientsScene,
-          start: () => footerCoverStart() + 0.6 * footerCoverPhasePx,
-          end: () => footerCoverStart() + 0.8 * footerCoverPhasePx,
+          start: () => footerCoverStart() + 0.6 * getFooterCoverPhasePx(),
+          end: () => footerCoverStart() + 0.8 * getFooterCoverPhasePx(),
           scrub: 1,
         },
         onUpdate: applyFooterClip,
@@ -1359,7 +1516,7 @@ export function initAnimations(pendingHash) {
       const footerContentTl = gsap.timeline({
         scrollTrigger: {
           trigger: clientsScene,
-          start: () => footerCoverStart() + 0.5 * footerCoverPhasePx,
+          start: () => footerCoverStart() + 0.5 * getFooterCoverPhasePx(),
           end: footerCoverEnd,
           scrub: 1,
         },
@@ -1374,17 +1531,19 @@ export function initAnimations(pendingHash) {
       })
     }
 
+    // Orientation recalculée à chaque refresh (portrait -> 0.4, paysage -> 0.5).
+    const getAmplitude = () => (window.innerWidth < window.innerHeight ? 0.4 : 0.5)
+
     clientCards.forEach((card, i) => {
       const sign = i % 2 === 0 ? 1 : -1
       const rotation = (Math.random() - 0.5) * 6
-      const amplitude = isPortrait ? 0.4 : 0.5
 
       gsap.fromTo(
         card,
         { rotation },
         {
           rotation: -rotation,
-          y: () => sign * -amplitude * window.innerHeight,
+          y: () => sign * -getAmplitude() * window.innerHeight,
           yPercent: () => sign * 50,
           yoyo: true,
           repeat: 1,
@@ -1395,6 +1554,7 @@ export function initAnimations(pendingHash) {
             start: "left 90%",
             end: "right 10%",
             scrub: true,
+            invalidateOnRefresh: true,
           },
         },
       )

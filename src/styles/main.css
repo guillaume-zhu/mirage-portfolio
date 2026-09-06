@@ -169,6 +169,44 @@ section {
   }
 }
 
+/* --- HERO RESPONSIVE (blob + logo + scroll indicator) — Option C, cf. vars.css ---
+   Desktop (>=1100px) : strictement inchangé.
+   Tablet (768-1099px) : interpolation continue depuis la valeur desktop à
+   1100px vers la cible Figma @834 (blob 702px / logo 569px), puis plateau
+   jusqu'à 768px.
+   Mobile (<768px) : continuité exacte avec le plateau à 768px, interpolation
+   vers la cible Figma @390 (blob 318px / logo 258px), puis floor.
+   .hero-logo-container reste le même noeud (cible parallaxe/sortie GSAP) :
+   seule sa largeur devient responsive, l'image passe à 100%. */
+@media (max-width: 1099px) {
+  .hero-center-container {
+    width: clamp(396px, 1661px - 115.04vw, 702px);
+  }
+
+  .hero-logo-container {
+    width: clamp(330px, 1318.35px - 89.85vw, 569px);
+  }
+
+  .hero-logo-img {
+    width: 100%;
+    max-width: none;
+  }
+
+  .scroll-indicator {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-center-container {
+    width: clamp(318px, 101.59vw - 78.2px, 702px);
+  }
+
+  .hero-logo-container {
+    width: clamp(258px, 82.28vw - 62.87px, 569px);
+  }
+}
+
 /* --- SECTION CONCEPT (Scrollytelling) --- */
 #concept {
   min-height: 100vh;
@@ -261,6 +299,39 @@ section {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+/* --- CONCEPT RESPONSIVE — Option C, cf. vars.css ---
+   Desktop (>=1100px) : 2 colonnes, strictement inchangé.
+   Tablet + Mobile (<1100px) : 1 colonne empilée (texte au-dessus, cluster
+   d'images en dessous), colonne centrée ~68vw conforme à Figma @834 / @390.
+   Le texte utilise le token CONCEPT (vars.css) — aucune font-size locale.
+   Géométrie verticale de #concept inchangée (padding global des sections). */
+@media (max-width: 1099px) {
+  .concept-container {
+    grid-template-columns: 1fr;
+    gap: clamp(3rem, 7vw, 4.5rem);
+    width: min(68vw, 680px);
+    max-width: none;
+  }
+
+  .concept-text {
+    padding-right: 0;
+  }
+
+  .reveal-paragraph {
+    width: 100%;
+  }
+
+  .concept-images {
+    height: 42vh;
+  }
+
+  /* Carte contrainte aussi par la hauteur : sur un viewport large mais peu
+     haut, width:60% seule atteignait ~400px et chevauchait le texte. */
+  .image-card {
+    width: min(55%, 23vh, 270px);
+  }
 }
 
 /* --- SECTION WORKS --- */
@@ -404,6 +475,74 @@ section {
   display: block;
 }
 
+/* --- WORKS / PROJETS RESPONSIVE (<1100px) — cf. worksMm (gsap.matchMedia) ---
+   Desktop (>=1100px) : grille 3 colonnes [meta] [titre] [meta] + pin, inchangé.
+   <1100px : chaque projet s'empile (meta-left / titre / meta-right, centrés),
+   liste verticale normale sans pin, conforme aux maquettes Figma @834 / @390.
+   Tokens DISPLAY LG / LABEL inchangés (cibles Figma déjà atteintes). */
+@media (max-width: 1099px) {
+  #works {
+    justify-content: flex-start;
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+
+  .works-container {
+    width: 100%;
+    max-width: 518px;
+  }
+
+  .project-list {
+    width: 100%;
+    gap: clamp(70px, 9.6vw, 80px);
+  }
+
+  .project-item {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    row-gap: 30px;
+    column-gap: 0;
+  }
+
+  .meta-left,
+  .meta-right {
+    text-align: center;
+  }
+}
+
+@media (max-width: 639px) {
+  #works {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .project-item {
+    row-gap: 22px;
+  }
+}
+
+/* Viewports intermédiaires peu hauts (Tablet large, ~1099x900) : la liste
+   empilée déborde en hauteur. On compacte uniquement les espaces blancs —
+   aucune réduction typo. 834x1194, Mobile <640 et Desktop >=1100 non affectés. */
+@media (min-width: 640px) and (max-width: 1099px) and (max-height: 950px) {
+  #works {
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .works-label {
+    margin-bottom: 1.5rem;
+  }
+
+  .project-list {
+    gap: 3rem;
+  }
+
+  .project-item {
+    row-gap: 18px;
+  }
+}
+
 /* Grain Texture */
 /* .noise-overlay {
   position: fixed;
@@ -542,17 +681,110 @@ section {
   display: inline-block;
 }
 
-@media (max-width: 1100px) {
-  .expertise-stage {
-    left: auto;
-    right: 4vw;
-    transform: scale(0.8);
-    transform-origin: right center;
+/* --- EXPERTISE RESPONSIVE (<1100px) — cf. gsap.matchMedia() dans animations.js ---
+   Sous 1100px la composition Desktop (texte absolu à gauche / scène 3D
+   superposée à droite, flip horizontal) est abandonnée au profit de la
+   maquette Figma : texte en haut, 2 slots en dessous (2 colonnes Tablet /
+   1 colonne Mobile). Chaque .expertise-cards reste un SLOT contenant ses
+   2 faces superposées ; le flip 3D est neutralisé, la face visible est
+   pilotée en opacité par GSAP (crossfade face1 -> face2). */
+@media (max-width: 1099px) {
+  #expertise {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .expertise-inner {
+    position: static;
+    height: auto;
+    min-height: 100vh;
+    flex-direction: column;
+    justify-content: center;
+    gap: clamp(2.5rem, 6vw, 4rem);
+    width: min(640px, calc(100% - 32px));
+    max-width: 640px;
+    margin: 0 auto;
+    padding-block: var(--gutter);
   }
 
   .expertise-text {
-    left: 6vw;
-    width: 34%;
+    position: static;
+    left: auto;
+    width: 100%;
+    min-width: 0;
+    gap: clamp(1.5rem, 4vw, 2.5rem);
+  }
+
+  .expertise-stage {
+    position: static;
+    left: auto;
+    width: 100%;
+    height: auto;
+    perspective: none;
+    transform: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    place-items: stretch;
+    gap: 24px;
+  }
+
+  .expertise-cards {
+    grid-area: auto;
+    position: relative;
+    width: 100%;
+    aspect-ratio: auto;
+    height: 340px;
+    transform-style: flat;
+    will-change: auto;
+  }
+
+  .expertise-card {
+    padding: 32px;
+    gap: 24px;
+  }
+
+  .expertise-card:nth-child(even) {
+    transform: none;
+  }
+}
+
+/* Breakpoint de COMPOSITION Expertise (local, 640px) : dissocié du breakpoint
+   typo (768). Entre 640 et 1099 on garde la composition Tablet 2 colonnes
+   ([A][B]) ; sous 640 seulement on empile ([A]/[B]). gsap.matchMedia (bascule
+   1100px) est indépendant et inchangé. */
+@media (max-width: 639px) {
+  .expertise-inner {
+    --expertise-mobile-space: clamp(24px, 3.5vh, 32px);
+
+    max-width: none;
+    width: min(78vw, 440px);
+
+    justify-content: flex-start;
+    gap: var(--expertise-mobile-space);
+
+    padding-top: clamp(96px, 12vh, 112px);
+    padding-bottom: var(--expertise-mobile-space);
+  }
+
+  .expertise-text {
+    gap: 1.25rem;
+  }
+
+  .expertise-stage {
+    width: 100%;
+    margin-inline: 0;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .expertise-cards {
+    aspect-ratio: auto;
+    height: clamp(200px, 24vh, 220px);
+  }
+
+  .expertise-card {
+    padding: 20px;
+    gap: 14px;
   }
 }
 
@@ -637,6 +869,70 @@ section {
   /* pivot sous la lettre : la rotation la fait sortir de sa boîte (overflow:hidden) au lieu de juste l'incliner sur place */
 }
 
+/* --- PRE-FOOTER RESPONSIVE (<1100px) ---
+   Structure Figma inchangée (bloc aligné à gauche, tokens DISPLAY LG / LABEL,
+   contenu centré vertical via justify-content:center hérité de `section`).
+   height:100vh conservé (cover). On récupère de la hauteur vs les 8rem actuels
+   sans détruire la respiration éditoriale des maquettes. */
+@media (max-width: 1099px) {
+  #pre-footer {
+    padding-block: clamp(4rem, 8vh, 6rem);
+  }
+
+  /* Exception locale : le label passe volontairement sur 2 lignes en
+     Tablet/Mobile (token LABEL = line-height:1, trop serré pour 2 lignes). */
+  .pre-footer-label {
+    line-height: 1.55;
+  }
+
+  .pre-footer-content {
+    gap: clamp(1.75rem, 3.6vh, 2.75rem);
+  }
+}
+
+/* Tablet : mesure éditoriale du manifeste (cible Figma @834). */
+@media (min-width: 640px) and (max-width: 1099px) {
+  .pre-footer-content {
+    max-width: 560px;
+  }
+}
+
+/* Vraie compression réservée aux viewports réellement courts (375x667, 320x568). */
+@media (max-width: 639px) and (max-height: 700px) {
+  #pre-footer {
+    padding-block: 2.5rem;
+  }
+
+  .pre-footer-content {
+    gap: 1.75rem;
+  }
+}
+
+/* Très petites largeurs (320-359px) — stress tests. Exception locale : le
+   cover height:100vh + texte long génère trop de lignes à DISPLAY LG (40px)
+   sous 360px. Le Mobile de référence (390px) reste strictement à 40px. */
+@media (max-width: 359px) {
+  #pre-footer {
+    padding-inline: clamp(20px, 6.7vw, 24px);
+  }
+
+  .pre-footer-manifest {
+    font-size: clamp(2rem, 10vw, 2.25rem);
+  }
+}
+
+/* Cas extrême : très petites largeurs ET petites hauteurs. Après tous les
+   autres paliers Pre-footer pour ne surcharger que dans ce cas. */
+@media (max-width: 359px) and (max-height: 700px) {
+  #pre-footer {
+    padding-block: 1.5rem;
+  }
+
+  .pre-footer-content {
+    gap: 1.25rem;
+  }
+}
+
 .clients-intro {
   position: absolute;
   top: 50%;
@@ -673,6 +969,13 @@ section {
   color: var(--c-black);
 }
 
+/* Chaque <p> est volontairement une ligne ("Des visions" / "partagées").
+   .clients-word ne protège que chaque mot ; on empêche ici la ligne entière
+   de wrapper — 2 lignes garanties à tous les formats (cf. Figma). */
+.clients-title p {
+  white-space: nowrap;
+}
+
 .clients-word {
   display: inline-block;
   white-space: nowrap;
@@ -701,30 +1004,21 @@ section {
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
 }
 
-/* Responsive Mobile */
-@media (max-width: 768px) {
-  .clients-title {
-    font-size: clamp(2.5rem, 12vw, 4rem);
-  }
-
+/* --- CLIENTS RESPONSIVE — .client-card ---
+   Desktop (>=1100px) : 12vw, inchangé. Interpolation continue sous 1100px
+   (aucune rupture au breakpoint) : 1100->~132px (= 12vw desktop), 834->~167px,
+   plateau 834-768, puis 768->~117px (= 30vw @390 actuel), floor.
+   L'ancien override local de .clients-title (font-size) est supprimé : le token
+   DISPLAY XL responsive (vars.css) s'applique désormais sur tous les formats. */
+@media (max-width: 1099px) {
   .client-card {
-    width: 30vw;
+    width: clamp(132px, 276.74px - 13.16vw, 167px);
   }
+}
 
-  .concept-container {
-    grid-template-columns: 1fr;
-    padding-top: 100px;
-    gap: 2rem;
-    height: auto;
-  }
-
-  .concept-images {
-    height: 50vh;
-    margin-top: 2rem;
-  }
-
-  .image-card {
-    width: 55%;
+@media (max-width: 767px) {
+  .client-card {
+    width: clamp(117px, 65.41px + 13.23vw, 167px);
   }
 }
 
