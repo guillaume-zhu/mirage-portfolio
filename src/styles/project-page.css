@@ -266,6 +266,47 @@ body {
   object-fit: cover;
 }
 
+@media (min-width: 768px) and (max-width: 1099px) {
+  .project-context + .project-gallery {
+    height: auto;
+    align-items: flex-start;
+    padding-top: clamp(118.4px, calc(220.1206px - 9.2471vw), 143px);
+  }
+
+  .project-context + .project-gallery .project-gallery-grid {
+    grid-template-columns: 1fr;
+    width: clamp(370.8px, calc(1922.3652px - 141.051vw), 746px);
+    height: auto;
+    gap: clamp(15.91px, calc(82.5043px - 6.0536vw), 32.017px);
+  }
+
+  .project-context + .project-gallery .project-gallery-item {
+    aspect-ratio: 233 / 298;
+    border-radius: clamp(25px, calc(54.0177px - 2.638vw), 32.017px);
+  }
+}
+
+@media (max-width: 767px) {
+  .project-context + .project-gallery {
+    height: auto;
+    align-items: flex-start;
+    padding-top: clamp(78px, calc(10.9365px + 17.1958vw), 143px);
+  }
+
+  .project-context + .project-gallery .project-gallery-grid {
+    grid-template-columns: 1fr;
+    width: clamp(365px, calc(-28.0952px + 100.7937vw), 746px);
+    max-width: calc(100vw - 22px);
+    height: auto;
+    gap: clamp(15.665px, calc(-1.2061px + 4.3259vw), 32.017px);
+  }
+
+  .project-context + .project-gallery .project-gallery-item {
+    aspect-ratio: 233 / 298;
+    border-radius: clamp(15.665px, calc(-1.2061px + 4.3259vw), 32.017px);
+  }
+}
+
 /* --- PROJECT DIRECTION --- */
 .project-direction {
   position: relative;
