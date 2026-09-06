@@ -1230,47 +1230,49 @@ export function initAnimations(pendingHash) {
     const clientsScene = document.querySelector(".clients-scene")
     const clientsCardsContainer = clientsRoot.querySelector(".clients-cards")
     const clientCards = clientsRoot.querySelectorAll(".client-card")
-    const clientsDistance = clientsCardsContainer.clientWidth - window.innerWidth
-    const isPortrait = window.innerWidth < window.innerHeight
-    // Confort tactile : sous 1100px on raccourcit la distance de SCROLL de la
-    // scène. Le tween horizontal garde x:-clientsDistance (distance graphique
-    // réelle) — seul le scroll requis pour la parcourir est réduit. >=1100 ->
-    // facteur 1 -> distances Desktop exactes. Capté une fois (comme
-    // clientsDistance) : robustesse resize = passe suivante.
-    const scrollFactor = getResponsiveScrollFactor()
-    const driftPhasePx = clientsDistance * scrollFactor
-    const coverPhasePx = window.innerHeight * scrollFactor
+    // Mesures dynamiques : tout est recalculé à chaque ScrollTrigger.refresh()
+    // (resize largeur/hauteur, orientation, franchissement 640/1100). Aucune
+    // valeur métier changée (0.8 Mobile / 0.85 Tablet / 1 Desktop, hold 0.35).
+    // getClientsDistance = distance GRAPHIQUE réelle du rail ; le facteur ne
+    // raccourcit que la distance de SCROLL nécessaire pour la parcourir.
+    const getClientsDistance = () => clientsCardsContainer.clientWidth - window.innerWidth
+    const getScrollFactor = () => getResponsiveScrollFactor()
+    const getDriftPhasePx = () => getClientsDistance() * getScrollFactor()
+    const getCoverPhasePx = () => window.innerHeight * getScrollFactor()
     // Court hold : le pré-footer reste immobile, plein écran, avant que le footer
     // ne commence à monter par-dessus.
-    const footerHoldPhasePx = window.innerHeight * 0.35 * scrollFactor
-    const footerCoverPhasePx = window.innerHeight * scrollFactor
+    const getFooterHoldPhasePx = () => window.innerHeight * 0.35 * getScrollFactor()
+    const getFooterCoverPhasePx = () => window.innerHeight * getScrollFactor()
 
     // Pin unique pour toute la scène (drift horizontal + recouvrement pré-footer + hold + recouvrement footer)
     const sceneST = ScrollTrigger.create({
       trigger: clientsScene || "#clients",
       start: "top top",
-      end: "+=" + (driftPhasePx + coverPhasePx + footerHoldPhasePx + footerCoverPhasePx),
+      end: () =>
+        "+=" +
+        (getDriftPhasePx() + getCoverPhasePx() + getFooterHoldPhasePx() + getFooterCoverPhasePx()),
       pin: true,
     })
 
     // Positions dérivées du pin principal (seule source de vérité)
-    const driftEnd = () => sceneST.start + driftPhasePx
-    const coverEnd = () => sceneST.start + driftPhasePx + coverPhasePx
-    const footerCoverStart = () => coverEnd() + footerHoldPhasePx
-    const footerCoverEnd = () => footerCoverStart() + footerCoverPhasePx
+    const driftEnd = () => sceneST.start + getDriftPhasePx()
+    const coverEnd = () => driftEnd() + getCoverPhasePx()
+    const footerCoverStart = () => coverEnd() + getFooterHoldPhasePx()
+    const footerCoverEnd = () => footerCoverStart() + getFooterCoverPhasePx()
 
     // Lien "Contact" : on vise la fin de l'animation d'entrée du footer, quand il
     // recouvre tout l'écran. Clamp de 1px pour rester dans la plage du pin.
     anchorResolvers["#footer"] = () => Math.max(0, footerCoverEnd() - 1)
 
     const clientsScrollTween = gsap.to(clientsCardsContainer, {
-      x: -clientsDistance,
+      x: () => -getClientsDistance(),
       ease: "none",
       scrollTrigger: {
         trigger: clientsScene || "#clients",
         start: () => sceneST.start,
         end: driftEnd,
         scrub: true,
+        invalidateOnRefresh: true,
       },
     })
 
@@ -1307,7 +1309,7 @@ export function initAnimations(pendingHash) {
       const preFooterWidthTrigger = {
         trigger: clientsScene,
         start: driftEnd,
-        end: () => driftEnd() + 0.8 * coverPhasePx,
+        end: () => driftEnd() + 0.8 * getCoverPhasePx(),
         scrub: 1,
       }
 
@@ -1323,8 +1325,8 @@ export function initAnimations(pendingHash) {
         ease: "none",
         scrollTrigger: {
           trigger: clientsScene,
-          start: () => driftEnd() + 0.6 * coverPhasePx, // dès 60% de la hauteur du viewport recouvert
-          end: () => driftEnd() + 0.8 * coverPhasePx,
+          start: () => driftEnd() + 0.6 * getCoverPhasePx(), // dès 60% de la hauteur du viewport recouvert
+          end: () => driftEnd() + 0.8 * getCoverPhasePx(),
           scrub: 1,
         },
         onUpdate: applyPreFooterClip,
@@ -1344,8 +1346,8 @@ export function initAnimations(pendingHash) {
         ease: "none",
         scrollTrigger: {
           trigger: clientsScene,
-          start: () => driftEnd() + 0.5 * coverPhasePx,
-          end: () => driftEnd() + 0.68 * coverPhasePx, // termine avant manifestRevealStart (0.7)
+          start: () => driftEnd() + 0.5 * getCoverPhasePx(),
+          end: () => driftEnd() + 0.68 * getCoverPhasePx(), // termine avant manifestRevealStart (0.7)
           scrub: 1,
         },
       })
@@ -1423,7 +1425,7 @@ export function initAnimations(pendingHash) {
         // donc pas de trigger fiable sur #pre-footer lui-même) :
         // le reveal démarre plus tard dans le recouvrement (60% parcouru) et se
         // termine pile quand le pré-footer a fini de recouvrir Clients.
-        const manifestRevealStart = () => driftEnd() + 0.7 * coverPhasePx
+        const manifestRevealStart = () => driftEnd() + 0.7 * getCoverPhasePx()
         const manifestRevealEnd = coverEnd
 
         gsap.to(manifestLetters, {
@@ -1475,7 +1477,7 @@ export function initAnimations(pendingHash) {
       const footerWidthTrigger = {
         trigger: clientsScene,
         start: footerCoverStart,
-        end: () => footerCoverStart() + 0.8 * footerCoverPhasePx,
+        end: () => footerCoverStart() + 0.8 * getFooterCoverPhasePx(),
         scrub: 1,
       }
 
@@ -1491,8 +1493,8 @@ export function initAnimations(pendingHash) {
         ease: "none",
         scrollTrigger: {
           trigger: clientsScene,
-          start: () => footerCoverStart() + 0.6 * footerCoverPhasePx,
-          end: () => footerCoverStart() + 0.8 * footerCoverPhasePx,
+          start: () => footerCoverStart() + 0.6 * getFooterCoverPhasePx(),
+          end: () => footerCoverStart() + 0.8 * getFooterCoverPhasePx(),
           scrub: 1,
         },
         onUpdate: applyFooterClip,
@@ -1514,7 +1516,7 @@ export function initAnimations(pendingHash) {
       const footerContentTl = gsap.timeline({
         scrollTrigger: {
           trigger: clientsScene,
-          start: () => footerCoverStart() + 0.5 * footerCoverPhasePx,
+          start: () => footerCoverStart() + 0.5 * getFooterCoverPhasePx(),
           end: footerCoverEnd,
           scrub: 1,
         },
@@ -1529,17 +1531,19 @@ export function initAnimations(pendingHash) {
       })
     }
 
+    // Orientation recalculée à chaque refresh (portrait -> 0.4, paysage -> 0.5).
+    const getAmplitude = () => (window.innerWidth < window.innerHeight ? 0.4 : 0.5)
+
     clientCards.forEach((card, i) => {
       const sign = i % 2 === 0 ? 1 : -1
       const rotation = (Math.random() - 0.5) * 6
-      const amplitude = isPortrait ? 0.4 : 0.5
 
       gsap.fromTo(
         card,
         { rotation },
         {
           rotation: -rotation,
-          y: () => sign * -amplitude * window.innerHeight,
+          y: () => sign * -getAmplitude() * window.innerHeight,
           yPercent: () => sign * 50,
           yoyo: true,
           repeat: 1,
@@ -1550,6 +1554,7 @@ export function initAnimations(pendingHash) {
             start: "left 90%",
             end: "right 10%",
             scrub: true,
+            invalidateOnRefresh: true,
           },
         },
       )
