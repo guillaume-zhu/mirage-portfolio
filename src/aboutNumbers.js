@@ -20,6 +20,12 @@ export function initAboutNumbers(gsap, ScrollTrigger) {
     if (i > 0) gsap.set(stateLines, { rotationY: 90 })
   })
 
+  function getScrollScale() {
+    if (window.innerWidth >= 1100) return 1
+    if (window.innerWidth >= 768) return 0.8
+    return 0.7
+  }
+
   const numbersScrollDistance = 2.5 // multiplicateur de window.innerHeight, à ajuster après test visuel
   // Cover Numbers -> Manifesto : même langage que Approach -> Numbers.
   // Manifesto (en flux normal, margin-top:-100vh dans about.css) remonte
@@ -30,7 +36,8 @@ export function initAboutNumbers(gsap, ScrollTrigger) {
     scrollTrigger: {
       trigger: root,
       start: "top top",
-      end: () => "+=" + window.innerHeight * (numbersScrollDistance + manifestoCoverDistance),
+      end: () =>
+        "+=" + window.innerHeight * (numbersScrollDistance + manifestoCoverDistance) * getScrollScale(),
       pin: true,
       scrub: true,
     },
@@ -51,8 +58,9 @@ export function initAboutNumbers(gsap, ScrollTrigger) {
   const coverHoldDuration = numbersAnimationDuration * (manifestoCoverDistance / numbersScrollDistance)
   master.to({}, { duration: coverHoldDuration })
 
-  const coverEnd = () => master.scrollTrigger.start + window.innerHeight * numbersScrollDistance
-  const manifestoCoverPhasePx = () => window.innerHeight * manifestoCoverDistance
+  const coverEnd = () =>
+    master.scrollTrigger.start + window.innerHeight * numbersScrollDistance * getScrollScale()
+  const manifestoCoverPhasePx = () => window.innerHeight * manifestoCoverDistance * getScrollScale()
   const manifestoCoverEnd = () => coverEnd() + manifestoCoverPhasePx()
 
   const manifestoEl = document.querySelector(".about-manifesto")

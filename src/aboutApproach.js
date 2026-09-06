@@ -85,6 +85,12 @@ export function initAboutApproach(gsap, ScrollTrigger) {
   // Ratio dérivé de la référence : master ≈0.31 pour n=4 vs ≈0.649 pour n=9
   // (≈0.478), appliqué aux ~700vh de scroll effectif de la référence
   // (800vh de pin-height - 100vh de viewport) → ≈334vh.
+  function getScrollScale() {
+    if (window.innerWidth >= 1100) return 1
+    if (window.innerWidth >= 768) return 0.8
+    return 0.7
+  }
+
   const approachScrollDistance = 1.5 // multiplicateur de window.innerHeight, à ajuster après test visuel
   // Cover Approach -> Numbers : même langage que Hero -> Approach. Numbers
   // (en flux normal, margin-top:-100vh dans about.css) remonte naturellement
@@ -102,7 +108,8 @@ export function initAboutApproach(gsap, ScrollTrigger) {
       scrollTrigger: {
         trigger: root,
         start: "top top",
-        end: () => "+=" + window.innerHeight * (approachScrollDistance + numbersCoverDistance),
+        end: () =>
+          "+=" + window.innerHeight * (approachScrollDistance + numbersCoverDistance) * getScrollScale(),
         pin: true,
         scrub: true,
         invalidateOnRefresh: true,
@@ -174,8 +181,9 @@ export function initAboutApproach(gsap, ScrollTrigger) {
 
   window.addEventListener("resize", handleResize)
 
-  const coverEnd = () => master.scrollTrigger.start + window.innerHeight * approachScrollDistance
-  const numbersCoverPhasePx = () => window.innerHeight * numbersCoverDistance
+  const coverEnd = () =>
+    master.scrollTrigger.start + window.innerHeight * approachScrollDistance * getScrollScale()
+  const numbersCoverPhasePx = () => window.innerHeight * numbersCoverDistance * getScrollScale()
   const numbersCoverEnd = () => coverEnd() + numbersCoverPhasePx()
 
   const numbersEl = document.querySelector(".about-numbers")

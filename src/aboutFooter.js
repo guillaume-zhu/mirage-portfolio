@@ -17,10 +17,16 @@ export function initAboutFooter(gsap, ScrollTrigger) {
   const manifesto = document.querySelector(".about-manifesto")
   if (!footer || !manifesto) return
 
+  function getScrollScale() {
+    if (window.innerWidth >= 1100) return 1
+    if (window.innerWidth >= 768) return 0.8
+    return 0.7
+  }
+
   const manifestoHoldST = ScrollTrigger.create({
     trigger: manifesto,
     start: "bottom bottom",
-    end: "+=100%",
+    end: () => "+=" + window.innerHeight * getScrollScale(),
     pin: true,
     pinSpacing: true, // valeur par défaut, documentée explicitement : le cover (+100vh) et le margin-top:-100vh du footer dépendent de ce spacing
   })

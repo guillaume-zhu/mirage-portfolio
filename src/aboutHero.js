@@ -141,7 +141,14 @@ export function initAboutHero(gsap, ScrollTrigger) {
   // occuper une place réelle dans une page scrollable, contrairement à la
   // référence qui bloque le scroll et tourne à l'infini. Le pin ne fait que
   // maintenir la scène à l'écran ; il ne pilote rien du moteur ci-dessus. ---
+  function getScrollScale() {
+    if (window.innerWidth >= 1100) return 1
+    if (window.innerWidth >= 768) return 0.8
+    return 0.7
+  }
+
   const heroScrollDistance = 0.8 // multiplicateur de window.innerHeight, à ajuster après test visuel
+  const heroScrollPhasePx = () => window.innerHeight * heroScrollDistance * getScrollScale()
 
   // Cover Hero -> Approach : même langage que Clients -> Pre-footer sur la
   // Home, sans yPercent — Approach (en flux normal, margin-top:-100vh dans
@@ -150,12 +157,12 @@ export function initAboutHero(gsap, ScrollTrigger) {
   // Fonction (pas une valeur figée) pour rester correcte après un
   // resize/ScrollTrigger.refresh, exactement comme heroScrollDistance.
   const approachCoverDistance = 1 // multiplicateur de window.innerHeight, à ajuster après test visuel
-  const approachCoverPhasePx = () => window.innerHeight * approachCoverDistance
+  const approachCoverPhasePx = () => window.innerHeight * approachCoverDistance * getScrollScale()
 
   const heroST = ScrollTrigger.create({
     trigger: root,
     start: "top top",
-    end: () => "+=" + (window.innerHeight * heroScrollDistance + approachCoverPhasePx()),
+    end: () => "+=" + (heroScrollPhasePx() + approachCoverPhasePx()),
     pin: true,
   })
 
@@ -166,7 +173,7 @@ export function initAboutHero(gsap, ScrollTrigger) {
   // Frontière stricte entre le comportement Hero existant (moteur 3D, pin) et
   // la phase de cover : tout ce qui précède coverEnd() reste inchangé, la
   // phase de cover ne commence qu'à partir de là.
-  const coverEnd = () => heroST.start + window.innerHeight * heroScrollDistance
+  const coverEnd = () => heroST.start + heroScrollPhasePx()
   const approachCoverEnd = () => coverEnd() + approachCoverPhasePx()
 
   const approachEl = document.querySelector(".about-approach")
