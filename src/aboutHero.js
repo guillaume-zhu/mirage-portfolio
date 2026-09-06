@@ -11,16 +11,15 @@ export function initAboutHero(gsap, ScrollTrigger) {
     (_, i) => (i / medias.length) * Math.PI * 2,
   )
 
-  const DESKTOP_MEDIA_VW = 10.7
-  const MOBILE_MEDIA_VW = 27
-
-  let mediaVw = DESKTOP_MEDIA_VW
   let layout
 
   function getLayout() {
     const w = window.innerWidth
     const h = window.innerHeight
-    const scale = mediaVw / DESKTOP_MEDIA_VW
+    // offsetWidth reflète la largeur CSS intrinsèque de la card sans inclure
+    // les transforms 3D appliqués ensuite par GSAP.
+    const mediaWidth = medias[0]?.offsetWidth || w * 0.107
+    const scale = w > 0 ? mediaWidth / (w * 0.107) : 1
     return {
       w,
       h,
@@ -117,21 +116,22 @@ export function initAboutHero(gsap, ScrollTrigger) {
     onUpdate: updateScene,
   })
 
-  const mm = gsap.matchMedia()
-  mm.add("(max-width: 768px)", () => {
-    mediaVw = MOBILE_MEDIA_VW
-  })
-  mm.add("(min-width: 769px)", () => {
-    mediaVw = DESKTOP_MEDIA_VW
-  })
+  function refreshLayout() {
+    layout = getLayout()
+    renderTilt()
+    updateScene()
+  }
 
-  layout = getLayout()
-  renderTilt()
-  updateScene()
+  function handleResize() {
+    refreshLayout()
+  }
+
+  refreshLayout()
 
   root.addEventListener("mousemove", handleMouseMove)
   root.addEventListener("touchstart", handleTouchMove, { passive: true })
   root.addEventListener("touchmove", handleTouchMove, { passive: true })
+  window.addEventListener("resize", handleResize)
   // Écouteur wheel natif, SANS preventDefault : le scroll de page (Lenis)
   // continue normalement en parallèle du boost de rotation/radius/perspective
   // ci-dessus — les deux réagissent au même événement, simultanément.
@@ -141,7 +141,14 @@ export function initAboutHero(gsap, ScrollTrigger) {
   // occuper une place réelle dans une page scrollable, contrairement à la
   // référence qui bloque le scroll et tourne à l'infini. Le pin ne fait que
   // maintenir la scène à l'écran ; il ne pilote rien du moteur ci-dessus. ---
+  function getScrollScale() {
+    if (window.innerWidth >= 1100) return 1
+    if (window.innerWidth >= 768) return 0.8
+    return 0.7
+  }
+
   const heroScrollDistance = 0.8 // multiplicateur de window.innerHeight, à ajuster après test visuel
+  const heroScrollPhasePx = () => window.innerHeight * heroScrollDistance * getScrollScale()
 
   // Cover Hero -> Approach : même langage que Clients -> Pre-footer sur la
   // Home, sans yPercent — Approach (en flux normal, margin-top:-100vh dans
@@ -150,12 +157,12 @@ export function initAboutHero(gsap, ScrollTrigger) {
   // Fonction (pas une valeur figée) pour rester correcte après un
   // resize/ScrollTrigger.refresh, exactement comme heroScrollDistance.
   const approachCoverDistance = 1 // multiplicateur de window.innerHeight, à ajuster après test visuel
-  const approachCoverPhasePx = () => window.innerHeight * approachCoverDistance
+  const approachCoverPhasePx = () => window.innerHeight * approachCoverDistance * getScrollScale()
 
   const heroST = ScrollTrigger.create({
     trigger: root,
     start: "top top",
-    end: () => "+=" + (window.innerHeight * heroScrollDistance + approachCoverPhasePx()),
+    end: () => "+=" + (heroScrollPhasePx() + approachCoverPhasePx()),
     pin: true,
   })
 
@@ -166,7 +173,7 @@ export function initAboutHero(gsap, ScrollTrigger) {
   // Frontière stricte entre le comportement Hero existant (moteur 3D, pin) et
   // la phase de cover : tout ce qui précède coverEnd() reste inchangé, la
   // phase de cover ne commence qu'à partir de là.
-  const coverEnd = () => heroST.start + window.innerHeight * heroScrollDistance
+  const coverEnd = () => heroST.start + heroScrollPhasePx()
   const approachCoverEnd = () => coverEnd() + approachCoverPhasePx()
 
   const approachEl = document.querySelector(".about-approach")
@@ -255,7 +262,7 @@ export function initAboutHero(gsap, ScrollTrigger) {
     root.removeEventListener("touchstart", handleTouchMove)
     root.removeEventListener("touchmove", handleTouchMove)
     root.removeEventListener("wheel", handleWheel)
-    mm.revert()
+    window.removeEventListener("resize", handleResize)
     heroST.kill()
     ;[insetXTween, radiusTween, heroScaleTween, approachRevealTl].forEach((t) => {
       t?.scrollTrigger?.kill()

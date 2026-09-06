@@ -22,14 +22,75 @@ export function initAboutApproach(gsap, ScrollTrigger) {
   const cards = root.querySelectorAll(".about-approach-card")
   const n = cards.length
 
-  const animationDistance = document.body.clientWidth + cards[0].clientWidth
-  const COLS = window.innerWidth <= 768 ? 2 : 4
   const duration = 1 / n
-  const stagger = window.innerWidth <= 768 ? 0.95 / n : 0.98 / n
+  let compact = window.innerWidth < 1100
+
+  function lerp(from, to, progress) {
+    return from + (to - from) * progress
+  }
+
+  function getCompactSpacing(width) {
+    if (width >= 834) {
+      const progress = (1100 - width) / (1100 - 834)
+      return {
+        inset: lerp(31.625, 71, progress),
+        gap: lerp(31.625, 48, progress),
+      }
+    }
+
+    if (width >= 768) return { inset: 71, gap: 48 }
+
+    if (width >= 390) {
+      const progress = (768 - width) / (768 - 390)
+      return {
+        inset: lerp(71, 48, progress),
+        gap: lerp(48, 20, progress),
+      }
+    }
+
+    return { inset: 48, gap: 20 }
+  }
+
+  function getGeometry() {
+    const viewportWidth = document.body.clientWidth
+    const cardWidth = cards[0].clientWidth
+
+    return {
+      viewportWidth,
+      cardWidth,
+      animationDistance: viewportWidth + cardWidth,
+      compactSpacing: compact ? getCompactSpacing(viewportWidth) : null,
+    }
+  }
+
+  function columnX(col) {
+    const { viewportWidth, cardWidth, animationDistance, compactSpacing } = getGeometry()
+
+    if (!compact) return -(col / 4) * animationDistance
+
+    if (col === 0) {
+      return compactSpacing.inset - viewportWidth + cardWidth + compactSpacing.gap
+    }
+    if (col === 1) return compactSpacing.inset - viewportWidth
+
+    return -viewportWidth - cardWidth
+  }
+
+  function setCompactInitialState() {
+    gsap.set(cards, { x: 0 })
+    gsap.set(cards[0], { x: columnX(1) })
+    gsap.set(cards[1], { x: columnX(0) })
+  }
 
   // Ratio dérivé de la référence : master ≈0.31 pour n=4 vs ≈0.649 pour n=9
   // (≈0.478), appliqué aux ~700vh de scroll effectif de la référence
   // (800vh de pin-height - 100vh de viewport) → ≈334vh.
+  function getScrollScale() {
+    if (window.innerWidth >= 1100) return 1
+    if (window.innerWidth >= 768) return 0.8
+    return 0.7
+  }
+
   const approachScrollDistance = 1.5 // multiplicateur de window.innerHeight, à ajuster après test visuel
   // Cover Approach -> Numbers : même langage que Hero -> Approach. Numbers
   // (en flux normal, margin-top:-100vh dans about.css) remonte naturellement
@@ -37,48 +98,92 @@ export function initAboutApproach(gsap, ScrollTrigger) {
   // ScrollTrigger) pour être disponible dès la première évaluation de `end`.
   const numbersCoverDistance = 1 // multiplicateur de window.innerHeight, à ajuster après test visuel
 
-  const master = gsap.timeline({
-    scrollTrigger: {
-      trigger: root,
-      start: "top top",
-      end: () => "+=" + window.innerHeight * (approachScrollDistance + numbersCoverDistance),
-      pin: true,
-      scrub: true,
-    },
-  })
+  function buildMaster(isCompact) {
+    const COLS = isCompact ? 2 : 4
+    const stagger = isCompact ? duration : 0.98 / n
 
-  cards.forEach((media, i) => {
-    const startCol = Math.max(0, COLS - 1 - i)
-    const endCol = Math.min(COLS, n - i)
+    if (isCompact) setCompactInitialState()
 
-    const tl = gsap.timeline({ defaults: { ease: "power2.inOut", duration } })
+    const timeline = gsap.timeline({
+      scrollTrigger: {
+        trigger: root,
+        start: "top top",
+        end: () =>
+          "+=" + window.innerHeight * (approachScrollDistance + numbersCoverDistance) * getScrollScale(),
+        pin: true,
+        scrub: true,
+        invalidateOnRefresh: true,
+        onRefreshInit: isCompact ? setCompactInitialState : undefined,
+      },
+    })
 
-    if (startCol > 0) {
-      tl.fromTo(
-        media,
-        { x: -(startCol / COLS) * animationDistance },
-        { x: -((startCol + 1) / COLS) * animationDistance },
-      )
-    } else {
-      tl.to(media, { x: -(1 / COLS) * animationDistance })
-    }
+    cards.forEach((media, i) => {
+      const startCol = Math.max(0, COLS - 1 - i)
+      const endCol = Math.min(COLS, n - i)
 
-    for (let col = startCol + 2; col <= endCol; col++) {
-      tl.to(media, { x: -(col / COLS) * animationDistance })
-    }
+      const tl = gsap.timeline({ defaults: { ease: "power2.inOut", duration } })
 
-    master.add(tl, (i - (COLS - 1)) * stagger + startCol * duration)
-  })
+      if (isCompact && i > 0) {
+        if (i === 1) {
+          tl.set(media, { x: () => columnX(0), immediateRender: false })
+        } else {
+          tl.fromTo(media, { x: 0 }, { x: () => columnX(0) })
+        }
+      }
 
-  // Hold calculé (jamais codé en dur) pour préserver exactement la vitesse
-  // actuelle du convoyeur : ancienne vitesse = A/S, nouvelle = (A+hold)/(S+C)
-  // avec hold = A×(C/S) => (A+hold)/(S+C) = A/S, identique quel que soit A/S/C.
-  const approachAnimationDuration = master.duration()
-  const coverHoldDuration = approachAnimationDuration * (numbersCoverDistance / approachScrollDistance)
-  master.to({}, { duration: coverHoldDuration })
+      if (startCol > 0) {
+        tl.fromTo(
+          media,
+          { x: () => columnX(startCol) },
+          { x: () => columnX(startCol + 1) },
+        )
+      } else {
+        tl.to(media, { x: () => columnX(1) })
+      }
 
-  const coverEnd = () => master.scrollTrigger.start + window.innerHeight * approachScrollDistance
-  const numbersCoverPhasePx = () => window.innerHeight * numbersCoverDistance
+      for (let col = startCol + 2; col <= endCol; col++) {
+        tl.to(media, { x: () => columnX(col) })
+      }
+
+      const waitingLeadIn = isCompact && i > 1 ? duration : 0
+      timeline.add(tl, (i - (COLS - 1)) * stagger + startCol * duration - waitingLeadIn)
+    })
+
+    // Hold calculé (jamais codé en dur) pour préserver exactement la vitesse
+    // actuelle du convoyeur : ancienne vitesse = A/S, nouvelle = (A+hold)/(S+C)
+    // avec hold = A×(C/S) => (A+hold)/(S+C) = A/S, identique quel que soit A/S/C.
+    const approachAnimationDuration = timeline.duration()
+    const coverHoldDuration = approachAnimationDuration * (numbersCoverDistance / approachScrollDistance)
+    timeline.to({}, { duration: coverHoldDuration })
+
+    return timeline
+  }
+
+  let master = buildMaster(compact)
+
+  let resizeFrame
+  function handleResize() {
+    cancelAnimationFrame(resizeFrame)
+    resizeFrame = requestAnimationFrame(() => {
+      const nextCompact = window.innerWidth < 1100
+
+      if (nextCompact !== compact) {
+        master.scrollTrigger?.kill()
+        master.kill()
+        gsap.set(cards, { clearProps: "transform,zIndex" })
+        compact = nextCompact
+        master = buildMaster(compact)
+      }
+
+      ScrollTrigger.refresh()
+    })
+  }
+
+  window.addEventListener("resize", handleResize)
+
+  const coverEnd = () =>
+    master.scrollTrigger.start + window.innerHeight * approachScrollDistance * getScrollScale()
+  const numbersCoverPhasePx = () => window.innerHeight * numbersCoverDistance * getScrollScale()
   const numbersCoverEnd = () => coverEnd() + numbersCoverPhasePx()
 
   const numbersEl = document.querySelector(".about-numbers")
@@ -153,6 +258,8 @@ export function initAboutApproach(gsap, ScrollTrigger) {
   }
 
   function destroy() {
+    cancelAnimationFrame(resizeFrame)
+    window.removeEventListener("resize", handleResize)
     master.scrollTrigger?.kill()
     master.kill()
     ;[insetXTween, radiusTween, approachScaleTween, numbersRevealTl].forEach((t) => {

@@ -22,6 +22,10 @@ html.lenis body {
   height: auto;
 }
 
+html {
+  overflow-x: clip;
+}
+
 .lenis.lenis-smooth {
   scroll-behavior: auto !important;
 }
@@ -52,6 +56,9 @@ body {
 
 /* --- SECTION ABOUT HERO --- */
 .about-hero {
+  --about-hero-media-width: 10.7vw;
+  --about-hero-media-radius: 0.85vw;
+
   position: relative;
   width: 100%;
   height: 100vh;
@@ -77,19 +84,19 @@ body {
 
 .about-hero-media {
   position: absolute;
-  top: calc(50% - 6.65vw);
-  left: calc(50% - 5.35vw);
-  width: 10.7vw;
+  inset: 0;
+  width: var(--about-hero-media-width);
   aspect-ratio: 185.53 / 230.596;
-  border-radius: 0.85vw;
+  margin: auto;
+  border-radius: var(--about-hero-media-radius);
   object-fit: cover;
   will-change: transform;
   transform-style: preserve-3d;
 }
 
-/* Centré via flex + inset (jamais via transform: translate), pour ne pas
+/* Centré via flex + inset/marges auto (jamais via transform: translate), pour ne pas
    entrer en conflit avec les transforms GSAP (contre-rotation) appliqués
-   au même élément — même logique que le top/left en dur de .about-hero-media. */
+   au même élément. */
 .about-hero-text {
   position: absolute;
   inset: 0;
@@ -113,17 +120,29 @@ body {
   margin: 0;
 }
 
-@media (max-width: 768px) {
-  .about-hero-media {
-    top: calc(50% - 16.8vw);
-    left: calc(50% - 13.5vw);
-    width: 27vw;
-    border-radius: 2.1vw;
+@media (min-width: 768px) and (max-width: 1099px) {
+  .about-hero {
+    /* 117.7px à 1100px, 185.53px à 834px, puis plateau jusqu'à 768px. */
+    --about-hero-media-width: clamp(117.7px, calc(398.2px - 25.5vw), 185.53px);
+    --about-hero-media-radius: clamp(9.35px, calc(31.1929px - 1.9857vw), 14.632px);
+  }
+}
+
+@media (max-width: 767px) {
+  .about-hero {
+    /* Continuité depuis 768px, cible Figma à 390px, puis floor. */
+    --about-hero-media-width: clamp(112.651px, calc(37.4584px + 19.2802vw), 185.53px);
+    --about-hero-media-radius: clamp(8.884px, calc(2.9535px + 1.5206vw), 14.632px);
   }
 }
 
 /* --- SECTION APPROACH --- */
 .about-approach {
+  /* Équivalent de la grille historique Desktop : à 1100px, l'inset et le
+     gap implicites du convoyeur valent tous deux 31.625px. */
+  --about-approach-card-inset: 2.875vw;
+  --about-approach-card-gap: 2.875vw;
+
   position: relative;
   z-index: 20; /* au-dessus du Hero pinné (position:fixed) — stacking explicite, pas implicite */
   height: 100vh;
@@ -152,7 +171,9 @@ body {
   font-weight: var(--type-label-weight);
   font-size: var(--type-label-size);
   letter-spacing: var(--type-label-tracking);
-  line-height: var(--type-label-leading); /* leading-none dans Figma — ne pas hériter du line-height du body */
+  line-height: var(
+    --type-label-leading
+  ); /* leading-none dans Figma — ne pas hériter du line-height du body */
   text-transform: uppercase;
   color: var(--c-black);
 }
@@ -221,6 +242,85 @@ body {
   font-weight: 500;
   font-size: clamp(1.2rem, 1.74vw, 1.875rem); /* 30px */
   line-height: 1.3;
+}
+
+@media (min-width: 768px) and (max-width: 1099px) {
+  .about-approach {
+    /* Continuité depuis la géométrie Desktop à 1100px, cibles Figma à
+       834px, puis plateau jusqu'à 768px. */
+    --about-approach-card-inset: clamp(31.625px, calc(194.4539px - 14.8026vw), 71px);
+    --about-approach-card-gap: clamp(31.625px, calc(99.3412px - 6.156vw), 48px);
+  }
+
+  .about-approach-intro {
+    top: clamp(141.35px, calc(648.5492px - 46.109vw), 264px);
+    width: clamp(381.26px, calc(1281.6886px - 81.8571vw), 599px);
+    gap: clamp(31.9px, calc(106.7496px - 6.8045vw), 50px);
+  }
+
+  .about-approach-row {
+    top: clamp(308px, calc(1556.8722px - 113.5338vw), 610px);
+    height: clamp(206.25px, calc(693.1861px - 44.2669vw), 324px);
+  }
+
+  .about-approach-card {
+    width: clamp(324.5px, calc(1091.6053px - 69.7368vw), 510px);
+    padding: clamp(38.17px, calc(128.4444px - 8.2068vw), 60px);
+    border-radius: clamp(15.95px, calc(53.3748px - 3.4023vw), 25px);
+  }
+
+  .about-approach-card-text {
+    font-size: clamp(1.2rem, calc(63.8617px - 4.0602vw), 1.875rem);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1099px) and (orientation: portrait) {
+  .about-approach-row {
+    top: min(clamp(308px, calc(1556.8722px - 113.5338vw), 610px), calc(100vh - 384px));
+  }
+}
+
+@media (max-width: 767px) {
+  .about-approach {
+    /* Continuité depuis la cible Tablet à 768px, cibles Figma à 390px,
+       puis floor sous 390px. */
+    --about-approach-card-inset: clamp(48px, calc(24.2698px + 6.0847vw), 71px);
+    --about-approach-card-gap: clamp(20px, calc(-8.8889px + 7.4074vw), 48px);
+  }
+
+  .about-approach-intro {
+    top: clamp(174px, calc(81.1429px + 23.8095vw), 264px);
+    width: clamp(310px, calc(11.8254px + 76.455vw), 599px);
+    gap: clamp(25px, calc(-0.7937px + 6.6138vw), 50px);
+  }
+
+  .about-approach-title-break {
+    display: none;
+  }
+
+  .about-approach-row {
+    top: clamp(406px, calc(195.5238px + 53.9683vw), 610px);
+    height: clamp(324px, calc(384.9524px - 7.9365vw), 354px);
+  }
+
+  .about-approach-card {
+    width: clamp(297px, calc(77.2381px + 56.3492vw), 510px);
+    padding: 60px;
+    border-radius: 25px;
+  }
+
+  .about-approach-card-text {
+    font-size: clamp(1.375rem, calc(13.746px + 2.1164vw), 1.875rem);
+  }
+}
+
+@media (max-width: 767px) and (orientation: portrait) {
+  .about-approach-row {
+    top: min(
+      clamp(406px, calc(195.5238px + 53.9683vw), 610px),
+      max(406px, calc(100vh - clamp(384px, calc(493.7143px - 14.2857vw), 438px)))
+    );
+  }
 }
 
 /* --- SECTION NUMBERS --- */
@@ -323,6 +423,44 @@ body {
   max-width: 90vw;
 }
 
+@media (min-width: 768px) and (max-width: 1099px) {
+  .about-numbers-content {
+    gap: clamp(31.9px, calc(106.7496px - 6.8045vw), 50px);
+  }
+
+  .about-numbers-state {
+    gap: clamp(12.76px, calc(42.6998px - 2.7218vw), 20px);
+  }
+
+  .about-numbers-value {
+    font-size: clamp(190.96px, calc(228.3435px - 3.3985vw), 200px);
+  }
+
+  .about-numbers-caption {
+    font-size: clamp(1.2rem, calc(63.8617px - 4.0602vw), 1.875rem);
+    width: clamp(381.26px, calc(1281.6886px - 81.8571vw), 599px);
+  }
+}
+
+@media (max-width: 767px) {
+  .about-numbers-content {
+    gap: clamp(30px, calc(9.3651px + 5.291vw), 50px);
+  }
+
+  .about-numbers-state {
+    gap: clamp(10px, calc(-0.3175px + 2.6455vw), 20px);
+  }
+
+  .about-numbers-value {
+    font-size: clamp(125px, calc(47.619px + 19.8413vw), 200px);
+  }
+
+  .about-numbers-caption {
+    font-size: clamp(1.375rem, calc(13.746px + 2.1164vw), 1.875rem);
+    width: min(599px, 90vw);
+  }
+}
+
 /* --- SECTION MANIFESTO --- */
 .about-manifesto {
   position: relative;
@@ -333,20 +471,13 @@ body {
   /* Panneau étroit + coins arrondis dès le premier paint, avant le JS —
      même filet de sécurité que .about-approach / .about-numbers. */
   clip-path: inset(0 8vw 0 8vw round 1.5rem 1.5rem 0 0);
-  /* Respiration d'entrée/sortie unique (haut/bas de tout le flux), reprise
-     de la marge du bloc centré dans le frame Figma (1117px) — pas dupliquée
-     par séquence, contrairement à l'ancien height:100vh. */
-  padding-top: 15.25vw;
-  padding-bottom: 15.25vw;
 }
 
 .about-manifesto-sequence {
   position: relative;
-  height: auto;
-}
-
-.about-manifesto-sequence + .about-manifesto-sequence {
-  margin-top: 10vw; /* valeur de premier test : plus continue que 15.25vw, plus respirante que la référence brute */
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
 }
 
 .about-manifesto-inner {
@@ -363,7 +494,7 @@ body {
   font-weight: var(--type-label-weight);
   font-size: var(--type-label-size);
   letter-spacing: var(--type-label-tracking);
-  line-height: var(--type-label-leading);
+  line-height: 1.3;
   text-transform: uppercase;
 }
 
@@ -371,7 +502,32 @@ body {
   font-family: var(--font-special);
   font-weight: 400;
   font-size: var(--type-display-lg-size);
-  line-height: var(--type-display-lg-leading);
+  line-height: 1.3;
+}
+
+@media (min-width: 768px) and (max-width: 1099px) {
+  .about-manifesto-inner {
+    margin-left: min(
+      clamp(101.2px, calc(131.3887px - 2.7444vw), 108.5px),
+      calc(50vw - 308.5px)
+    );
+    width: clamp(617px, calc(-212.767px + 99.4925vw), 881.65px);
+    gap: clamp(48.4px, calc(162.5353px - 10.3759vw), 76px);
+  }
+}
+
+@media (max-width: 767px) {
+  .about-manifesto-inner {
+    margin-inline: auto;
+    width: clamp(322px, calc(17.6349px + 78.0423vw), 617px);
+    max-width: calc(100vw - 68px);
+    gap: clamp(30px, calc(-17.4603px + 12.1693vw), 76px);
+    top: -12px;
+  }
+
+  .about-manifesto-label {
+    line-height: 2;
+  }
 }
 
 .about-manifesto-line {
