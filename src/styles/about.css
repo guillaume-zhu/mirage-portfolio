@@ -1,6 +1,7 @@
 @import "./vars.css";
 @import "./header.css";
 @import "./footer.css";
+@import "./view-transitions.css";
 
 /* --- FONT FACES (Plus Jakarta Sans, self-hosted via @fontsource-variable) ---
    Nécessaire pour que --font-regular/--font-bold se rendent correctement ;
