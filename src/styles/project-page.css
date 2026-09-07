@@ -441,6 +441,10 @@ body {
 }
 
 @media (max-width: 1099px) {
+  .project-testimonial {
+    margin-top: 0;
+  }
+
   .project-testimonial-inner {
     top: min(
       clamp(0px, calc(115.789px - 10.5263vw), 28px),

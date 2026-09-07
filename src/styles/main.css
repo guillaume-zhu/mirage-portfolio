@@ -393,12 +393,6 @@ section {
     filter 0.3s ease-out;
 }
 
-/* Dim other items on hover (hover pris uniquement sur le nom du projet) */
-.project-list:has(.project-title:hover) .project-item:not(:has(.project-title:hover)) {
-  opacity: 0.3;
-  filter: blur(10px);
-}
-
 .project-title {
   font-family: var(--font-special);
   font-weight: 400;
@@ -427,11 +421,19 @@ section {
   color: var(--c-black);
 }
 
-.project-item:has(.project-title:hover) .project-meta {
-  position: relative;
-  z-index: 6;
-  color: #fff;
-  mix-blend-mode: difference;
+/* Hover pris uniquement sur le nom du projet et sur un appareil qui le supporte. */
+@media (min-width: 1100px) and (hover: hover) and (pointer: fine) {
+  .project-list:has(.project-title:hover) .project-item:not(:has(.project-title:hover)) {
+    opacity: 0.3;
+    filter: blur(10px);
+  }
+
+  .project-item:has(.project-title:hover) .project-meta {
+    position: relative;
+    z-index: 6;
+    color: #fff;
+    mix-blend-mode: difference;
+  }
 }
 
 .meta-left {

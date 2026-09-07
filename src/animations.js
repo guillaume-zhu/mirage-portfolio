@@ -847,6 +847,9 @@ export function initAnimations(pendingHash) {
   const previewRight = document.querySelector("#preview-right-img")
   const previewLeftContainer = document.querySelector(".work-preview-left")
   const previewRightContainer = document.querySelector(".work-preview-right")
+  const worksHoverMedia = window.matchMedia(
+    "(min-width: 1100px) and (hover: hover) and (pointer: fine)",
+  )
 
   if (workItems.length > 0) {
     // Get the SVG defs to append filters to
@@ -899,6 +902,8 @@ export function initAnimations(pendingHash) {
       const hoverTarget = title || item
 
       hoverTarget.addEventListener("mouseenter", () => {
+        if (!worksHoverMedia.matches) return
+
         const imgLeft = item.querySelector(".project-img-left")?.getAttribute("src")
         const imgRight = item.querySelector(".project-img-right")?.getAttribute("src")
 
@@ -1152,6 +1157,8 @@ export function initAnimations(pendingHash) {
 
     // 2. Animate on Hover (uniquement sur le nom du projet)
     title.addEventListener("mouseenter", () => {
+      if (!worksHoverMedia.matches) return
+
       gsap.to(path, {
         strokeDashoffset: 0,
         opacity: 1,
