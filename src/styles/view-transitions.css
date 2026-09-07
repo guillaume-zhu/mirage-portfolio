@@ -25,7 +25,7 @@
 
 ::view-transition-new(root) {
   z-index: 1;
-  animation: mirage-page-in 1300ms cubic-bezier(0.16, 1, 0.3, 1) 1000ms both;
+  animation: mirage-page-in 1300ms cubic-bezier(0.16, 1, 0.3, 1) 800ms both;
 }
 
 @keyframes mirage-page-out {
