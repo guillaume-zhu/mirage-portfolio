@@ -111,6 +111,7 @@ body {
   height: 48.9vw; /* 845/1728 */
   border-radius: 1.5625rem; /* 25px, valeur Figma exacte */
   overflow: hidden;
+  opacity: 0;
   will-change: width, height, transform;
 }
 

@@ -15,7 +15,6 @@ const pendingHash = SUPPORTED_ANCHORS.includes(window.location.hash) ? window.lo
 if (pendingHash) {
   history.scrollRestoration = 'manual'
   history.replaceState(null, '', window.location.pathname + window.location.search)
-  window.scrollTo(0, 0)
 }
 
 document.addEventListener('DOMContentLoaded', () => {

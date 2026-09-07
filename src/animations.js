@@ -1576,13 +1576,15 @@ export function initAnimations(pendingHash) {
 
   // --- NAVIGATION ANCRE : arrivée cross-page (pendingHash) ---
   // Placé après TOUT le reste (conceptTl, expertise, worksTl, clients scene,
-  // footer resolver...) pour garantir que anchorResolvers est complet. Attend
-  // un état "page réellement prête" robuste, y compris si `load` est déjà
-  // passé (readyState "complete"), puis force refresh + resize AVANT de
-  // calculer et rejouer la destination — jamais avant, sinon lenis.limit
-  // (recalculé par défaut avec 250ms de debounce) est encore l'ancienne
-  // valeur et clampe silencieusement scrollTo() en dessous de la vraie cible.
+  // footer resolver...) pour garantir que anchorResolvers est complet. Une
+  // première passe quitte immédiatement le Hero, puis la passe finale attend
+  // un état "page réellement prête" robuste et recale la destination exacte.
   if (pendingHash) {
+    ScrollTrigger.refresh()
+    lenis.resize()
+    scrollToAnchor(pendingHash, { immediate: true, force: true })
+    ScrollTrigger.update()
+
     const pageLoaded =
       document.readyState === "complete"
         ? Promise.resolve()
