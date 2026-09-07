@@ -507,10 +507,7 @@ body {
 
 @media (min-width: 768px) and (max-width: 1099px) {
   .about-manifesto-inner {
-    margin-left: min(
-      clamp(101.2px, calc(131.3887px - 2.7444vw), 108.5px),
-      calc(50vw - 308.5px)
-    );
+    margin-left: min(clamp(101.2px, calc(131.3887px - 2.7444vw), 108.5px), calc(50vw - 308.5px));
     width: clamp(617px, calc(-212.767px + 99.4925vw), 881.65px);
     gap: clamp(48.4px, calc(162.5353px - 10.3759vw), 76px);
   }
