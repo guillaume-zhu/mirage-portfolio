@@ -39,10 +39,218 @@ export function initProjectOtherUniverses(gsap, ScrollTrigger) {
 
   const mm = gsap.matchMedia()
 
-  // Mode natif : .project-other-track (source) redevient le rail réel via
-  // le CSS de la media query correspondante — aucun DOM généré ici.
+  // Mode natif : le rail source reste piloté par le navigateur (overflow,
+  // inertie et scroll-snap). Six cycles clonés entourent le cycle source pour
+  // absorber l'inertie sans réutiliser Observer, FLIP ou le moteur Desktop.
   mm.add("(max-width: 900px), (hover: none), (pointer: coarse)", () => {
-    container.scrollLeft = (container.scrollWidth - container.clientWidth) / 2
+    root.classList.add("is-native")
+    root.classList.remove("is-native-ready")
+    root.classList.remove("is-dragging")
+
+    const OUTER_CYCLE_COUNT = 3
+    const CENTRAL_CYCLE_START = projects.length * OUTER_CYCLE_COUNT
+
+    const createOuterClone = (card) => {
+      const clone = card.cloneNode(true)
+      clone.setAttribute("aria-hidden", "true")
+      clone.setAttribute("tabindex", "-1")
+      return clone
+    }
+
+    const previousCycles = Array.from({ length: OUTER_CYCLE_COUNT }, () =>
+      sourceCards.map(createOuterClone),
+    )
+    const nextCycles = Array.from({ length: OUTER_CYCLE_COUNT }, () =>
+      sourceCards.map(createOuterClone),
+    )
+    const nativeClones = previousCycles.flat().concat(nextCycles.flat())
+    sourceTrack.prepend(...previousCycles.flat())
+    sourceTrack.append(...nextCycles.flat())
+
+    const nativeCards = Array.from(sourceTrack.querySelectorAll(".project-other-card"))
+    nativeCards.forEach((card, index) => {
+      card.dataset.nativeProjectIndex = String(index % projects.length)
+      card.classList.remove("is-active")
+    })
+
+    let activeProjectIndex = 0
+    let scrollRaf = null
+    let resizeRaf = null
+    let resumeScrollRaf = null
+    let initialRaf = null
+    let settleTimer = null
+    let labelTween = null
+    let isScrollUpdateSuspended = true
+    const supportsScrollEnd = "onscrollend" in container
+
+    function findClosestCard() {
+      const center = container.scrollLeft + container.clientWidth / 2
+      let closest = nativeCards[0]
+      let closestDistance = Infinity
+
+      nativeCards.forEach((card) => {
+        const cardCenter = card.offsetLeft + card.offsetWidth / 2
+        const distance = Math.abs(cardCenter - center)
+        if (distance < closestDistance) {
+          closest = card
+          closestDistance = distance
+        }
+      })
+
+      return closest
+    }
+
+    function updateLabel(projectIndex, animate) {
+      const title = projects[projectIndex].title
+      if (!animate || labelIdle.textContent === title) {
+        labelTween?.kill()
+        labelTween = null
+        labelIdle.textContent = title
+        gsap.set(labelIdle, { opacity: 1 })
+        return
+      }
+
+      labelTween?.kill()
+      labelTween = gsap.timeline({
+        onComplete: () => {
+          labelTween = null
+        },
+      })
+      labelTween.to(labelIdle, { opacity: 0, duration: 0.12, ease: "power2.out" })
+      labelTween.add(() => {
+        labelIdle.textContent = title
+      })
+      labelTween.to(labelIdle, { opacity: 1, duration: 0.16, ease: "power2.out" })
+    }
+
+    function setActiveCard(card, { animateLabel = true } = {}) {
+      const nextProjectIndex = Number(card.dataset.nativeProjectIndex) || 0
+      const projectChanged = nextProjectIndex !== activeProjectIndex
+      nativeCards.forEach((item) => item.classList.toggle("is-active", item === card))
+      activeProjectIndex = nextProjectIndex
+      if (projectChanged || !labelIdle.textContent) {
+        updateLabel(activeProjectIndex, animateLabel && projectChanged)
+      }
+    }
+
+    function centerCard(card) {
+      container.scrollLeft = card.offsetLeft + card.offsetWidth / 2 - container.clientWidth / 2
+    }
+
+    function updateActiveFromScroll() {
+      scrollRaf = null
+      setActiveCard(findClosestCard())
+    }
+
+    function recenterOuterCycle() {
+      if (isScrollUpdateSuspended) return
+
+      if (scrollRaf !== null) {
+        cancelAnimationFrame(scrollRaf)
+        scrollRaf = null
+      }
+
+      const currentCard = findClosestCard()
+      setActiveCard(currentCard)
+      const currentIndex = nativeCards.indexOf(currentCard)
+      if (
+        currentIndex >= CENTRAL_CYCLE_START &&
+        currentIndex < CENTRAL_CYCLE_START + projects.length
+      ) return
+
+      const centralCard = nativeCards[CENTRAL_CYCLE_START + activeProjectIndex]
+      root.classList.add("is-native-repositioning")
+      container.scrollLeft += centralCard.offsetLeft - currentCard.offsetLeft
+      setActiveCard(centralCard, { animateLabel: false })
+      void centralCard.querySelector("img")?.offsetWidth
+      root.classList.remove("is-native-repositioning")
+    }
+
+    function handleScroll() {
+      if (isScrollUpdateSuspended) return
+      if (scrollRaf === null) scrollRaf = requestAnimationFrame(updateActiveFromScroll)
+
+      if (!supportsScrollEnd) {
+        clearTimeout(settleTimer)
+        settleTimer = setTimeout(recenterOuterCycle, 120)
+      }
+    }
+
+    function handleResize() {
+      const preservedProjectIndex = activeProjectIndex
+      isScrollUpdateSuspended = true
+
+      if (scrollRaf !== null) {
+        cancelAnimationFrame(scrollRaf)
+        scrollRaf = null
+      }
+      clearTimeout(settleTimer)
+      if (resizeRaf !== null) cancelAnimationFrame(resizeRaf)
+      if (resumeScrollRaf !== null) cancelAnimationFrame(resumeScrollRaf)
+
+      resizeRaf = requestAnimationFrame(() => {
+        resizeRaf = requestAnimationFrame(() => {
+          resizeRaf = null
+          const centralCard = nativeCards[CENTRAL_CYCLE_START + preservedProjectIndex]
+          const changesActiveCard = !centralCard.classList.contains("is-active")
+          if (changesActiveCard) root.classList.add("is-native-repositioning")
+          centerCard(centralCard)
+          setActiveCard(centralCard, { animateLabel: false })
+          if (changesActiveCard) {
+            void centralCard.querySelector("img")?.offsetWidth
+            root.classList.remove("is-native-repositioning")
+          }
+
+          resumeScrollRaf = requestAnimationFrame(() => {
+            resumeScrollRaf = null
+            isScrollUpdateSuspended = false
+          })
+        })
+      })
+    }
+
+    container.addEventListener("scroll", handleScroll, { passive: true })
+    if (supportsScrollEnd) container.addEventListener("scrollend", recenterOuterCycle)
+    window.addEventListener("resize", handleResize)
+
+    const initialCard = nativeCards[CENTRAL_CYCLE_START]
+    labelIdle.style.removeProperty("opacity")
+    labelIdle.style.removeProperty("visibility")
+    initialRaf = requestAnimationFrame(() => {
+      initialRaf = requestAnimationFrame(() => {
+        initialRaf = null
+        centerCard(initialCard)
+        setActiveCard(initialCard, { animateLabel: false })
+        // Valide l'état actif tant que le rail est masqué : sa transition
+        // ne peut ainsi pas démarrer au moment où .is-native-ready le révèle.
+        void initialCard.querySelector("img")?.offsetWidth
+        root.classList.add("is-native-ready")
+        isScrollUpdateSuspended = false
+      })
+    })
+
+    return () => {
+      if (scrollRaf !== null) cancelAnimationFrame(scrollRaf)
+      if (resizeRaf !== null) cancelAnimationFrame(resizeRaf)
+      if (resumeScrollRaf !== null) cancelAnimationFrame(resumeScrollRaf)
+      if (initialRaf !== null) cancelAnimationFrame(initialRaf)
+      clearTimeout(settleTimer)
+      labelTween?.kill()
+      gsap.killTweensOf(labelIdle)
+      container.removeEventListener("scroll", handleScroll)
+      if (supportsScrollEnd) container.removeEventListener("scrollend", recenterOuterCycle)
+      window.removeEventListener("resize", handleResize)
+      nativeCards.forEach((card) => card.classList.remove("is-active"))
+      nativeClones.forEach((card) => card.remove())
+      sourceCards.forEach((card) => delete card.dataset.nativeProjectIndex)
+      container.scrollLeft = 0
+      labelIdle.textContent = ""
+      labelIdle.style.removeProperty("opacity")
+      labelIdle.style.removeProperty("visibility")
+      root.classList.remove("is-native-repositioning")
+      root.classList.remove("is-native-ready")
+      root.classList.remove("is-native")
+    }
   })
 
   mm.add("(min-width: 901px) and (hover: hover) and (pointer: fine)", () => {
