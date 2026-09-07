@@ -1,111 +1,153 @@
-# MIRAGE — Studio Portfolio (Fictional) — WIP 🚧
+# Mirage Studio
 
-Portfolio expérimental pour **MIRAGE**, un studio fictif hybride entre **photographie de mode**, **direction artistique** et **création visuelle surréaliste**.  
-Objectif : prototyper une expérience web **minimaliste, arty et immersive**, avec une forte attention au **rythme**, à la **typographie**, à l'esthétique et à la mise en scène des projets.
+A fictional creative studio website shaped through art direction, editorial composition, and motion-led interaction.
 
-👉 Preview : https://mirage-portfolio.vercel.app/
+_Imaginer des mondes. Leur donner forme._
 
+[View the live site](https://mirage-portfolio.vercel.app/)
 
----
+![Mirage Studio home](./public/assets/images/readme/home-hero.webp)
 
-## Concept (ADN du studio)
+## Overview
 
-**MIRAGE**  
-> Une agence hybride entre photographie de mode, direction artistique et création visuelle surréaliste.  
-> Nous créons des images qui oscillent entre réalité et rêve, mises en scène dans des décors minimaux, conceptuels et profondément esthétiques.
+Mirage Studio is a fictional creative studio exploring image, space, light, material, and movement through a contemporary, fashion-oriented visual language.
 
----
+The project brings art direction and creative front-end development together in a multi-page experience designed across Desktop, Tablet, and Mobile. Motion is treated as part of the composition itself, shaping rhythm, transitions, and the way content is discovered.
 
-## Objectifs du projet
+All studios, brands, and campaigns represented within Mirage are fictional and were created for the project.
 
-- Explorer un workflow de **prototypage rapide** (Antigravity) pour matérialiser une DA et une narration.
-- Construire un **portfolio crédible** : positionnement, tonalité, structure UX, et “case studies” cohérentes.
-- Tester une approche **motion-first** (GSAP) : micro-interactions, transitions, scroll animations.
-- Constituer une base solide avant une future version **from scratch** (front-end) à mesure de la montée en compétences.
+## Home Experience
 
----
+![Mirage Studio projects](./public/assets/images/readme/projects.webp)
 
-## Rôle
+The Home page unfolds as a sequence of editorial compositions, connecting the Hero, Concept, Projects, Expertise, Clients, and closing sections through scroll-driven motion and section transitions.
 
-Projet personnel — **réalisé en autonomie** :
-- Direction artistique (identité, ton, mood, composition)
-- Structure UX / contenu (narration, hiérarchie, sections)
-- Intégration / mise en page (Antigravity)
-- Animations & micro-interactions (GSAP)
-- Création des “cas clients” simulés (concepts + visuels)
+Pinned sequences, project interactions, horizontal movement, and cover effects shape the desktop experience. On smaller viewports, layouts and interactions are reworked rather than simply scaled down.
 
----
+## About
 
-## Stack & outils
+![Mirage Studio about page](./public/assets/images/readme/about-hero.webp)
 
-- **Antigravity** (prototypage / site)
-- **GSAP** (motion & micro-interactions)
-- **Figma** (layout / UI / intentions)
-- **Génération d’images** : Banana, Midjourney *(cas simulés — voir notes)*
+The About page is built as a distinct experience within the same visual system, moving through a spatial Hero, animated Approach cards, a Numbers sequence, and a typographic Manifesto.
 
----
+Native WebGL drives the Numbers treatment, while SplitText is used to animate and redistribute the Manifesto typography.
 
-## Statut
+## Project Pages
 
-**Work in Progress (WIP)**  
-- ✅ Home : structure principale + direction + premières animations
-- ⏳ Section projets : listing (en cours de polishing)
-- ⏳ Case studies : contenu & visuels en cours d’itération
-- ⏳ Responsive final + optimisation perf + accessibilité
+![Flora Obscura project page](./public/assets/images/readme/flora-obscura-hero.webp)
 
----
+Four fictional project universes share the same page architecture and JavaScript runtime:
 
-## Aperçu
+- Flora Obscura
+- Helios Bloom
+- In Transit
+- Petal Radiance
 
-*(Ajoute 2–4 screenshots dans `docs/` pour rendre le projet “portfolio-ready”)*
+Each page combines an animated Hero, editorial content, image galleries, art direction, testimonial, “Other Universes” navigation, and a shared Footer transition.
 
-- `docs/hero.png`
-- `docs/about.png`
-- `docs/project-list.png`
+“Other Universes” adapts to input capabilities: GSAP Observer drives the desktop drag experience, while touch devices use native horizontal scrolling with inertia and scroll snapping.
 
-Exemple :
+## Motion & Interactions
 
-![Home](docs/hero.png)
-![About](docs/about.png)
-![Projects](docs/project-list.png)
+GSAP and ScrollTrigger coordinate scrubbed sequences, pinned scenes, editorial reveals, and section transitions. Lenis provides smooth scrolling, while SplitText and GSAP Observer support typography and pointer-driven interactions.
 
----
+Native WebGL and GLSL power the About Numbers treatment and the shared Footer deformation.
 
-## Case studies (simulés)
+Page-to-page motion uses native cross-document View Transitions. Browsers without support fall back to standard navigation, while reduced-motion preferences disable the custom transition animation.
 
-Le site présente **5 projets fictifs** afin de tester une narration “studio” réaliste :
-- brief / intention créative
-- parti-pris DA
-- exécution & livrables (simulés)
+## Responsive Design
 
-> Les “cas clients” sont des scénarios de démonstration (pas des projets réels).
+The main layout ranges are:
 
----
+- **Desktop** — 1100px and above
+- **Tablet** — 768px to 1099px
+- **Mobile** — below 768px
 
-## Roadmap
+Responsive behaviour is structural rather than purely proportional. Layouts become stacked where needed, typography and spacing adapt continuously, hover-only effects are removed on touch layouts, and native scrolling is used where it provides the better interaction.
 
-### V1 — Prototype solide (en cours)
-- Finaliser contenu (about, services, projets)
-- Remplacer les placeholders par du texte définitif + assets cohérents
-- Polishing motion (GSAP) : transitions, timings, easing, micro-interactions
-- Responsive final (mobile / tablet / desktop)
-- Accessibilité de base (contraste, navigation)
+Some interactions also adapt according to pointer capabilities rather than viewport size alone.
 
-### V2 — Version “from scratch” (à venir)
-- Rebuild en front-end (ex: Vue/Vite / ou React)
-- Architecture composants + perf + optimisation
-- Possibles modules immersifs (WebGL/Three.js) selon progression
+## Tech Stack
 
----
+- Vite 5
+- HTML
+- CSS
+- Vanilla JavaScript with ES modules
+- GSAP
+- ScrollTrigger
+- SplitText
+- GSAP Observer
+- Lenis
+- Native WebGL
+- GLSL
 
-## Notes & transparence (visuels)
+Typography pairs Plus Jakarta Sans Variable, self-hosted through `@fontsource-variable`, with Gloock loaded from Google Fonts.
 
-Les visuels de certains projets sont **générés** (Banana / Midjourney) et **dirigés artistiquement** pour servir des **cas simulés** et un exercice de mise en scène.  
-Aucune prétention de “projets clients réels”.
+## Project Structure
 
----
+```text
+.
+├── index.html
+├── about.html
+├── flora-obscura.html
+├── helios-bloom.html
+├── in-transit.html
+├── petal-radiance.html
+├── vite.config.js
+├── vite-plugin-partials.js
+├── src/
+│   ├── main.js
+│   ├── aboutMain.js
+│   ├── projectPageMain.js
+│   ├── home/
+│   │   └── animations.js
+│   ├── about/
+│   │   ├── aboutHero.js
+│   │   ├── aboutApproach.js
+│   │   ├── aboutNumbers.js
+│   │   ├── aboutManifesto.js
+│   │   └── aboutFooter.js
+│   ├── projects/
+│   │   ├── projectHero.js
+│   │   ├── projectTestimonial.js
+│   │   ├── projectOtherUniverses.js
+│   │   └── projectFooter.js
+│   ├── webgl/
+│   │   ├── footerWebGL.js
+│   │   └── aboutNumbersWebGL.js
+│   ├── partials/
+│   ├── shaders/
+│   └── styles/
+└── public/
+    └── assets/
+```
 
-## Liens
+## Getting Started
 
-- Preview : https://mirage-portfolio.vercel.app/
+Install dependencies:
 
+```sh
+npm install
+```
+
+Start the development server:
+
+```sh
+npm run dev
+```
+
+Create a production build:
+
+```sh
+npm run build
+```
+
+Preview the production build:
+
+```sh
+npm run preview
+```
+
+## Notes
+
+Mirage Studio is a fictional creative project. The studios, brands, campaigns, imagery, and visual assets presented throughout the experience were created and/or generated specifically for it.

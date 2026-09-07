@@ -2,11 +2,11 @@ import './styles/project-page.css'
 import gsap from 'gsap'
 import ScrollTrigger from 'gsap/ScrollTrigger'
 import Lenis from '@studio-freight/lenis'
-import { initProjectHero } from './projectHero'
-import { initProjectTestimonial } from './projectTestimonial'
-import { initProjectOtherUniverses } from './projectOtherUniverses'
-import { initProjectFooter } from './projectFooter'
-import { createFooterWebGL } from './footerWebGL'
+import { initProjectHero } from './projects/projectHero'
+import { initProjectTestimonial } from './projects/projectTestimonial'
+import { initProjectOtherUniverses } from './projects/projectOtherUniverses'
+import { initProjectFooter } from './projects/projectFooter'
+import { createFooterWebGL } from './webgl/footerWebGL'
 
 // Empêche le navigateur de restaurer l'ancienne position de scroll au reload
 // (sinon la page peut se recharger au milieu du Hero, ScrollTrigger/Lenis

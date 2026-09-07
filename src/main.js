@@ -1,6 +1,6 @@
 import './styles/main.css';
-import { initAnimations } from './animations';
-import { createFooterWebGL } from './footerWebGL';
+import { initAnimations } from './home/animations';
+import { createFooterWebGL } from './webgl/footerWebGL';
 
 // Ancres qui existent bien dans le DOM, mais dont la position réelle ne
 // correspond pas à la destination visuelle voulue car elles participent à

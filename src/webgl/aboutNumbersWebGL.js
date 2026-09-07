@@ -6,8 +6,8 @@
 // lui-même, pour ne jamais sauter dans la phase du bruit).
 // Aucune interaction souris : uStrength reste à 0 en permanence.
 
-import VERTEX_SHADER from "./shaders/footer/vertex.glsl?raw"
-import FRAGMENT_SHADER from "./shaders/footer/fragment.glsl?raw"
+import VERTEX_SHADER from "../shaders/footer/vertex.glsl?raw"
+import FRAGMENT_SHADER from "../shaders/footer/fragment.glsl?raw"
 
 function createShader(gl, type, source) {
   const shader = gl.createShader(type)

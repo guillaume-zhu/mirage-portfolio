@@ -4,8 +4,8 @@
 // calme. Aucune dépendance à GSAP/ScrollTrigger : ce module ne gère que le
 // rendu du background, jamais la transition de section.
 
-import VERTEX_SHADER from "./shaders/footer/vertex.glsl?raw"
-import FRAGMENT_SHADER from "./shaders/footer/fragment.glsl?raw"
+import VERTEX_SHADER from "../shaders/footer/vertex.glsl?raw"
+import FRAGMENT_SHADER from "../shaders/footer/fragment.glsl?raw"
 
 function createShader(gl, type, source) {
   const shader = gl.createShader(type)
